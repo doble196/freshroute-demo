@@ -1,0 +1,16 @@
+Location,Total Land Area (acres),Number of Cows,Farm Size,Date,Product ID,Product Name,Brand,Quantity (liters/kg),Price per Unit,Total Value,Shelf Life (days),Storage Condition,Production Date,Expiration Date,Quantity Sold (liters/kg),Price per Unit (sold),Approx. Total Revenue(INR),Customer Location,Sales Channel,Quantity in Stock (liters/kg),Minimum Stock Threshold (liters/kg),Reorder Quantity (liters/kg)
+Haryana,310.84,96,Medium,2022-12-01,5,Milk,Amul,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,500,50.0,100.0
+Haryana,310.84,96,Medium,2022-12-01,5,Cheese,Amul,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,,50.0,100.0
+Haryana,310.84,96,Medium,2022-12-01,5,Curd,Amul,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,500,,100.0
+Haryana,310.84,96,Medium,2022-12-01,5,Ghee,Amul,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,N/A,50.0,100.0
+Haryana,310.84,96,Medium,2022-12-01,5,Lassi,Amul,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,42 L,50.0,100.0
+Haryana,310.84,96,Medium,2022-12-01,5,Paneer,Amul,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,-5,50.0,100.0
+Haryana,310.84,96,Medium,2022-12-01,5,Yogurt,Amul,200.0,85.72,17144.0,25,Frozen,2022-11-20,not a date,7,82.24,575.68,Delhi,Wholesale,500,50.0,100.0
+ haryana ,310.84,96,Medium,2022-12-01,5,Ice Cream,Amul,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,500,50.0,100.0
+Haryana,310.84,96,Medium,2022-12-01,5,Buttermilk,Amul,200.0,85.72,17144.0,25,FROZEN,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,500,50.0,100.0
+Haryana,310.84,96,Medium,2022-12-01,5,Butter,Amul  ,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,500,50.0,100.0
+Kerala,310.84,96,Medium,2022-12-05,5,Milk,Sudha,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,900,50.0,100.0
+Kerala,310.84,96,Medium,2022-12-05,5,Milk,Sudha,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,10,50.0,100.0
+Delhi,310.84,96,Medium,2022-12-01,5,Ghee,Raj,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,300,50.0,100.0
+Gujarat,310.84,96,Medium,2022-12-01,5,Ghee,Raj,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,300,50.0,100.0
+Bihar,310.84,96,Medium,2022-12-01,5,Cheese,Warana,200.0,85.72,17144.0,25,Frozen,2022-11-20,2022-12-15,7,82.24,575.68,Delhi,Wholesale,9,100.0,100.0

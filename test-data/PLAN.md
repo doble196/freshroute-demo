@@ -1,0 +1,41 @@
+# Synthetic test rows — planned before generated
+
+**Kept in `test-data/`, never in `data/`.** It must be impossible to mistake
+this for the real export, or a bad number ends up in a real reorder list.
+
+Columns match `dairy_dataset.csv` exactly — 23 of them, same names, same order.
+A fixture with different columns tests the fixture, not the app.
+
+Every row exists to prove one specific thing. If a row doesn't have a stated
+job, it shouldn't be in the file.
+
+| # | Row | Guard | What it must prove |
+|---|-----|-------|--------------------|
+| 1 | baseline, all fields valid | — | the fixture parses at all; a control that must **not** be flagged |
+| 2 | `Quantity in Stock` = `` (blank) | blanks | lands in **Needs review**, does not crash, does not count as 0 |
+| 3 | `Minimum Stock Threshold` = `` | blanks | same, on the other side of the comparison |
+| 4 | `Quantity in Stock` = `N/A` | blanks | a *word* meaning empty is caught too, not just an empty cell |
+| 5 | `Quantity in Stock` = `42 L` | types | a unit smuggled into a number is rejected — `parseFloat` would return 42 |
+| 6 | `Quantity in Stock` = `-5` | types | negative stock is impossible, not merely small |
+| 7 | `Expiration Date` = `not a date` | types | unparseable date → review, never a silent `NaT` in a sort |
+| 8 | `Location` = ` haryana ` | spelling | folds onto `Haryana`; must **not** create a 16th location |
+| 9 | `Storage Condition` = `FROZEN` | spelling | folds onto `Frozen`; must **not** create a 6th storage group |
+| 10 | `Brand` = `Amul  ` (trailing) | spelling | trailing whitespace folds — but at **parse time**, not by the merge stage. Two layers: `parseCSV` trims; `normKey` folds case. Row 10 proves the first one. |
+| 11–12 | same product+brand+location+**date**, stock `10` vs `900` | repeats | a real conflict — resolves to **10** (conservative) and is *reported*, not silently picked |
+| 13–14 | same product+brand, **different location** | repeats | **NOT** a duplicate. Same name ≠ same row. Both must survive. |
+| 15 | stock `9`, threshold `100` | — | a clean, unambiguous flag — proves the pipeline still works with junk in the file |
+
+## What this file is not
+
+It is **not** a test of whether the numbers are right — the real dataset and
+`verify.py` do that. It tests whether the app survives inputs it wasn't built
+for, which is the only thing a cold tester will actually find at 2:45.
+
+## How to run it
+
+```bash
+node test-data/guards-test.js
+```
+
+Every row's stated job is asserted. A row that stops proving its point fails
+the suite loudly rather than quietly passing.

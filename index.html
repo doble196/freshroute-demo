@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FreshRoute — Morning Inventory Triage</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Morning triage</h1>
+    <p class="sub">What needs attention today — not every row.</p>
+  </header>
+  <div class="controls">
+    <label for="location">Location</label>
+    <select id="location"><option>Loading…</option></select>
+    <select id="viewToggle">
+      <option value="urgency">Most urgent first</option>
+      <option value="supplier">Order by supplier</option>
+    </select>
+    <label class="toggle"><input type="checkbox" id="groupToggle" checked> Group by storage</label>
+    <button id="export" type="button" disabled>Loading…</button>
+  </div>
+  <p id="source" class="source"></p>
+  <p id="summary" class="summary">Loading…</p>
+  <p id="scope"></p>
+  <div id="log"></div>
+  <details id="tech" hidden>
+    <summary id="techSummary">Technical details</summary>
+    <div id="techlog"></div>
+  </details>
+
+  <section id="briefBox">
+    <h2>This morning <span class="hint" id="briefHeading">—</span></h2>
+    <div id="brief"></div>
+  </section>
+
+  <section>
+    <h2>Reorder now <span class="hint">— stock below its minimum threshold</span></h2>
+    <div id="reorder"></div>
+  </section>
+
+  <section>
+    <h2>Expiring soon <span class="hint">— within 14 days</span></h2>
+    <div id="expiry"></div>
+  </section>
+
+  <section>
+    <h2>Needs review <span class="hint">— items the tool couldn't read</span></h2>
+    <div id="review"></div>
+  </section>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
