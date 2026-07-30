@@ -1,0 +1,27 @@
+row,id,column,value,guard,expect,note,file,expected_units,expected_cases
+1,Amul,(none — control),,control,clean,valid vendor — must join and compute; the control that must NOT be flagged,messy_vendors.csv,,
+2,Britannia Industries,(none — control),,control,clean,"valid vendor whose Lead Sun is blank = closed Sunday; ordering Sunday -> review, Monday -> clean",messy_vendors.csv,,
+3,Mother Dairy,(none — control),,spelling,fold-base,clean base the variant below must fold ONTO,messy_vendors.csv,,
+4, mother dairy ,(none — control),,spelling,fold,case/whitespace variant folds onto Mother Dairy; must NOT create an extra vendor,messy_vendors.csv,,
+5,Raj,(none — control),,repeats,conflict-base,clean base of the discount-conflict pair,messy_vendors.csv,,
+6,Raj,Discount (%),2.0,repeats,conflict,"same vendor, different discount — keep the LOWER (honest cost estimate), report it",messy_vendors.csv,,
+7,Sudha,(none — control),,repeats,dedupe-base,clean base of the byte-identical pair,messy_vendors.csv,,
+8,Sudha,(none — control),,repeats,dedupe,byte-identical duplicate — silently collapses to one; the join must NOT multiply order lines,messy_vendors.csv,,
+9,Dodla Dairy#case-blank,Case Size (units),,blanks,review,blank case size -> review; must not divide by nothing,messy_vendors.csv,,
+10,Palle2patnam#disc-na,Discount (%),N/A,blanks,review,"a WORD meaning empty is caught, not just an empty cell",messy_vendors.csv,,
+11,Dynamix Dairies#lead-unit,Lead Mon,3 days,types,review,unit smuggled into a number — parseFloat would return 3,messy_vendors.csv,,
+12,Warana#disc-pct,Discount (%),10%,types,review,"percent sign smuggled in — same trap, other column",messy_vendors.csv,,
+13,Parag#case-neg,Case Size (units),-6,types,review,"negative case size is impossible, not merely small",messy_vendors.csv,,
+14,Passion#case-zero,Case Size (units),0,types,review,zero case size -> ceil(q/0) is Infinity; the division guard,messy_vendors.csv,,
+15,Dodla#case-half,Case Size (units),12.5,types,review,half a case does not exist; integers only,messy_vendors.csv,,
+16,Palle2patnam#disc-150,Discount (%),150,bounds,review,discount >100% means being paid to take stock — bounds check,messy_vendors.csv,,
+17,Dynamix#disc-100,Discount (%),100,bounds,review,"exactly 100% = free goods — a red-flag boundary, review not accept",messy_vendors.csv,,
+18,Warana#cutoff-2599,Order Cutoff,25:99,types,review,impossible clock time,messy_vendors.csv,,
+19,Parag#cutoff-word,Order Cutoff,noon,types,review,a word where HH:MM belongs,messy_vendors.csv,,
+20,Passion#lead-45,Lead Fri,45,bounds,review,"45-day lead is a magnitude red flag (>30) — investigate, not accept",messy_vendors.csv,,
+21,Dodla#lead-neg,Lead Sat,-1,types,review,negative lead time — arrives before you order it,messy_vendors.csv,,
+22,Palle2patnam#addr,Address,"Plot 7, ""Gate B"", Milk Colony, Pune",quoting,clean,comma AND quotes in address — must survive the CSV round trip intact,messy_vendors.csv,,
+1,Amul/Milk,(none — control),,join,clean,"clean join: reorder 100 @ case 48 -> 144 units, 3 cases",messy_vendor_stock.csv,144,3
+2,Nandini/Ghee,Brand,Nandini,join,review,"no vendor record — review, never a silent unpriced order",messy_vendor_stock.csv,,
+3,AMUL/Curd,Brand,AMUL,spelling,clean,brand variant folds and still joins,messy_vendor_stock.csv,144,3
+4,Amul/Butter,Reorder Quantity (liters/kg),49,join,clean,"49 @ case 48 -> 96 units 2 cases, NOT 48 — cases round UP",messy_vendor_stock.csv,96,2

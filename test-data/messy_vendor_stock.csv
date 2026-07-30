@@ -1,0 +1,5 @@
+Location,Date,Product Name,Brand,Price per Unit,Quantity in Stock (liters/kg),Minimum Stock Threshold (liters/kg),Reorder Quantity (liters/kg)
+Haryana,2022-12-01,Milk,Amul,42.61,5,50,100
+Kerala,2022-12-01,Ghee,Nandini,85.72,5,50,100
+Delhi,2022-12-01,Curd,AMUL,30.00,5,50,100
+Punjab,2022-12-01,Butter,Amul,99.99,5,50,49

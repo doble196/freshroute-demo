@@ -22,9 +22,14 @@ import io
 import json
 import subprocess
 import sys
+from pathlib import Path
+
 import pandas as pd
 
-CSV = "data/dairy_dataset.csv"
+# Anchored to this file's directory so verify.py runs from anywhere,
+# including the repo root.
+HERE = Path(__file__).resolve().parent
+CSV = HERE / "data/dairy_dataset.csv"
 WINDOW_DAYS = 14
 
 STOCK = "Quantity in Stock (liters/kg)"
@@ -152,7 +157,8 @@ def compute():
 
 def main():
     js = json.loads(subprocess.run(
-        ["node", "dump-js-results.js"], capture_output=True, text=True, check=True).stdout)
+        ["node", str(HERE / "dump-js-results.js")],
+        capture_output=True, text=True, check=True).stdout)
     py = compute()
 
     failures = []

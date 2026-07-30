@@ -1,0 +1,23 @@
+Vendor,Address,Order Cutoff,Case Size (units),Discount (%),Lead Mon,Lead Tue,Lead Wed,Lead Thu,Lead Fri,Lead Sat,Lead Sun
+Amul,"38 Dairy Rd, Sector 16, Anand",15:30,48,2.5,2,2,2,2,3,4,4
+Britannia Industries,"16 Dairy Rd, Sector 33, Erode",12:30,48,10.0,1,1,1,1,2,3,
+Mother Dairy,"18 Dairy Rd, Sector 30, Karnal",12:30,24,10.0,1,1,1,1,2,3,3
+ mother dairy ,"18 Dairy Rd, Sector 30, Karnal",12:30,24,10.0,1,1,1,1,2,3,3
+Raj,"90 Dairy Rd, Sector 18, Pune",14:00,24,2.5,3,3,3,3,4,5,5
+Raj,"90 Dairy Rd, Sector 18, Pune",14:00,24,2.0,3,3,3,3,4,5,5
+Sudha,"3 Dairy Rd, Sector 33, Erode",11:00,48,10.0,3,3,3,3,4,5,5
+Sudha,"3 Dairy Rd, Sector 33, Erode",11:00,48,10.0,3,3,3,3,4,5,5
+Dodla Dairy#case-blank,"61 Dairy Rd, Sector 37, Erode",14:00,,2.5,2,2,2,2,3,4,4
+Palle2patnam#disc-na,"62 Dairy Rd, Sector 4, Pune",14:00,6,N/A,3,3,3,3,4,5,5
+Dynamix Dairies#lead-unit,"36 Dairy Rd, Sector 11, Karnal",11:00,12,7.5,3 days,3,3,3,4,5,5
+Warana#disc-pct,"93 Dairy Rd, Sector 26, Karnal",15:30,24,10%,3,3,3,3,4,5,5
+Parag#case-neg,"42 Dairy Rd, Sector 34, Pune",15:30,-6,10.0,3,3,3,3,4,5,5
+Passion#case-zero,"54 Dairy Rd, Sector 35, Anand",14:00,0,0.0,3,3,3,3,4,5,5
+Dodla#case-half,"61 Dairy Rd, Sector 37, Erode",14:00,12.5,2.5,2,2,2,2,3,4,4
+Palle2patnam#disc-150,"62 Dairy Rd, Sector 4, Pune",14:00,6,150,3,3,3,3,4,5,5
+Dynamix#disc-100,"36 Dairy Rd, Sector 11, Karnal",11:00,12,100,3,3,3,3,4,5,5
+Warana#cutoff-2599,"93 Dairy Rd, Sector 26, Karnal",25:99,24,0.0,3,3,3,3,4,5,5
+Parag#cutoff-word,"42 Dairy Rd, Sector 34, Pune",noon,24,10.0,3,3,3,3,4,5,5
+Passion#lead-45,"54 Dairy Rd, Sector 35, Anand",14:00,24,0.0,3,3,3,3,45,5,5
+Dodla#lead-neg,"61 Dairy Rd, Sector 37, Erode",14:00,48,2.5,2,2,2,2,3,-1,4
+Palle2patnam#addr,"Plot 7, ""Gate B"", Milk Colony, Pune",14:00,6,10.0,3,3,3,3,4,5,5

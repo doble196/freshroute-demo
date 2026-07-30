@@ -2,13 +2,16 @@
 // can be diffed against them. Run: node dump-js-results.js > /tmp/js.json
 
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { parseCSV, toSnapshot, reorderList, expiringSoon,
          locationCounts, groupByStorage, byLocation, toCSV, ORDER_COLUMNS,
          C, EXPIRY_WINDOW_DAYS } from "./logic.js";
 
 const MAX_ROWS_SHOWN = 20;   // must match script.js
 
-const parsed = parseCSV(readFileSync("data/dairy_dataset.csv", "utf8"));
+const HERE = dirname(fileURLToPath(import.meta.url));
+const parsed = parseCSV(readFileSync(join(HERE, "data/dairy_dataset.csv"), "utf8"));
 const snapshot = toSnapshot(parsed.rows);
 const { flagged, unknown } = reorderList(snapshot);
 

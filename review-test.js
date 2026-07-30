@@ -1,11 +1,16 @@
 // Break the data on purpose; confirm the review bucket screams.
 // An empty review bucket on clean data proves nothing — Cheatcode #22.
-// Run: node review-test.js
+// Runs from anywhere — paths resolve from this file's location:
+//   node data/inventory-app/review-test.js    (repo root)
+//   node review-test.js                       (app dir)
 
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { parseCSV, toSnapshot, reorderList, expiringSoon, C } from "./logic.js";
 
-const raw = parseCSV(readFileSync("data/dairy_dataset.csv", "utf8"));
+const HERE = dirname(fileURLToPath(import.meta.url));
+const raw = parseCSV(readFileSync(join(HERE, "data/dairy_dataset.csv"), "utf8"));
 const CLEAN = toSnapshot(raw.rows);
 
 // Corrupt ONE field on the first row and hand back a fresh copy.

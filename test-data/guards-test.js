@@ -1,13 +1,18 @@
 // Every row in messy_rows.csv has a stated job in PLAN.md. This asserts it.
 // A row that stops proving its point fails loudly instead of quietly passing.
 //
-// Run from the app root:  node test-data/guards-test.js
+// Paths resolve from THIS file's location, so it runs from anywhere:
+//   node data/inventory-app/test-data/guards-test.js      (repo root)
+//   node test-data/guards-test.js                         (app dir)
 
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { parseCSV, toSnapshot, reorderList, expiringSoon, byLocation,
          groupByStorage, normKey, C } from "../logic.js";
 
-const raw = parseCSV(readFileSync("test-data/messy_rows.csv", "utf8"));
+const HERE = dirname(fileURLToPath(import.meta.url));
+const raw = parseCSV(readFileSync(join(HERE, "messy_rows.csv"), "utf8"));
 const snap = toSnapshot(raw.rows);
 const { flagged, unknown } = reorderList(snap);
 const { unparseable } = expiringSoon(snap, new Date("2022-12-10"), 14);
