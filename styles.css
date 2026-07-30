@@ -133,3 +133,16 @@ td.n.short { color:var(--bad); }
 #storyboard > summary:hover { opacity:1; }
 .beats { margin:.6rem 0 .2rem; padding-left:1.2rem; max-width:62ch; }
 .beats li { margin:.45rem 0; font-size:.9rem; line-height:1.5; }
+
+/* The opening story. This URL's real audience is people deciding whether the
+   work is any good, so the page leads with the mistake that shaped it rather
+   than with a feature list. Kept to four lines so the tool stays near the top. */
+#intro { max-width:64ch; margin:.2rem 0 .8rem; }
+#intro p { margin:.45rem 0; font-size:.92rem; line-height:1.55; }
+#intro .intro-close { border-left:3px solid var(--bad); padding-left:.7rem; opacity:.95; }
+/* On a phone the intro is the thing between the user and the count, so it
+   gives back what it can without losing a sentence. */
+@media (max-width:520px){
+  #intro p { font-size:.86rem; line-height:1.45; margin:.35rem 0; }
+  #intro { margin-bottom:.5rem; }
+}

@@ -11,6 +11,24 @@
     <h1>Morning triage</h1>
     <p class="sub">What needs attention today — not every row.</p>
   </header>
+  <!-- Visible on purpose, and it costs the working user four lines. The real
+       audience of this URL is people deciding whether the work is any good,
+       and the honest version of that story is more persuasive than a feature
+       list. The structured five-beat version stays collapsed below. -->
+  <section id="intro">
+    <p>My first version of this told a coordinator <b>918 items</b> needed
+      reordering. The real number was <b>113</b> — the file is a transaction
+      log, not a stock snapshot, and I had never asked what one row actually
+      represented.</p>
+    <p>This version reads the same export and returns the 113 that need a
+      decision today. It also flags the 12 where the supplier's own reorder
+      quantity doesn't cover the shortfall beside it — one by 56 units —
+      because a number that quietly under-orders is worse than none.</p>
+    <p class="intro-close">Same reason the expiry panel says DEMO: that dataset
+      ends in 2022. <b>A tool that hides its limits is the one you stop
+      trusting.</b></p>
+  </section>
+
   <!-- Collapsed by default on purpose. A coordinator opening this at 8am wants
        the count, not the pitch — but anyone meeting the product cold needs to
        know who it's for before they meet a dashboard. Same pattern as the
