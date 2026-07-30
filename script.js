@@ -4,7 +4,7 @@
 
 import { C, EXPIRY_WINDOW_DAYS, ALL_LOCATIONS, parseCSV, audit, toSnapshot,
          reorderList, expiringSoon, byLocation, locationCounts, num,
-         toCSV, ORDER_COLUMNS, groupByStorage, STORAGE_IS_PACKAGING,
+         toCSV, ORDER_COLUMNS, groupByStorage, STORAGE_IS_PACKAGING, orderShortfall,
          morningBrief, briefPrompt, SOURCE_KINDS, DATA_SOURCE,
          bySupplier, supplierOrderText, capWithExemptions } from "./logic.js";
 
@@ -104,7 +104,7 @@ function note(kind, msg) {
 
 const HEAD = `<thead><tr>
     <th>Product</th><th>Brand</th><th>Location</th>
-    <th class="n">On hand</th><th class="n">Min</th><th class="n">Order</th><th></th>
+    <th class="n">On hand</th><th class="n">Min</th><th class="n">Supplier qty</th><th></th>
   </tr></thead>`;
 
 // A cap may hide rows it ranked low. It may NOT hide a row that carries a
@@ -134,10 +134,19 @@ function exemptBlock(hiddenRows, label) {
 const expiryTag = r => r._expiresInDays !== undefined
   ? `<span class="tag warn-tag">expires in ${r._expiresInDays}d</span>` : "";
 
+// The supplier's stated quantity, and — when it does not close the gap — how
+// far short it leaves you. Silence here is what made the panel misleading.
+const qtyCell = r => {
+  const left = orderShortfall(r);
+  return `<td class="n${left ? " short" : ""}">${Math.round(num(r[C.reorder]))}` +
+    (left ? `<span class="short-tag" title="Ordering this leaves the item ${left} below its minimum">still ${left} short</span>` : "") +
+    `</td>`;
+};
+
 const bodyRows = rows => rows.map(r => `<tr class="${r._expiresInDays !== undefined ? "conflict" : r._severity > 0.75 ? "critical" : ""}">
     <td><strong>${esc(r[C.product])}</strong></td><td>${esc(r[C.brand])}</td><td>${esc(r[C.location])}</td>
     <td class="n bad">${esc(r[C.stock])}</td><td class="n">${Math.round(num(r[C.threshold]))}</td>
-    <td class="n">${Math.round(num(r[C.reorder]))}</td><td>${expiryTag(r)}</td>
+    ${qtyCell(r)}<td>${expiryTag(r)}</td>
   </tr>`).join("");
 
 // Grouped view: every group shows its FULL count in the header, and caps its
@@ -154,7 +163,7 @@ function renderReorder(rows, grouped) {
       rows.slice(0, MAX_ROWS_SHOWN).map(r => `<tr class="${r._expiresInDays !== undefined ? "conflict" : r._severity > 0.75 ? "critical" : ""}">
         <td><strong>${esc(r[C.product])}</strong></td><td>${esc(r[C.brand])}</td><td>${esc(r[C.location])}</td>
         <td class="n bad">${esc(r[C.stock])}</td><td class="n">${Math.round(num(r[C.threshold]))}</td>
-        <td class="n">${Math.round(num(r[C.reorder]))}</td><td>${esc(r[C.storage])} ${expiryTag(r)}</td>
+        ${qtyCell(r)}<td>${esc(r[C.storage])} ${expiryTag(r)}</td>
       </tr>`).join("") + `</tbody></table>` + more + exemptBlock(hidden, "below the cut");
   }
 
@@ -211,11 +220,11 @@ function renderSuppliers(groups, asOf) {
       ${g.conflicts ? `<p class="conflict-note">${g.conflicts} item${g.conflicts === 1 ? " is" : "s are"}
         also expiring within ${EXPIRY_WINDOW_DAYS} days — confirm before ordering.</p>` : ""}
       <table><thead><tr><th>Product</th><th>Location</th>
-        <th class="n">On hand</th><th class="n">Min</th><th class="n">Order</th><th></th>
+        <th class="n">On hand</th><th class="n">Min</th><th class="n">Supplier qty</th><th></th>
       </tr></thead><tbody>${g.rows.map(r => `<tr class="${r._expiresInDays !== undefined ? "conflict" : ""}">
         <td><strong>${esc(r[C.product])}</strong></td><td>${esc(r[C.location])}</td>
         <td class="n bad">${esc(r[C.stock])}</td><td class="n">${Math.round(num(r[C.threshold]))}</td>
-        <td class="n">${Math.round(num(r[C.reorder]))}</td>
+        ${qtyCell(r)}
         <td>${r._expiresInDays !== undefined
           ? `<span class="tag warn-tag">expires in ${r._expiresInDays}d</span>` : ""}</td>
       </tr>`).join("")}</tbody></table>

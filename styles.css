@@ -110,3 +110,12 @@ tr.conflict { background:#fffbeb; }
                 border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); resize:vertical; }
 .copybox-close { margin-top:.4rem; font:inherit; font-size:12.5px; padding:.25rem .6rem; cursor:pointer;
                  border:1px solid var(--line); border-radius:5px; background:var(--bg); color:var(--fg); }
+
+/* The supplier's stated quantity doesn't always close the gap it sits beside.
+   Where it doesn't, say so on the row — it's a number a coordinator would
+   otherwise act on and come up short. Deliberately quieter than .warn-tag:
+   this is a caveat on a figure, not a second alarm competing with expiry. */
+td.n.short { color:var(--bad); }
+.short-tag { display:block; font-size:.64rem; font-weight:600; text-transform:uppercase;
+  letter-spacing:.03em; color:#92400e; white-space:nowrap; }
+@media (prefers-color-scheme:dark){ .short-tag{ color:#fcd34d; } }

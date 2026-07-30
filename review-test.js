@@ -349,14 +349,59 @@ ce("the ranking is untouched — shown rows are still the top N by severity",
 
 console.log(`\ncap exemptions: ${ce_pass} passed, ${ce_fail} failed`);
 
+
+// ── the supplier quantity that doesn't cover the gap ───────────────────
+// This panel is headed "Reorder now". If the number on the row doesn't
+// close the shortfall on the same row, the app is telling a coordinator to
+// under-order in its own voice. These assert the arithmetic AND that the
+// real export still contains the case — a fixture-only test would pass
+// forever after the data changed.
+import { orderShortfall } from "./logic.js";
+
+console.log("\n=== supplier qty vs the gap ===");
+let os_pass = 0, os_fail = 0;
+const os = (label, cond, detail = "") => {
+  cond ? os_pass++ : os_fail++;
+  console.log(`${cond ? "PASS" : "FAIL"}  ${label}${detail ? `\n      \u2192 ${detail}` : ""}`);
+};
+
+const mk = (stock, min, qty) => ({ [C.stock]: stock, [C.threshold]: min,
+  [C.reorder]: qty, _gap: min - stock });
+
+os("a quantity that exactly covers the gap reports 0",
+   orderShortfall(mk(10, 100, 90)) === 0);
+os("a quantity larger than the gap reports 0, never a negative",
+   orderShortfall(mk(10, 100, 500)) === 0);
+os("a quantity that leaves you short reports the leftover",
+   orderShortfall(mk(11, 94, 27)) === 56,
+   `expected 56, got ${orderShortfall(mk(11, 94, 27))}`);
+os("an unreadable quantity reports null, not 0 — unknown is not covered",
+   orderShortfall(mk(10, 100, "n/a")) === null);
+os("a row with no recorded gap reports null",
+   orderShortfall({ [C.reorder]: 50 }) === null);
+
+const shortRows = flagged.filter(r => orderShortfall(r) > 0);
+os("the real export still contains under-covering rows",
+   shortRows.length > 0, `${shortRows.length} of ${flagged.length} flagged`);
+os("every flagged row resolves to a number or null — never undefined/NaN",
+   flagged.every(r => { const v = orderShortfall(r); return v === null || Number.isFinite(v); }));
+// `.every()` on an empty array is TRUE, so this must assert the set is
+// non-empty in the same breath — otherwise breaking orderShortfall empties
+// shortRows and this "passes" while reporting nothing. It did exactly that
+// the first time it was mutation-tested.
+os("no under-covering row is silently reported as covered",
+   shortRows.length > 0 && shortRows.every(r => r._gap - Number(r[C.reorder]) > 0));
+
+console.log(`\nsupplier qty: ${os_pass} passed, ${os_fail} failed`);
+
 // Guard: assert every case actually ran. A suite that silently skips half
 // its tests and prints "passed" is the exact failure this file exists to
 // catch — it happened once already writing this.
-const EXPECTED_CASES = cases.length + 6 + 11 + 6 + 8 + 8 + 6;
-const ran = pass + fail + lf_pass + lf_fail + cx_pass + cx_fail + gs_pass + gs_fail + mb_pass + mb_fail + sp_pass + sp_fail + ce_pass + ce_fail;
+const EXPECTED_CASES = cases.length + 6 + 11 + 6 + 8 + 8 + 6 + 8;
+const ran = pass + fail + lf_pass + lf_fail + cx_pass + cx_fail + gs_pass + gs_fail + mb_pass + mb_fail + sp_pass + sp_fail + ce_pass + ce_fail + os_pass + os_fail;
 if (ran !== EXPECTED_CASES) {
   console.log(`\nFAIL  only ${ran} of ${EXPECTED_CASES} cases executed — suite is skipping tests`);
   process.exit(1);
 }
-console.log(`\nTOTAL: ${pass + lf_pass + cx_pass + gs_pass + mb_pass + sp_pass + ce_pass}/${EXPECTED_CASES} passed`);
-process.exit(fail + lf_fail + cx_fail + gs_fail + mb_fail + sp_fail + ce_fail ? 1 : 0);
+console.log(`\nTOTAL: ${pass + lf_pass + cx_pass + gs_pass + mb_pass + sp_pass + ce_pass + os_pass}/${EXPECTED_CASES} passed`);
+process.exit(fail + lf_fail + cx_fail + gs_fail + mb_fail + sp_fail + ce_fail + os_fail ? 1 : 0);

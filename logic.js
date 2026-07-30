@@ -458,6 +458,24 @@ export function toCSV(rows, columns) {
   return [head, ...body].join("\r\n") + "\r\n";   // CRLF: Excel's expectation
 }
 
+// The supplier's reorder quantity is a FIELD IN THE FILE, not a calculation —
+// so nothing makes it close the gap it sits next to, and on this export it
+// often doesn't: order exactly what the column says and 12 of 113 items are
+// still below their minimum, one by 56 units. The column was labelled "Order"
+// under a heading that reads "Reorder now", which is the app telling a
+// coordinator to under-order in its own voice.
+//
+// Returns units still short AFTER ordering the stated quantity:
+//   null -> can't tell (unreadable quantity or no gap recorded)
+//   0    -> the stated quantity covers it
+//   n    -> ordering this leaves you n units below minimum
+export function orderShortfall(row) {
+  const qty = num(row[C.reorder]);
+  const gap = row._gap;
+  if (qty === null || gap === null || gap === undefined) return null;
+  return Math.max(0, Math.round(gap - qty));
+}
+
 export const ORDER_COLUMNS = [
   { label: "Product",        get: r => r[C.product] },
   { label: "Brand",          get: r => r[C.brand] },
