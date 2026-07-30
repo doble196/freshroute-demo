@@ -7,7 +7,9 @@ import { C, EXPIRY_WINDOW_DAYS, ALL_LOCATIONS, parseCSV, audit, toSnapshot,
          toCSV, ORDER_COLUMNS, groupByStorage, STORAGE_IS_PACKAGING, orderShortfall,
          morningBrief, briefPrompt, SOURCE_KINDS, DATA_SOURCE,
          bySupplier, supplierOrderText, capWithExemptions } from "./logic.js";
+import { parseVendors, planOrders } from "./vendor-logic.js";
 
+const VENDOR_SOURCE = "data/vendors.csv";
 const SOURCE = "data/dairy_dataset.csv";
 const EXPECTED_MIN_ROWS = 4000;   // outside expectation — catches a truncated download
 const MAX_ROWS_SHOWN = 20;        // attention is the budget, not screen space
@@ -208,6 +210,33 @@ function renderReview(rows) {
 }
 
 
+// Turn a supplier's rows into the purchase order a coordinator actually
+// places: whole CASES (you cannot buy 27 of a 48-unit case), the vendor's
+// discount, and the day it lands given today's cutoff and their weekday lead.
+// Every row in a group shares a brand, so they share a vendor — one schedule
+// for the group. Returns null when there is no vendor table, so the panel
+// degrades to what it showed before rather than breaking.
+function poLine(group) {
+  if (!STATE.vendors) return "";
+  const { orders } = planOrders(group.rows, STATE.vendors, STATE.asOfDate);
+  if (!orders.length) return "";
+  const cases = orders.reduce((n, o) => n + o.cases, 0);
+  const units = orders.reduce((n, o) => n + o.units, 0);
+  const priced = orders.filter(o => o.cost !== null);
+  const cost = priced.reduce((n, o) => n + o.cost, 0);
+  const o = orders[0];
+  const bits = [`${cases} case${cases === 1 ? "" : "s"} (${units} units)`];
+  if (o.discountPct) bits.push(`${o.discountPct}% off`);
+  if (priced.length === orders.length) bits.push(`~${Math.round(cost).toLocaleString()}`);
+  bits.push(`arrives ${o.arrival}`);
+  // Rounding UP to whole cases buys more than the shortfall asked for. Say so
+  // rather than letting the number quietly disagree with the column above it.
+  const over = units - Math.round(orders.reduce((n, x) => n + x.unitsRequested, 0));
+  return `<p class="po">${esc(bits.join(" \u00b7 "))}` +
+    (over > 0 ? `<span class="po-note">whole cases — ${over} units above what the rows ask for</span>` : "") +
+    `</p>`;
+}
+
 // Supplier cards. Conflicts lead, because a call where something shouldn't
 // be reordered needs care more than the biggest call needs speed.
 function renderSuppliers(groups, asOf) {
@@ -217,6 +246,7 @@ function renderSuppliers(groups, asOf) {
       <h3>${esc(g.supplier)}
         <span class="count">${g.rows.length} item${g.rows.length === 1 ? "" : "s"} ·
         ${g.sites} site${g.sites === 1 ? "" : "s"} · ${g.units} units</span></h3>
+      ${poLine(g)}
       ${g.conflicts ? `<p class="conflict-note">${g.conflicts} item${g.conflicts === 1 ? " is" : "s are"}
         also expiring within ${EXPIRY_WINDOW_DAYS} days — confirm before ordering.</p>` : ""}
       <table><thead><tr><th>Product</th><th>Location</th>
@@ -241,6 +271,19 @@ function draw() {
   const review  = byLocation(STATE.review, loc);
   const tracked = byLocation(STATE.snapshot, loc);
 
+  // An item the vendor table cannot schedule (no vendor record, unreadable
+  // quantity, vendor closed that day) is NOT an order — it is something a
+  // person has to look at. That is exactly what the review panel is for, so
+  // it goes there rather than being dropped or rendered blank.
+  // Computed from `flagged`, not the expiry-annotated copy: vendor planning
+  // reads brand, quantity and price only. It must also sit ABOVE the summary
+  // line that counts it — declaring it lower put it in the temporal dead zone
+  // and the whole load threw "Could not load inventory".
+  const vendorReview = STATE.vendors
+    ? planOrders(flagged, STATE.vendors, STATE.asOfDate).review
+    : [];
+
+
   // "Position" was my word for the data grain (product × brand × location).
   // A coordinator reorders "Amul Butter in Haryana" — that's an ITEM at a
   // site. Nobody says "I have 600 positions of milk." Renamed everywhere it
@@ -252,7 +295,7 @@ function draw() {
 
   $("summary").textContent =
     `${flagged.length} below reorder threshold · ${soon.length} expiring within ${EXPIRY_WINDOW_DAYS} days · ` +
-    `${review.length} need review · ${scope}`;
+    `${review.length + vendorReview.length} need review · ${scope}`;
 
   // When filtered, say what's being hidden. A quiet filter is a lying filter.
   $("scope").innerHTML = loc === ALL_LOCATIONS ? "" :
@@ -280,7 +323,9 @@ function draw() {
     return d === undefined ? r : { ...r, _expiresInDays: d };
   });
 
+
   const suppliers = bySupplier(flaggedAnnotated, soon);
+
   $("reorder").innerHTML = STATE.view === "supplier"
     ? renderSuppliers(suppliers, STATE.asOf)
     : renderReorder(flaggedAnnotated, STATE.grouped);
@@ -296,7 +341,7 @@ function draw() {
   vt.onchange = () => { STATE.view = vt.value; draw(); };
   $("groupToggle").parentElement.style.display = STATE.view === "supplier" ? "none" : "";
   $("expiry").innerHTML  = renderExpiry(soon);
-  $("review").innerHTML  = renderReview(review);
+  $("review").innerHTML  = renderReview([...review, ...vendorReview]);
 
   const clear = $("clear");
   if (clear) clear.onclick = () => { $("location").value = ALL_LOCATIONS; STATE.location = ALL_LOCATIONS; draw(); };
@@ -381,7 +426,23 @@ function buildLocationFilter() {
 
     // Spread the existing STATE so view prefs (grouped) survive — a bare
     // object literal here silently dropped `grouped` and forced the flat view.
-    STATE = { ...STATE, flagged, soon, review: [...unknown, ...unparseable], snapshot,
+    // Fail-soft on purpose: no vendor table means no case/discount/arrival
+    // detail, and the app is still the thing it was yesterday. A missing
+    // reference file must not take down the panel that reads the main one.
+    let vendors = null;
+    try {
+      const vres = await fetch(VENDOR_SOURCE, { cache: "no-store" });
+      if (!vres.ok) throw new Error(`${vres.status} ${vres.statusText}`);
+      const pv = parseVendors(parseCSV(await vres.text()).rows);
+      vendors = pv.vendors;
+      note("ok", `vendor table — ${pv.vendors.size} suppliers` +
+        (pv.review.length ? `, ${pv.review.length} unusable` : "") +
+        (pv.merged.length ? `, ${pv.merged.length} name variant(s) folded` : ""));
+    } catch (e) {
+      note("warn", `no vendor table (${e.message}) — supplier view shows units only, no cases or arrival dates`);
+    }
+
+    STATE = { ...STATE, vendors, asOfDate: asOf, flagged, soon, review: [...unknown, ...unparseable], snapshot,
               location: ALL_LOCATIONS, conflicts: snapshot.conflicts ?? [],
               asOf: asOf.toISOString().slice(0, 10) };
     buildLocationFilter();

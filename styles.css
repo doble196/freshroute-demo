@@ -119,3 +119,8 @@ td.n.short { color:var(--bad); }
 .short-tag { display:block; font-size:.64rem; font-weight:600; text-transform:uppercase;
   letter-spacing:.03em; color:#92400e; white-space:nowrap; }
 @media (prefers-color-scheme:dark){ .short-tag{ color:#fcd34d; } }
+
+/* The purchase order a supplier group adds up to. Sits under the header
+   because it is a consequence of those rows, not a separate fact. */
+.po { margin:.15rem 0 .5rem; font-size:.82rem; font-weight:600; }
+.po-note { display:block; font-weight:500; font-size:.72rem; opacity:.75; }
