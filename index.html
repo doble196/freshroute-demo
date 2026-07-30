@@ -11,6 +11,35 @@
     <h1>Morning triage</h1>
     <p class="sub">What needs attention today — not every row.</p>
   </header>
+  <!-- Collapsed by default on purpose. A coordinator opening this at 8am wants
+       the count, not the pitch — but anyone meeting the product cold needs to
+       know who it's for before they meet a dashboard. Same pattern as the
+       technical-details block below. -->
+  <details id="storyboard">
+    <summary>Why this exists — who it's for and what it fixes</summary>
+    <ol class="beats">
+      <li><b>The role.</b> An inventory coordinator opens a 4,325-row
+        distribution export every morning and has to decide what to reorder
+        before the delivery window closes.</li>
+      <li><b>The problem, and its root cause.</b> That file is a transaction
+        log, not a stock snapshot — one row is one recorded reading, not one
+        item — so <i>"how much do I have right now"</i> is not a question the
+        export can answer directly, and reading it the obvious way turns 113
+        real shortages into 918.</li>
+      <li><b>What changes.</b> She finishes the reorder decision before the
+        delivery window instead of after it, knows which items are deepest
+        below their minimum, and on a quiet day can tell the difference
+        between nothing being wrong and the tool being broken.</li>
+      <li><b>The flow.</b> Open the page, read one line, pick a location,
+        switch to supplier view, copy that supplier's order.</li>
+      <li><b>What to watch.</b> The <b>"still N short"</b> flag — on 12 of 113
+        items the supplier's own reorder quantity doesn't cover the gap printed
+        beside it — and the <b>DEMO</b> label admitting the expiry panel runs
+        against an export that ends in 2022, because a tool that hides its
+        limits is the one you stop trusting.</li>
+    </ol>
+  </details>
+
   <div class="controls">
     <label for="location">Location</label>
     <select id="location"><option>Loading…</option></select>
