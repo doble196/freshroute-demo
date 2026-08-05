@@ -1,7 +1,7 @@
 {
   "id": "chart-spin",
   "title": "Chart Spin — the same numbers, both ways",
-  "subtitle": "One query, one dataset, two opposite arguments — and every number on both charts is correct",
+  "subtitle": "One query, two opposite arguments — plus three more ways a technically correct chart misleads: raw counts, rank encoding, and the wrong form",
   "source": {
     "publisher": "Same DOHMH data as the Inspections tab — that is the point",
     "id": "43nn-pn8j",
@@ -13,11 +13,20 @@
   "grain": {
     "row_is": "one violation citation, rated per inspection",
     "counts": [
-      { "label": "months plotted (each chart)", "n": 12 },
-      { "label": "candidate 12-month windows searched", "n": 15 },
-      { "label": "levers that differ between the two", "n": 4 }
+      {
+        "label": "months plotted (each chart)",
+        "n": 12
+      },
+      {
+        "label": "candidate 12-month windows searched",
+        "n": 15
+      },
+      {
+        "label": "display levers demonstrated",
+        "n": 6
+      }
     ],
-    "note": "The honest chart's window was fixed by the question before looking. The spun chart's window was chosen by searching all 15 possible 12-month starts for the one that maximized Brooklyn's slope — a choice that leaves no visual trace whatsoever."
+    "note": "The honest chart's window was fixed by the question before looking. The spun chart's window was chosen by searching all 15 possible 12-month starts for the one that maximized Brooklyn's slope — a choice that leaves no visual trace whatsoever. The last two charts widen the lesson past framing into form itself — a denominator that ranks population, a rank encoding that hides magnitude, and a map for a pattern with no geography."
   },
   "charts": [
     {
@@ -46,12 +55,31 @@
       "form_why": "Equal panels isolate the levers under study. An earlier version drew the spun panel narrower — preserving the aspect trick — which confounded 'the y-axis is zoomed' with 'the panel is squished' and made the comparison itself guilty of the thing it teaches.",
       "method": "Left and right render from the same array of numbers in the same script execution. The only differences are y-range, window, and which series got smoothed.",
       "caution": "'The axes are labeled, just read them' is the standard defense of a spun chart. This image is the counterexample. Window, y-range, aspect ratio and asymmetric smoothing have no axis labels — so a reader who checks only the labels has audited nothing."
+    },
+    {
+      "title": "Raw counts rank by size — and rank encoding hides how small the gap is",
+      "img": "assets/queens_bump.png",
+      "insight": "A founder claimed Queens had the worst inspection problem 'because it recorded the most critical violations.' Manhattan actually has the most (18,487 vs 13,253). Queens does lead both fair metrics — but the four other boroughs cluster within 3% of each other, and Queens sits only 9% above that cluster.",
+      "form": "Bump chart across three denominators",
+      "form_why": "On the findings tab this chart answers whether the claim survives. Here it demonstrates two display traps at once. First, the founder's own chart — a bar of raw counts — was a population census wearing a problem's clothes: a raw count across groups of different sizes ranks the sizes. Second, and more uncomfortable, THIS chart has its own failure mode: bump charts encode rank, and rank makes a hairline gap look like a landslide. A 2% difference and a 40% difference produce identical line crossings.",
+      "method": "Values print at every node specifically to defuse the rank illusion, and the caption is computed from the cluster shape rather than the global max-minus-min — so 'Queens is rank 1' and 'the lead is modest' cannot contradict each other on the same image. An earlier draft used a global spread statistic and produced exactly that contradiction.",
+      "caution": "Correcting a distortion can introduce its opposite. The founder's raw count exaggerated Queens's problem; a rank-only chart would have exaggerated its refutation. Neither denominator here is automatically fairer either — per-inspection reflects enforcement policy, per-restaurant confounds exposure time. The denominator has to follow the decision being made."
+    },
+    {
+      "title": "The wrong form: a map for a pattern that isn't spatial",
+      "img": "assets/residual_map.png",
+      "insight": "A stakeholder requested a map titled 'Where frequent inspections cause worse outcomes.' The association turned out to be 98% non-geographic — pooled slope +5.75, zip-demeaned slope +5.64 — so neighborhoods explain about 2% of it. The requested map would have shown a 'where' for something that has no where.",
+      "form": "Residual scatter map — a deliberate demotion",
+      "form_why": "Maps are persuasive because every dot is real, and that persuasiveness is exactly the risk: a map can show WHERE things coincide but never WHY, and this claim was entirely a why-claim. Rather than refuse the map, it was demoted to the one job a map can honestly do here — display what geography still explains AFTER cuisine and neighborhood means are removed. It renders as salt-and-pepper with no clusters, and that emptiness is the answer.",
+      "method": "Severity minus cuisine mean minus neighborhood mean, plotted per restaurant. 20,092 restaurants; 313 excluded for missing or (0,0) coordinates and counted rather than silently dropped. Aspect ratio set to roughly cos(latitude) so New York is not stretched — an unconsidered aspect ratio is itself a distortion.",
+      "caution": "The requested title contained the word 'cause' before any analysis had earned it — and in this domain the arrow runs backward, since risk-based enforcement assigns more inspections to worse restaurants. A title that names its conclusion in advance turns the chart into an illustration of a decision already made."
     }
   ],
   "cannot_answer": [
     "Whether any particular published chart was spun deliberately. These four levers are also the everyday choices of honest charting; intent is not visible in the output, which is precisely why disclosure matters more than motive.",
     "Whether a chart is trustworthy from the chart alone. Two of these levers — the window search and the asymmetric smoothing — leave no visual trace at all. You need the method, not just the image.",
-    "How to make an unambiguously neutral chart, because there isn't one. Every chart chooses a window, a baseline, an aspect ratio, a smoothing policy, a color assignment and a caption. The honest ones disclose those choices; they do not avoid making them."
+    "How to make an unambiguously neutral chart, because there isn't one. Every chart chooses a window, a baseline, an aspect ratio, a smoothing policy, a color assignment and a caption. The honest ones disclose those choices; they do not avoid making them.",
+    "Whether these five exhaust the ways a chart misleads. They do not — they are the ones encountered while building this site, including two the author introduced and had to fix."
   ],
   "reproduce": "python3 data/socrata/viz_borough_trend.py — writes honest.png, misleading.png and comparison.png in a single run"
 }
