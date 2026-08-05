@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watch a true chart become a false one</title>
+<meta name="description" content="A scroll-driven piece: the honest borough chart transforms into the spun one, one display lever at a time. The numbers never change.">
+<style>
+/* Same tokens as the data-app shell — this page is part of that system. */
+:root{
+  --bg:#f4f4f1; --panel:#fff; --panel2:#faf9f6; --line:#dedcd6;
+  --ink:#14161a; --dim:#5a5f68; --faint:#9aa0aa;
+  --accent:#b45309; --crit:#b91c1c; --link:#1d4ed8;
+  --blue:#2a78d6; --red:#e34948;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0d1014; --panel:#161a20; --panel2:#1c2128; --line:#2a3038;
+         --ink:#e9ecf1; --dim:#98a0ab; --faint:#5f6874;
+         --accent:#f0a030; --crit:#f87171; --link:#7aa5ff;
+         --blue:#5b9be0; --red:#f06d6c; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 "Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+a{color:var(--link)}
+header{border-bottom:1px solid var(--line);background:var(--panel);padding:14px 20px}
+header .inner{max-width:1080px;margin:0 auto;display:flex;justify-content:space-between;
+  align-items:baseline;gap:12px;flex-wrap:wrap}
+header b{font-size:15px;letter-spacing:-.2px}
+header a{font-size:13.5px}
+.intro,.outro{max-width:640px;margin:0 auto;padding:40px 20px 10px}
+.intro h1{font-size:26px;line-height:1.2;letter-spacing:-.4px;margin:0 0 12px;text-wrap:balance}
+.intro p,.outro p{font-size:16px;color:var(--dim);margin:0 0 14px}
+.intro p b,.outro p b{color:var(--ink)}
+
+/* ── the scrolly frame ─────────────────────────────────────────── */
+#scrolly{max-width:1080px;margin:0 auto;padding:0 20px;display:grid;
+  grid-template-columns:minmax(280px,340px) 1fr;gap:28px}
+.steps{padding:20vh 0 10vh}
+.step{margin:0 0 78vh;padding:16px 18px;background:var(--panel);
+  border:1px solid var(--line);border-radius:3px;opacity:.45;
+  transition:opacity .25s ease, border-color .25s ease}
+.step.active{opacity:1;border-color:var(--accent)}
+.step:last-child{margin-bottom:30vh}
+.step .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 6px;font-weight:700}
+.step p{margin:0;font-size:15px}
+.step p+p{margin-top:8px}
+.step .n{font-variant-numeric:tabular-nums;font-weight:700}
+
+.viz-wrap{position:sticky;top:0;height:100vh;display:flex;align-items:center}
+figure.viz{margin:0;width:100%;background:var(--panel);border:1px solid var(--line);
+  border-radius:3px;padding:16px 18px 12px}
+.fig-title{margin:0 0 2px;font-size:15px;font-weight:600;min-height:2.6em;
+  transition:color .3s ease;text-wrap:balance}
+.fig-title.spun{color:var(--crit);text-transform:uppercase;letter-spacing:.02em}
+.levers{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 10px}
+.levers span{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 8px;border:1px solid var(--line);border-radius:10px;color:var(--faint);
+  transition:all .3s ease}
+.levers span.fired{border-color:var(--crit);color:var(--crit);font-weight:700}
+.levers span.zero{border-color:var(--accent);color:var(--accent);font-weight:700}
+svg#chart{width:100%;height:auto;max-height:60vh;display:block}
+.grid line{stroke:var(--line);stroke-width:1}
+.axis text{fill:var(--dim);font:10.5px "Helvetica Neue",Helvetica,Arial,sans-serif}
+.endlab{font:10.5px "Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:700}
+.endlab2{font:9.5px "Helvetica Neue",Helvetica,Arial,sans-serif;fill:var(--dim)}
+.readout{margin:8px 0 0;font-size:12.5px;color:var(--dim)}
+.readout b{color:var(--ink)}
+
+.fallback{max-width:1080px;margin:0 auto;padding:20px}
+.fallback img{width:100%;border:1px solid var(--line);border-radius:3px}
+
+.outro{padding-bottom:70px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 18px;margin:18px 0;font-size:13.5px;color:var(--dim)}
+.card b{color:var(--ink)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:2px;padding:1px 5px}
+
+@media (max-width:760px){
+  #scrolly{grid-template-columns:1fr;gap:0}
+  .viz-wrap{order:-1;top:0;height:auto;padding:8px 0;z-index:2;
+    background:var(--bg);align-items:flex-start}
+  svg#chart{max-height:38vh}
+  .steps{padding-top:6vh}
+  .step{margin-bottom:60vh;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+}
+@media (prefers-reduced-motion:reduce){
+  .step,.levers span,.fig-title{transition:none!important}
+}
+</style>
+</head>
+<body>
+<header><div class="inner">
+  <b>Watch a true chart become a false one</b>
+  <a href="index.html">← back to the data app</a>
+</div></header>
+
+<section class="intro">
+  <h1>Six display levers, pulled one at a time, in front of you</h1>
+  <p>On the chart-spin tab there are two renders of the same query — an honest one
+     that says <b>Brooklyn is flat</b>, and a spun one that shouts a surge. A gallery
+     can only assert they're the same data. This page demonstrates it: one chart,
+     pinned to your screen, transformed by scrolling. <b>No number changes at any
+     point.</b> Scroll back up whenever you don't believe it.</p>
+  <p class="mono" style="font-size:13px">rate = violation citations ÷ distinct inspections · NYC DOHMH · live from the API</p>
+</section>
+
+<noscript><div class="fallback">
+  <img src="assets/comparison.png" alt="Honest and spun renders side by side">
+  <p>JavaScript is off — this is the static side-by-side the scroll piece animates between.</p>
+</div></noscript>
+
+<section id="scrolly" hidden>
+  <div class="steps" id="steps">
+    <div class="step" data-i="0">
+      <p class="k">The honest chart</p>
+      <p>Violations per inspection, five boroughs, the last <span class="n">12</span> complete
+         months, y-axis from zero. Brooklyn: <b class="n" data-f="hFirst"></b> →
+         <b class="n" data-f="hLast"></b>. Flat — and its drift ranks third among the boroughs.</p>
+      <p>Keep your eye on the numbers. They never change again.</p>
+    </div>
+    <div class="step" data-i="1">
+      <p class="k">Lever 1 — baseline</p>
+      <p>Zoom the y-axis to Brooklyn's own range and a wobble fills the whole panel.
+         Every value is identical; the frame around them shrank.</p>
+      <p>There's even a true rule to hide behind: line charts don't have to start at zero.</p>
+    </div>
+    <div class="step" data-i="2">
+      <p class="k">Lever 2 — window</p>
+      <p>Slide the window back to start at Brooklyn's trough. This start was found by
+         searching all <span class="n" data-f="candidates"></span> possible 12-month
+         windows for the steepest Brooklyn slope.</p>
+      <p>That search leaves <b>no trace on the chart</b>. You only know it happened
+         because this page tells you.</p>
+    </div>
+    <div class="step" data-i="3">
+      <p class="k">Lever 3 — aspect ratio</p>
+      <p>Squeeze the panel tall and narrow. Every slope on screen steepens —
+         the data hasn't moved.</p>
+      <p>Nobody audits aspect ratio.</p>
+    </div>
+    <div class="step" data-i="4">
+      <p class="k">Lever 4 — smoothing</p>
+      <p>A 3-month average — for Brooklyn only. Its line becomes clean “signal” while
+         the raw gray boroughs read as noise around it.</p>
+      <p>The real chart disclosed this. In 5.5-point type.</p>
+    </div>
+    <div class="step" data-i="5">
+      <p class="k">Levers 5 + 6 — color and the title</p>
+      <p>Alarm red, and a headline that states the conclusion. This is the spun render
+         from the gallery, rebuilt in front of you.</p>
+      <p>Each of the six choices could be defended in a meeting by citing a real principle.
+         That's what makes this the realistic failure mode.</p>
+    </div>
+    <div class="step" data-i="6">
+      <p class="k">Now reverse everything at once</p>
+      <p>Brooklyn: <b class="n" data-f="hFirst"></b> → <b class="n" data-f="hLast"></b>.
+         Same numbers, start to finish. You watched a true chart become a false one —
+         and there was no single moment it stopped being true.</p>
+      <p>That's why the method has to travel with the image. The image can't testify.</p>
+    </div>
+  </div>
+
+  <div class="viz-wrap"><figure class="viz">
+    <p class="fig-title" id="figTitle"></p>
+    <div class="levers" id="levers">
+      <span data-l="baseline">baseline</span><span data-l="window">window</span><span
+        data-l="aspect">aspect</span><span data-l="smoothing">smoothing</span><span
+        data-l="color">color</span><span data-l="title">title</span><span
+        data-l="zero" hidden>numbers changed: 0</span>
+    </div>
+    <svg id="chart" viewBox="0 0 660 430" role="img"
+         aria-label="Violations per inspection by borough; the chart's framing changes per step but its values never do"></svg>
+    <p class="readout mono" id="readout"></p>
+  </figure></div>
+</section>
+
+<section class="outro">
+  <p><b>What this piece fired:</b> six of the seven levers documented on the chart-spin
+     tab — window, baseline, aspect ratio, smoothing, color, caption. The seventh,
+     encoding (changing the chart form itself), is covered by the map and bump-chart
+     exhibits there.</p>
+  <div class="card" id="provenance">Loading provenance…</div>
+  <div class="card">
+    <b>Machinery.</b> Scroll triggering is <a href="https://github.com/russellsamora/scrollama">scrollama.js</a>
+    (MIT), by Russell Samora at <a href="https://pudding.cool">The Pudding</a> — the same
+    open-source library behind their scroll-driven visual essays; this page follows their
+    sticky-graphic pattern. The chart itself is hand-rolled SVG rendered from
+    <code>datasets/borough-series.json</code>, exported by the same guarded pull that
+    drew the static PNGs. <b>Sequencing is a display choice too</b> — showing the levers
+    one at a time argues they're separable, when in the wild they arrive together.
+    The final step reverses all of them at once as the check that no data changed.
+  </div>
+  <p><a href="index.html">← back to the data app</a> ·
+     <a href="assets/comparison.png">static side-by-side (the no-JS fallback)</a></p>
+</section>
+
+<script src="lib/scrollama.min.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const BLUE = getComputedStyle(document.documentElement).getPropertyValue("--blue").trim();
+const RED  = getComputedStyle(document.documentElement).getPropertyValue("--red").trim();
+const GRAY = "#b9b8b3";
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const VB = {w:660, h:430}, M = {l:44, r:86, t:10, b:26};
+const PLOT_H = VB.h - M.t - M.b, PLOT_W_MAX = VB.w - M.l - M.r;
+
+let D, STATES, S, seriesEls = {}, tweenId = null;
+
+const lerp = (a,b,t) => a + (b-a)*t;
+const ease = t => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+const hex2rgb = h => [1,3,5].map(i => parseInt(h.slice(i,i+2),16));
+const lerpColor = (a,b,t) => {
+  const A = hex2rgb(a), B = hex2rgb(b);
+  return `rgb(${A.map((v,i)=>Math.round(lerp(v,B[i],t))).join(",")})`;
+};
+
+// current value of a series at month index — Brooklyn blends toward its
+// (cherry-window) smoothed series as S.smooth rises
+function val(b, i){
+  const raw = D.rates[b][i];
+  if (b !== "Brooklyn" || S.smooth <= 0) return raw;
+  const j = i - D.cherry_start;
+  if (j < 0 || j > 11) return raw;
+  return lerp(raw, D.brooklyn_smoothed_cherry[j], S.smooth);
+}
+
+function draw(){
+  const plotW = PLOT_W_MAX * S.aspect;
+  const xs = i => M.l + (i - S.x0) * plotW/11;
+  const ys = v => M.t + (1-(v-S.y0)/(S.y1-S.y0)) * PLOT_H;
+
+  $("#clipR").setAttribute("width", plotW);
+
+  // y grid + labels: fixed count, positions follow the domain
+  const span = S.y1 - S.y0;
+  const step = [5,2,1,.5,.25,.2,.1,.05].find(s => span/s >= 3 && span/s <= 8) || span/4;
+  let g = "", yl = "";
+  for (let v = Math.ceil(S.y0/step)*step; v <= S.y1+1e-9; v += step){
+    const y = ys(v);
+    if (y < M.t-1 || y > M.t+PLOT_H+1) continue;
+    g  += `<line x1="${M.l}" x2="${M.l+plotW}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/>`;
+    yl += `<text x="${M.l-6}" y="${(y+3.5).toFixed(1)}" text-anchor="end">${step<1?v.toFixed(step<.2?2:1):v.toFixed(0)}</text>`;
+  }
+  $("#grid").innerHTML = g; $("#ylab").innerHTML = yl;
+
+  // x labels slide with the pan; absolute-index parity keeps them stable
+  let xl = "";
+  for (let i = Math.max(0,Math.ceil(S.x0-.001)); i <= Math.min(D.months.length-1, Math.floor(S.x0+11.001)); i++){
+    if (i % 2) continue;
+    const x = xs(i);
+    if (x < M.l-2 || x > M.l+plotW+2) continue;
+    xl += `<text x="${x.toFixed(1)}" y="${VB.h-8}" text-anchor="middle">${D.months[i].slice(2)}</text>`;
+  }
+  $("#xlab").innerHTML = xl;
+
+  // series
+  for (const b of D.boros){
+    const el = seriesEls[b];
+    el.setAttribute("d", D.months.map((_,i) =>
+      `${i?"L":"M"}${xs(i).toFixed(1)},${ys(val(b,i)).toFixed(1)}`).join(""));
+    if (b === "Brooklyn"){
+      el.setAttribute("stroke", lerpColor(BLUE.length===7?BLUE:"#2a78d6", RED.length===7?RED:"#e34948", S.spin));
+      el.setAttribute("stroke-width", (2.4 + .8*S.spin).toFixed(2));
+    } else {
+      el.setAttribute("opacity", (1 - .35*S.spin).toFixed(2));
+    }
+  }
+
+  // end labels at the last visible month
+  const iEnd = Math.min(D.months.length-1, Math.round(S.x0)+11);
+  const bkY = ys(val("Brooklyn", iEnd));
+  const others = D.boros.filter(b => b!=="Brooklyn");
+  let othY = others.reduce((a,b)=>a+ys(val(b,iEnd)),0)/others.length;
+  if (Math.abs(othY-bkY) < 26) othY = bkY + (othY>=bkY?26:-26);
+  const lb = $("#labBK"), lo = $("#labOth");
+  lb.setAttribute("x", M.l+plotW+5); lb.setAttribute("y", bkY+3.5);
+  lb.setAttribute("fill", lerpColor(BLUE.length===7?BLUE:"#2a78d6", RED.length===7?RED:"#e34948", S.spin));
+  lo.setAttribute("x", M.l+plotW+5); lo.setAttribute("y", Math.max(M.t+8, Math.min(M.t+PLOT_H-2, othY))+3.5);
+
+  // readout: what the frame does to the same numbers
+  const i0 = Math.max(0, Math.round(S.x0)), i1 = Math.min(D.months.length-1, i0+11);
+  const vis = []; for (let i=i0;i<=i1;i++) vis.push(val("Brooklyn",i));
+  const fill = (Math.max(...vis)-Math.min(...vis))/(S.y1-S.y0)*100;
+  $("#readout").innerHTML =
+    `Brooklyn in view: <b>${vis[0].toFixed(2)} → ${vis[vis.length-1].toFixed(2)}</b> · ` +
+    `its range fills <b>${Math.min(100,fill).toFixed(0)}%</b> of panel height · ` +
+    `window ${D.months[i0]} – ${D.months[i1]}`;
+}
+
+function setState(target, instant){
+  if (tweenId) cancelAnimationFrame(tweenId);
+  const from = {...S}, keys = ["x0","y0","y1","aspect","smooth","spin"];
+  if (instant || REDUCED){ keys.forEach(k => S[k] = target[k]); draw(); return; }
+  const t0 = performance.now(), dur = 750;
+  const tick = now => {
+    const t = ease(Math.min(1,(now-t0)/dur));
+    keys.forEach(k => S[k] = lerp(from[k], target[k], t));
+    draw();
+    if (t < 1) tweenId = requestAnimationFrame(tick);
+  };
+  tweenId = requestAnimationFrame(tick);
+}
+
+let curIdx = -1;
+function enterStep(i){
+  if (i === curIdx) return;
+  curIdx = i;
+  setState(STATES[i]);
+  document.querySelectorAll(".step").forEach((el,j) => el.classList.toggle("active", i===j));
+  const T = $("#figTitle");
+  T.textContent = STATES[i].title;
+  T.classList.toggle("spun", !!STATES[i].spunTitle);
+  const fired = [[],["baseline"],["baseline","window"],["baseline","window","aspect"],
+    ["baseline","window","aspect","smoothing"],
+    ["baseline","window","aspect","smoothing","color","title"],[]][i];
+  document.querySelectorAll("#levers span").forEach(el => {
+    el.classList.toggle("fired", fired.includes(el.dataset.l));
+    el.classList.remove("zero");
+    if (el.dataset.l === "zero") el.hidden = (i !== 6);
+  });
+  if (i === 6) document.querySelector('[data-l="zero"]').classList.add("zero");
+}
+
+(async () => {
+  try {
+    D = await (await fetch("datasets/borough-series.json", {cache:"no-store"})).json();
+  } catch (e) {
+    document.querySelector(".intro").insertAdjacentHTML("afterend",
+      `<div class="fallback"><img src="assets/comparison.png" alt="Honest and spun renders side by side">
+       <p>Could not load the series (${e.message}) — this is the static side-by-side instead.</p></div>`);
+    return;
+  }
+  $("#scrolly").hidden = false;
+
+  const iH = D.honest_start, iC = D.cherry_start;
+  const bkH = D.rates.Brooklyn.slice(iH, iH+12);
+  const bkC = D.rates.Brooklyn.slice(iC, iC+12);
+  const sm  = D.brooklyn_smoothed_cherry;
+  const yMaxH = Math.max(...D.boros.map(b => Math.max(...D.rates[b].slice(iH, iH+12)))) * 1.15;
+  const fit = a => { const lo=Math.min(...a), hi=Math.max(...a), p=(hi-lo)*.07||.05;
+                     return {y0:lo-p, y1:hi+p}; };
+  const fH = fit(bkH), fC = fit(bkC), fS = fit(sm);
+  const honestTitle = `Violations per inspection — Brooklyn ${bkH[0].toFixed(2)} → ${bkH[11].toFixed(2)}, all five boroughs in one band`;
+
+  STATES = [
+    {x0:iH, y0:0,     y1:yMaxH, aspect:1,  smooth:0, spin:0, title:honestTitle},
+    {x0:iH, y0:fH.y0, y1:fH.y1, aspect:1,  smooth:0, spin:0, title:"Same numbers — the y-axis is now Brooklyn's own range"},
+    {x0:iC, y0:fC.y0, y1:fC.y1, aspect:1,  smooth:0, spin:0, title:"Same numbers — the window slid to the steepest of "+D.candidates+" starts"},
+    {x0:iC, y0:fC.y0, y1:fC.y1, aspect:.48,smooth:0, spin:0, title:"Same numbers — the panel squeezed tall and narrow"},
+    {x0:iC, y0:fS.y0, y1:fS.y1, aspect:.48,smooth:1, spin:0, title:"Same numbers — Brooklyn smoothed, every other line left raw"},
+    {x0:iC, y0:fS.y0, y1:fS.y1, aspect:.48,smooth:1, spin:1, title:"Brooklyn violations surge 12 months running ↗", spunTitle:true},
+    {x0:iH, y0:0,     y1:yMaxH, aspect:1,  smooth:0, spin:0, title:"The honest chart again — nothing about the data ever changed"},
+  ];
+  S = {...STATES[0]};
+
+  // fill step-text numbers from the data itself
+  document.querySelectorAll("[data-f=hFirst]").forEach(el => el.textContent = bkH[0].toFixed(2));
+  document.querySelectorAll("[data-f=hLast]").forEach(el => el.textContent = bkH[11].toFixed(2));
+  document.querySelectorAll("[data-f=candidates]").forEach(el => el.textContent = D.candidates);
+
+  // build the SVG once; draw() only mutates attributes
+  const svg = $("#chart");
+  svg.innerHTML = `
+    <defs><clipPath id="clip"><rect id="clipR" x="${M.l}" y="${M.t}" width="${PLOT_W_MAX}" height="${PLOT_H}"/></clipPath></defs>
+    <g id="grid" class="grid"></g>
+    <g id="ylab" class="axis"></g><g id="xlab" class="axis"></g>
+    <g clip-path="url(#clip)" id="series"></g>
+    <text id="labBK" class="endlab">Brooklyn</text>
+    <text id="labOth" class="endlab2">other boroughs</text>`;
+  const NS = "http://www.w3.org/2000/svg";
+  for (const b of D.boros){
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("fill", "none");
+    p.setAttribute("stroke", b==="Brooklyn" ? BLUE : GRAY);
+    p.setAttribute("stroke-width", b==="Brooklyn" ? 2.4 : 1.2);
+    if (b === "Brooklyn") p.setAttribute("data-bk","1");
+    $("#series")[b==="Brooklyn" ? "append" : "prepend"](p);
+    seriesEls[b] = p;
+  }
+  enterStep(0); draw();
+
+  $("#provenance").innerHTML =
+    `<b>Provenance.</b> Pulled <span class="mono">${D.generated}</span> · publisher watermark
+     <span class="mono">${D.watermark}</span> · ${D.source} · honest window
+     <span class="mono">${D.months[iH]} – ${D.months[iH+11]}</span>, cherry-picked window
+     <span class="mono">${D.months[iC]} – ${D.months[iC+11]}</span> (steepest of ${D.candidates}).
+     Reproduce the numbers: <code>python3 data/socrata/export_scrolly.py</code>`;
+
+  scrollama().setup({step: "#steps .step", offset: 0.55})
+    .onStepEnter(({index}) => enterStep(index));
+  // scrollama's IntersectionObserver can miss a step when a jump (End key,
+  // fast fling) crosses its trigger band inside one frame — reconcile from
+  // geometry so the chart can never desync from the text beside it
+  const stepEls = [...document.querySelectorAll("#steps .step")];
+  const reconcile = () => {
+    const line = innerHeight * 0.55;
+    let idx = 0;
+    stepEls.forEach((el, j) => { if (el.getBoundingClientRect().top <= line) idx = j; });
+    if (idx !== curIdx) enterStep(idx);
+  };
+  addEventListener("scroll", () => requestAnimationFrame(reconcile), {passive: true});
+  addEventListener("resize", () => { draw(); requestAnimationFrame(reconcile); });
+})();
+</script>
+</body>
+</html>

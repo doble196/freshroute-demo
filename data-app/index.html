@@ -53,6 +53,14 @@ figcaption{margin-top:10px}
 .caution{border-left:3px solid var(--accent);padding:6px 0 6px 12px;margin:10px 0 0;
   font-size:13.5px;color:var(--dim)}
 .caution b{color:var(--accent)}
+a.storycard{display:block;text-decoration:none;color:inherit;background:var(--panel);
+  border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:3px;
+  padding:20px 22px;transition:border-color .15s ease}
+a.storycard:hover{border-color:var(--accent)}
+a.storycard .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin:0 0 6px}
+a.storycard .t{font-size:18px;font-weight:700;letter-spacing:-.2px;margin:0 0 6px;text-wrap:balance}
+a.storycard .go{color:var(--link);font-size:14px;font-weight:600}
 ul.limits{margin:6px 0 0;padding-left:20px}
 ul.limits li{font-size:14px;color:var(--dim);margin:7px 0}
 .src{font-size:13px;color:var(--dim)}
@@ -101,7 +109,13 @@ function render(){
 
   const figs = d.charts.map(c => `
     <figure>
-      <img src="${esc(c.img)}" alt="${esc(c.title)}" loading="lazy">
+      ${c.interactive
+        ? `<a class="storycard" href="${esc(c.interactive)}">
+             <p class="k">Interactive — scroll-driven</p>
+             <p class="t">${esc(c.title)}</p>
+             <p class="go">Watch the transformation →</p>
+           </a>`
+        : `<img src="${esc(c.img)}" alt="${esc(c.title)}" loading="lazy">`}
       <figcaption>
         <p class="insight"><b>${esc(c.title)}.</b> ${esc(c.insight)}</p>
         <p class="meta"><b>Form:</b> ${esc(c.form)} — ${esc(c.form_why)}</p>

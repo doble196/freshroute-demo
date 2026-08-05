@@ -48,6 +48,15 @@
       "caution": "Every individual choice here has a legitimate use, and each could be defended in a meeting by citing a real principle. That is what makes this the realistic failure mode — far more common than fabricated data, and much harder to catch."
     },
     {
+      "title": "Watch it happen — the honest chart becomes the spun one, one lever at a time",
+      "interactive": "spin-scrolly.html",
+      "insight": "The two renders above are separated by six display decisions and nothing else. This piece pins one chart to your screen and fires the levers in sequence as you scroll — baseline, window, aspect, smoothing, color, title. Brooklyn is 3.67 → 3.67 the entire time, and the final step reverses everything at once to prove it.",
+      "form": "Scrollytelling — a pinned chart the reader transforms by scrolling",
+      "form_why": "A gallery can only assert that the honest and spun charts are the same data; a scroll piece demonstrates it, because the reader watches the transformation happen and can scroll back to any point. The pattern and the trigger library (scrollama.js, MIT) come from The Pudding, who open-source the machinery behind their visual essays.",
+      "method": "The chart renders client-side from borough-series.json — the same numbers the PNGs were drawn from, exported by the same guarded pull under the same watermark. Six of this tab's seven levers fire one per step; encoding, the seventh, is covered by the map and bump-chart exhibits below. Falls back to the static side-by-side when JavaScript is off.",
+      "caution": "Sequencing is itself a display choice. Showing the levers one at a time argues they are separable, when in a real spun chart they arrive together and reinforce each other — the piece says so on the page rather than leaving it implicit."
+    },
+    {
       "title": "Side by side — every axis labeled, and the right panel still lies",
       "img": "assets/comparison.png",
       "insight": "Both panels carry full axis labels and their own disclosure line. The deception survives anyway, because it lives in the frame rather than in anything a label can name.",
@@ -90,5 +99,5 @@
     "How to make an unambiguously neutral chart, because there isn't one. Every chart chooses a window, a baseline, an aspect ratio, a smoothing policy, a color assignment and a caption. The honest ones disclose those choices; they do not avoid making them.",
     "Whether these five exhaust the ways a chart misleads. They do not — they are the ones encountered while building this site, including two the author introduced and had to fix."
   ],
-  "reproduce": "python3 data/socrata/viz_borough_trend.py — writes honest.png, misleading.png and comparison.png in a single run"
+  "reproduce": "python3 data/socrata/viz_borough_trend.py — writes honest.png, misleading.png and comparison.png in a single run · python3 data/socrata/export_scrolly.py — writes the series JSON the scroll piece renders from"
 }
