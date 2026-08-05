@@ -1,7 +1,7 @@
 {
   "id": "chart-spin",
   "title": "Chart Spin — the same numbers, both ways",
-  "subtitle": "One query, two opposite arguments — plus three more ways a technically correct chart misleads: raw counts, rank encoding, and the wrong form",
+  "subtitle": "One query, two opposite arguments — plus four more ways a technically correct chart misleads: raw counts, rank encoding, the wrong form, and axis order",
   "source": {
     "publisher": "Same DOHMH data as the Inspections tab — that is the point",
     "id": "43nn-pn8j",
@@ -23,7 +23,7 @@
       },
       {
         "label": "display levers demonstrated",
-        "n": 6
+        "n": 7
       }
     ],
     "note": "The honest chart's window was fixed by the question before looking. The spun chart's window was chosen by searching all 15 possible 12-month starts for the one that maximized Brooklyn's slope — a choice that leaves no visual trace whatsoever. The last two charts widen the lesson past framing into form itself — a denominator that ranks population, a rank encoding that hides magnitude, and a map for a pattern with no geography."
@@ -73,6 +73,15 @@
       "form_why": "Maps are persuasive because every dot is real, and that persuasiveness is exactly the risk: a map can show WHERE things coincide but never WHY, and this claim was entirely a why-claim. Rather than refuse the map, it was demoted to the one job a map can honestly do here — display what geography still explains AFTER cuisine and neighborhood means are removed. It renders as salt-and-pepper with no clusters, and that emptiness is the answer.",
       "method": "Severity minus cuisine mean minus neighborhood mean, plotted per restaurant. 20,092 restaurants; 313 excluded for missing or (0,0) coordinates and counted rather than silently dropped. Aspect ratio set to roughly cos(latitude) so New York is not stretched — an unconsidered aspect ratio is itself a distortion.",
       "caution": "The requested title contained the word 'cause' before any analysis had earned it — and in this domain the arrow runs backward, since risk-based enforcement assigns more inspections to worse restaurants. A title that names its conclusion in advance turns the chart into an illustration of a decision already made."
+    },
+    {
+      "title": "Axis order is a causal claim — even when the title says otherwise",
+      "img": "assets/axis_swap.png",
+      "insight": "Restaurants scoring in the A range (0–13) receive 1.04 inspections on average; those scoring 41+ receive 2.18. The jump begins right at 14, which is where DOHMH's re-inspection rule fires. Scoring worse gets you inspected more.",
+      "form": "Bucketed line, cause on x and effect on y",
+      "form_why": "Readers parse x → y as cause → effect in the first two seconds, before any title is read. The Inspections tab's facet chart plots inspections on x and score on y, so its LAYOUT argues 'inspections make restaurants worse' — the reverse of the measured mechanism. Rewriting that chart's title fixed the words; this chart fixes the grammar. Same data, same window, same grain: only the axis assignment changed.",
+      "method": "One point per restaurant — its worst score and how many inspections it received — bucketed into DOHMH's own grading bands rather than invented cut points. n printed at every point. Zero baseline, deliberately: an earlier render started the y-axis at 1.0 and let a 1.04→2.18 climb fill the whole panel, which is the y-zoom lever two charts above this one.",
+      "caution": "Swapping axes does NOT establish causality. It aligns the visual grammar with a mechanism already known from the written enforcement rule. Absent that rule, this chart would imply the reverse just as readily — the honesty comes from the documented policy, not from the axis order."
     }
   ],
   "cannot_answer": [
