@@ -92,3 +92,23 @@ agreeing with a copy of itself isn't.
 
 Files: [`logic.js`](logic.js) is all the data logic (imported by both the app and
 the tests), [`script.js`](script.js) is DOM and render only.
+
+---
+
+## Data app (`/data-app/`)
+
+A reusable shell for publishing findings that state their own limits. Every
+dataset renders the same four blocks: **what one row counts** (grain, measured
+not assumed), **the charts** (each with why that form and what method), **what
+this data cannot answer**, and **source + provenance**.
+
+**Adding a dataset is one JSON file — no code changes.**
+
+1. Drop your chart PNGs in `data-app/assets/`
+2. Write `data-app/datasets/<your-dataset>.json` (copy an existing one; the
+   schema is: `id, title, subtitle, source{}, grain{}, charts[], cannot_answer[]`)
+3. Add the filename to `datasets` in `data-app/datasets/manifest.json`
+
+Every chart entry carries `form` and `form_why` because the choice of chart
+type is an argument, and `method` + `caution` because framing choices —
+window, denominator, smoothing, axis range — decide what a reader concludes.

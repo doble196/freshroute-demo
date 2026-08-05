@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Data — findings that state their own limits</title>
+<meta name="description" content="Public-data findings where every chart declares what one row counts, what the data cannot answer, and which framing choices were made.">
+<style>
+/* Grounded in NYC municipal signage — Helvetica (a system face, so nothing
+   loads and nothing can silently fall back), high contrast, dense tabular
+   figures. Light ground by default for a public page; dark honored. */
+:root{
+  --bg:#f4f4f1; --panel:#fff; --panel2:#faf9f6; --line:#dedcd6;
+  --ink:#14161a; --dim:#5a5f68; --faint:#9aa0aa;
+  --accent:#b45309; --good:#15803d; --crit:#b91c1c; --link:#1d4ed8;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0d1014; --panel:#161a20; --panel2:#1c2128; --line:#2a3038;
+         --ink:#e9ecf1; --dim:#98a0ab; --faint:#5f6874;
+         --accent:#f0a030; --good:#4ade80; --crit:#f87171; --link:#7aa5ff; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 "Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+header{border-bottom:1px solid var(--line);background:var(--panel);padding:22px 20px 0}
+header .inner{max-width:1080px;margin:0 auto}
+h1{font-size:21px;margin:0 0 4px;letter-spacing:-.3px}
+.tagline{color:var(--dim);font-size:14px;margin:0 0 16px;max-width:70ch}
+.tabs{display:flex;gap:2px;flex-wrap:wrap}
+.tabs button{background:transparent;border:0;border-bottom:2px solid transparent;
+  padding:9px 14px;font:inherit;font-size:14px;color:var(--dim);cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.tabs button:hover{color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+h2{font-size:19px;margin:34px 0 2px;letter-spacing:-.2px}
+.sub{color:var(--dim);font-size:14px;margin:0 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:18px 20px;margin:0 0 18px}
+.card h3{font-size:15px;margin:0 0 8px}
+.grain{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;margin:0 0 12px}
+.grain div{flex:1;min-width:150px;padding:12px 15px;background:var(--panel2)}
+.grain div+div{border-left:1px solid var(--line)}
+.grain .k{font-size:10.5px;color:var(--dim);letter-spacing:.07em;text-transform:uppercase}
+.grain .v{font-size:22px;font-weight:700;margin-top:3px}
+figure{margin:0 0 26px}
+figure img{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:3px;background:#fff}
+figcaption{margin-top:10px}
+.insight{font-size:15.5px;margin:0 0 10px}
+.meta{font-size:13.5px;color:var(--dim);margin:7px 0}
+.meta b{color:var(--ink);font-weight:600}
+.caution{border-left:3px solid var(--accent);padding:6px 0 6px 12px;margin:10px 0 0;
+  font-size:13.5px;color:var(--dim)}
+.caution b{color:var(--accent)}
+ul.limits{margin:6px 0 0;padding-left:20px}
+ul.limits li{font-size:14px;color:var(--dim);margin:7px 0}
+.src{font-size:13px;color:var(--dim)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:2px;padding:1px 5px}
+a{color:var(--link)}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--dim)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="inner">
+  <h1 id="appTitle">Open Data</h1>
+  <p class="tagline" id="appTagline"></p>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+</div></header>
+
+<div class="wrap"><main id="main" aria-live="polite"></main>
+  <footer>
+    Every figure is generated from source by a script; none is hand-drawn or hand-edited.
+    Adding a dataset to this app is one JSON file in <code>data-app/datasets/</code> plus its
+    images — no code changes. · <a href="../index.html">FreshRoute inventory board</a>
+  </footer>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => Number(n).toLocaleString("en-US");
+let SETS = [], cur = 0;
+
+function render(){
+  const d = SETS[cur];
+  document.querySelectorAll("#tabs button").forEach((b,i) =>
+    b.setAttribute("aria-selected", String(i === cur)));
+
+  const grain = `
+    <h2>${esc(d.title)}</h2>
+    <p class="sub">${esc(d.subtitle)}</p>
+    <div class="card">
+      <h3>What one row counts</h3>
+      <div class="grain">${d.grain.counts.map(c =>
+        `<div><div class="k">${esc(c.label)}</div><div class="v mono">${fmt(c.n)}</div></div>`).join("")}</div>
+      <p class="meta"><b>One row is ${esc(d.grain.row_is)}.</b> ${esc(d.grain.note)}</p>
+    </div>`;
+
+  const figs = d.charts.map(c => `
+    <figure>
+      <img src="${esc(c.img)}" alt="${esc(c.title)}" loading="lazy">
+      <figcaption>
+        <p class="insight"><b>${esc(c.title)}.</b> ${esc(c.insight)}</p>
+        <p class="meta"><b>Form:</b> ${esc(c.form)} — ${esc(c.form_why)}</p>
+        <p class="meta"><b>Method:</b> ${esc(c.method)}</p>
+        ${c.caution ? `<p class="caution"><b>Read carefully:</b> ${esc(c.caution)}</p>` : ""}
+      </figcaption>
+    </figure>`).join("");
+
+  const limits = `
+    <div class="card">
+      <h3>What this data cannot answer</h3>
+      <ul class="limits">${d.cannot_answer.map(l => `<li>${esc(l)}</li>`).join("")}</ul>
+    </div>`;
+
+  const src = `
+    <div class="card">
+      <h3>Source and provenance</h3>
+      <p class="src">${esc(d.source.publisher)} · <code>${esc(d.source.id)}</code>
+        ${d.source.url ? `· <a href="${esc(d.source.url)}">source</a>` : ""}</p>
+      <p class="src">Pulled ${esc(d.source.pulled)} · publisher watermark
+        <span class="mono">${esc(d.source.watermark)}</span></p>
+      <p class="meta">${esc(d.source.note)}</p>
+      ${d.reproduce ? `<p class="src">Reproduce: <code>${esc(d.reproduce)}</code></p>` : ""}
+    </div>`;
+
+  $("#main").innerHTML = grain + figs + limits + src;
+  window.scrollTo({ top: 0 });
+}
+
+(async () => {
+  try{
+    const man = await (await fetch("datasets/manifest.json", {cache:"no-store"})).json();
+    $("#appTitle").textContent = man.app;
+    $("#appTagline").textContent = man.tagline;
+    SETS = await Promise.all(man.datasets.map(f =>
+      fetch("datasets/" + f, {cache:"no-store"}).then(r => r.json())));
+    $("#tabs").innerHTML = SETS.map((d,i) =>
+      `<button role="tab" data-i="${i}" aria-selected="${i===0}">${esc(d.title)}</button>`).join("");
+    $("#tabs").addEventListener("click", e => {
+      const b = e.target.closest("button"); if(!b) return;
+      cur = +b.dataset.i; render();
+    });
+    render();
+  }catch(err){
+    $("#main").innerHTML = `<div class="card"><h3>Could not load datasets</h3>
+      <p class="meta">${esc(err.message)} — if you opened this file directly from disk,
+      serve it instead: <code>python3 -m http.server 8000</code></p></div>`;
+  }
+})();
+</script>
+</body>
+</html>

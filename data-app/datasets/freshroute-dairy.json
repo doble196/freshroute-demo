@@ -1,0 +1,38 @@
+{
+  "id": "freshroute-dairy",
+  "title": "FreshRoute — Dairy Distribution",
+  "subtitle": "The morning inventory board this site started as",
+  "source": {
+    "publisher": "Kaggle (Dairy Goods Sales Dataset), a static export",
+    "id": "dairy_dataset.csv",
+    "url": "../index.html",
+    "pulled": "static file — see caveat",
+    "watermark": "n/a (no live feed)",
+    "note": "STATIC, not live. A real export downloaded once; every day after, it drifts further from reality and nothing in the file says so. The live board is linked above."
+  },
+  "grain": {
+    "row_is": "one product-location-day observation",
+    "counts": [
+      { "label": "history rows", "n": 4325 },
+      { "label": "current positions (product × location × brand)", "n": 600 },
+      { "label": "below reorder threshold", "n": 113 }
+    ],
+    "note": "The file is a transaction log, not a stock snapshot. Taking the latest row per product × location × brand gives 600 real current items. Summing locations would hide a stockout in one place behind surplus in another."
+  },
+  "charts": [
+    {
+      "title": "Shortages by location",
+      "img": "assets/shortages_by_location.png",
+      "insight": "19% of tracked positions sit below their minimum stock, concentrated unevenly across 15 locations.",
+      "form": "Horizontal bar, single hue",
+      "form_why": "One measure across named categories, and the category labels are long — horizontal bars read without rotating anyone's head. A map was rejected: the locations are administrative regions, not a spatial pattern.",
+      "method": "Computed from the cleaned copy after 13 same-day conflicting stock readings were resolved to the lower value (an under-read costs extra inventory; an over-read costs a stockout).",
+      "caution": "Raw counts per location, not per-capita or per-SKU. The chart labels this explicitly rather than implying that the biggest bar is the worst-run site."
+    }
+  ],
+  "cannot_answer": [
+    "Anything current. The export stopped in 2022 — every expiry-window feature evaluates against a file whose last recorded day has long passed.",
+    "Why anything is unprofitable. There is no cost column, so the data can detect what needs attention but never explain the economics."
+  ],
+  "reproduce": "python3 data/dairy/dedupe_dairy.py && python3 data/dairy/plot_clean.py"
+}

@@ -1,0 +1,67 @@
+{
+  "id": "nyc-restaurant-inspections",
+  "title": "NYC Restaurant Inspections",
+  "subtitle": "DOHMH violation citations for active NYC restaurants",
+  "source": {
+    "publisher": "NYC Department of Health and Mental Hygiene, via NYC OpenData",
+    "id": "43nn-pn8j",
+    "url": "https://data.cityofnewyork.us/resource/43nn-pn8j.json",
+    "pulled": "2026-08-05",
+    "watermark": "Tue, 04 Aug 2026 22:04:51 GMT",
+    "note": "Pulled live from the SODA API on every rebuild. The watermark is the publisher's own last-modified stamp — it is checked on every page of every request, so a dataset that changes mid-pull raises rather than silently blending two states."
+  },
+  "grain": {
+    "row_is": "one violation citation",
+    "counts": [
+      { "label": "violation citations (rows)", "n": 295054 },
+      { "label": "inspections (camis + date)", "n": 87660 },
+      { "label": "restaurants (camis)", "n": 31194 }
+    ],
+    "note": "3.37 violations per inspection · 2.81 inspections per restaurant. A row count reported as a restaurant count is wrong by 9.5×. All three numbers are true and answer different questions."
+  },
+  "charts": [
+    {
+      "title": "Restaurants that score worse get inspected more",
+      "img": "assets/freq_severity.png",
+      "insight": "Median inspection score climbs from 12 at one inspection to ~30 at six or more, and the climb repeats in every cuisine.",
+      "form": "Bucketed median lines",
+      "form_why": "The x-variable is discrete (you can have 1 or 2 inspections, never 1.6), so four computed points beat a fitted curve. The first version of this chart used a regression line that extrapolated to x=8 where almost no restaurants exist — technically a correct least-squares fit, visually a claim about data that isn't there.",
+      "method": "Median not mean (score tops out at 214; outliers drag an average). n printed at every point. Nothing under n=25 is drawn — the line ends where the evidence ends. The citywide panel splits 4/5/6+ because n supports it there (207/57/25); the cuisine facets pool at 4+ because American has 2 restaurants at 6 inspections and Mexican has 1.",
+      "caution": "The x-axis is the OUTCOME of enforcement policy, not its cause. DOHMH re-inspects any initial scoring ≥14 by written rule — measured: restaurants that ever scored ≥14 average 1.69 inspections vs 1.04 for those that never did. The correlation exists partly by construction."
+    },
+    {
+      "title": "One dataset, two arguments",
+      "img": "assets/comparison.png",
+      "insight": "The same query renders as 'Brooklyn is flat (+0.00)' or 'BROOKLYN SURGES' depending only on framing choices. Every axis is labeled on both panels, and the right one still lies.",
+      "form": "Side-by-side line charts, equal panels",
+      "form_why": "Equal panel sizes isolate the levers under study. An earlier version drew the spun panel narrower — preserving the aspect-ratio trick — which confounded 'the y-axis is zoomed' with 'the panel is squished' and made the comparison itself guilty of the thing it teaches.",
+      "method": "Left: y from zero, window fixed by the question before looking, no smoothing, identical treatment for every line. Right: y zoomed to Brooklyn's range, window cherry-picked as the max-slope choice out of 15 candidate starts, Brooklyn smoothed with a 3-month average while other boroughs stay raw.",
+      "caution": "'Read the axes' is the standard defense of a spun chart. This pair is the counterexample: window, y-range, aspect and asymmetric smoothing have no axis labels. The frame does the lying."
+    },
+    {
+      "title": "Does 'Queens is worst' survive a denominator?",
+      "img": "assets/queens_bump.png",
+      "insight": "A claim that Queens has the worst inspection problem 'because it recorded the most critical violations' turns out right by accident — Manhattan has the most raw criticals (18,487 vs 13,253), but Queens leads both fair metrics. Rank walk: 2 → 1 → 1.",
+      "form": "Bump chart across three metrics",
+      "form_why": "The claim was a ranking claim, and the finding is a rank reversal — a bump chart is a rank reversal drawn. The leftmost column is deliberately the claimant's own metric, so each step right walks their evidence through a fairer denominator.",
+      "method": "Raw count → per 100 inspections → per restaurant, last 12 complete months. Values print at every node because rank encoding erases magnitude. The caption is computed from the cluster shape, not the global range, so 'rank 1' and 'modest lead' can't contradict each other on the same image.",
+      "caution": "Neither denominator is automatically fairer — per-inspection reflects enforcement policy, per-restaurant confounds exposure time. The denominator must follow the decision being made."
+    },
+    {
+      "title": "The map, demoted to what a map can say",
+      "img": "assets/residual_map.png",
+      "insight": "A stakeholder asked for a map titled 'where frequent inspections cause worse outcomes.' The association is 98% non-geographic — the pooled slope is +5.75 and the zip-demeaned slope is +5.64, so neighborhoods explain 2%.",
+      "form": "Residual scatter map",
+      "form_why": "A choropleth of the raw relationship would have shown 'where' for a pattern that isn't spatial. Mapping residuals — severity minus cuisine and neighborhood means — shows only what geography still explains after the confounders have spoken. It renders as salt-and-pepper, which is the answer.",
+      "method": "20,092 restaurants, 313 excluded for missing or (0,0) coordinates and counted. Aspect ratio set to ~cos(latitude) so NYC isn't stretched.",
+      "caution": "The requested title contained 'cause' before any analysis had earned it, and in this domain the arrow runs backward: risk-based enforcement assigns more inspections to worse restaurants."
+    }
+  ],
+  "cannot_answer": [
+    "Whether restaurants are actually cleaner or dirtier — this records citations, which are inspector observations under a policy, not measurements of hygiene.",
+    "Anything about restaurants that failed and closed. Only ACTIVE establishments are included, so the failures were removed and any 'do bad inspections predict closure' question is unanswerable by construction.",
+    "Long-run trends. The dataset is a rolling window of roughly three years prior to each restaurant's most recent inspection, so multi-year trends are artifacts of the window.",
+    "Whether more inspections cause worse outcomes. The enforcement rule creates the correlation; separating it would need a design this observational data cannot supply."
+  ],
+  "reproduce": "python3 data/socrata/viz_freq_severity.py · viz_borough_trend.py · viz_queens_bump.py"
+}
