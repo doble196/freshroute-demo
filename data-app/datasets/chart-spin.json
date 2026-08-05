@@ -1,0 +1,57 @@
+{
+  "id": "chart-spin",
+  "title": "Chart Spin — the same numbers, both ways",
+  "subtitle": "One query, one dataset, two opposite arguments — and every number on both charts is correct",
+  "source": {
+    "publisher": "Same DOHMH data as the Inspections tab — that is the point",
+    "id": "43nn-pn8j",
+    "url": "https://data.cityofnewyork.us/resource/43nn-pn8j.json",
+    "pulled": "2026-08-05",
+    "watermark": "Tue, 04 Aug 2026 22:04:51 GMT",
+    "note": "Both charts below are produced by one script in one run from one API call. No data was added, removed, or altered between them. Everything that differs is a display choice."
+  },
+  "grain": {
+    "row_is": "one violation citation, rated per inspection",
+    "counts": [
+      { "label": "months plotted (each chart)", "n": 12 },
+      { "label": "candidate 12-month windows searched", "n": 15 },
+      { "label": "levers that differ between the two", "n": 4 }
+    ],
+    "note": "The honest chart's window was fixed by the question before looking. The spun chart's window was chosen by searching all 15 possible 12-month starts for the one that maximized Brooklyn's slope — a choice that leaves no visual trace whatsoever."
+  },
+  "charts": [
+    {
+      "title": "The honest render",
+      "img": "assets/honest.png",
+      "insight": "Brooklyn's violations-per-inspection went 3.67 → 3.67 over the last twelve complete months. Flat. Its annualized drift (+0.19/yr) ranks third behind the Bronx (+0.32) and Manhattan (+0.23), and all five boroughs sit inside a narrow band.",
+      "form": "Multi-line, zero baseline, one accented series",
+      "form_why": "The claim under test was about change over time across groups, so time goes on x and every borough shares one y-scale. Graying four series and accenting one is emphasis — it directs attention without altering what any line shows.",
+      "method": "y-axis from zero so visible change equals real change. Window = last 12 complete calendar months, fixed by the question before any data was seen. No smoothing. Identical treatment for every line. Partial current month excluded.",
+      "caution": "This chart's headline is that a premise handed to us — 'Brooklyn is steadily rising while others stay flat' — turned out to be false. The honest render could not make that claim, so it doesn't."
+    },
+    {
+      "title": "The spun render — same data, four levers moved",
+      "img": "assets/misleading.png",
+      "insight": "'BROOKLYN VIOLATIONS SURGE 12 MONTHS RUNNING.' Manufactured from a 14% wobble in a dataset where the honest answer was +0.00. Nothing here is fabricated; every plotted value is real.",
+      "form": "The same multi-line chart, reframed",
+      "form_why": "Identical form, opposite conclusion — which is the whole demonstration. Spin does not require a different chart type or a false number. It requires four defensible-sounding choices.",
+      "method": "1) Window cherry-picked as the max-slope option out of 15 candidates, starting at Brooklyn's trough. 2) y-axis zoomed to Brooklyn's own range, so a 14% change fills 100% of panel height — hiding behind the true rule that line charts need not start at zero. 3) Tall-narrow aspect ratio amplifies any slope; nobody audits aspect ratio. 4) Three-month smoothing applied to Brooklyn ONLY (disclosed at 5.5pt), so its cleaned line reads as signal while the raw grays read as noise.",
+      "caution": "Every individual choice here has a legitimate use, and each could be defended in a meeting by citing a real principle. That is what makes this the realistic failure mode — far more common than fabricated data, and much harder to catch."
+    },
+    {
+      "title": "Side by side — every axis labeled, and the right panel still lies",
+      "img": "assets/comparison.png",
+      "insight": "Both panels carry full axis labels and their own disclosure line. The deception survives anyway, because it lives in the frame rather than in anything a label can name.",
+      "form": "Paired panels, equal size",
+      "form_why": "Equal panels isolate the levers under study. An earlier version drew the spun panel narrower — preserving the aspect trick — which confounded 'the y-axis is zoomed' with 'the panel is squished' and made the comparison itself guilty of the thing it teaches.",
+      "method": "Left and right render from the same array of numbers in the same script execution. The only differences are y-range, window, and which series got smoothed.",
+      "caution": "'The axes are labeled, just read them' is the standard defense of a spun chart. This image is the counterexample. Window, y-range, aspect ratio and asymmetric smoothing have no axis labels — so a reader who checks only the labels has audited nothing."
+    }
+  ],
+  "cannot_answer": [
+    "Whether any particular published chart was spun deliberately. These four levers are also the everyday choices of honest charting; intent is not visible in the output, which is precisely why disclosure matters more than motive.",
+    "Whether a chart is trustworthy from the chart alone. Two of these levers — the window search and the asymmetric smoothing — leave no visual trace at all. You need the method, not just the image.",
+    "How to make an unambiguously neutral chart, because there isn't one. Every chart chooses a window, a baseline, an aspect ratio, a smoothing policy, a color assignment and a caption. The honest ones disclose those choices; they do not avoid making them."
+  ],
+  "reproduce": "python3 data/socrata/viz_borough_trend.py — writes honest.png, misleading.png and comparison.png in a single run"
+}

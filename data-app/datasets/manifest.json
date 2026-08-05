@@ -1,8 +1,9 @@
 {
-  "app": "Open Data — findings that state their own limits",
-  "tagline": "Every chart here declares what one row counts, what it cannot answer, and which choices were made in framing it. Adding a dataset is one JSON file — no code changes.",
+  "app": "Open Data \u2014 findings that state their own limits",
+  "tagline": "Every chart here declares what one row counts, what it cannot answer, and which choices were made in framing it. Adding a dataset is one JSON file \u2014 no code changes.",
   "datasets": [
     "nyc-restaurant-inspections.json",
+    "chart-spin.json",
     "freshroute-dairy.json"
   ]
 }
