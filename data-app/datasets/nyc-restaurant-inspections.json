@@ -32,7 +32,7 @@
     {
       "title": "One dataset, two arguments",
       "img": "assets/comparison.png",
-      "insight": "The same query renders as 'Brooklyn is flat (+0.00)' or 'BROOKLYN SURGES' depending only on framing choices. Every axis is labeled on both panels, and the right one still lies.",
+      "insight": "This is how you flip an outcome without touching a single number. Left panel: Brooklyn is flat (+0.00). Right panel: BROOKLYN SURGES. Same query, same data, every axis labeled on both — and the right one still lies.",
       "form": "Side-by-side line charts, equal panels",
       "form_why": "Equal panel sizes isolate the levers under study. An earlier version drew the spun panel narrower — preserving the aspect-ratio trick — which confounded 'the y-axis is zoomed' with 'the panel is squished' and made the comparison itself guilty of the thing it teaches.",
       "method": "Left: y from zero, window fixed by the question before looking, no smoothing, identical treatment for every line. Right: y zoomed to Brooklyn's range, window cherry-picked as the max-slope choice out of 15 candidate starts, Brooklyn smoothed with a 3-month average while other boroughs stay raw.",
