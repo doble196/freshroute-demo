@@ -146,3 +146,11 @@ td.n.short { color:var(--bad); }
   #intro p { font-size:.86rem; line-height:1.45; margin:.35rem 0; }
   #intro { margin-bottom:.5rem; }
 }
+
+/* site nav: every destination reachable from the home page */
+.sitenav{display:flex;flex-direction:column;gap:6px;margin-top:14px;
+  padding-top:12px;border-top:1px solid var(--line, #dedcd6)}
+.sitenav a{font-size:14px;text-decoration:none;color:inherit;
+  padding:2px 0;text-underline-offset:3px}
+.sitenav a:hover{text-decoration:underline}
+.sitenav a b{color:var(--accent, #b45309)}
