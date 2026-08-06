@@ -1,0 +1,431 @@
+<title>What does that grade in the window actually mean?</title>
+<style>
+  :root{
+    --ground:#faf9f7; --panel:#fff; --ink:#171614; --ink2:#5f5c56; --ink3:#8a8580;
+    --rule:#e6e2da; --track:#eceae4; --band:#dcd8cf;
+    --ok:#2f7d5d; --watch:#b07407; --act:#bd3f1e;
+    --shadow:0 1px 2px rgba(23,22,20,.05), 0 8px 24px -12px rgba(23,22,20,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ground:#131211; --panel:#1c1a18; --ink:#f2efe9; --ink2:#a8a29a; --ink3:#7d7871;
+      --rule:#302d2a; --track:#2a2724; --band:#3b3733;
+      --ok:#5cb98e; --watch:#e0a63c; --act:#ee7a55;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#131211; --panel:#1c1a18; --ink:#f2efe9; --ink2:#a8a29a; --ink3:#7d7871;
+    --rule:#302d2a; --track:#2a2724; --band:#3b3733;
+    --ok:#5cb98e; --watch:#e0a63c; --act:#ee7a55;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+  :root[data-theme="light"]{
+    --ground:#faf9f7; --panel:#fff; --ink:#171614; --ink2:#5f5c56; --ink3:#8a8580;
+    --rule:#e6e2da; --track:#eceae4; --band:#dcd8cf;
+    --ok:#2f7d5d; --watch:#b07407; --act:#bd3f1e;
+    --shadow:0 1px 2px rgba(23,22,20,.05), 0 8px 24px -12px rgba(23,22,20,.18);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:26px 18px 70px; background:var(--ground); color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  .wrap{max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:20px}
+  .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace; font-variant-numeric:tabular-nums}
+  .lab{font-size:10.5px; font-weight:650; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3)}
+
+  h1{font-size:23px; font-weight:700; letter-spacing:-.02em; margin:0 0 5px; text-wrap:balance}
+  .sub{font-size:14px; color:var(--ink2); margin:0}
+
+  /* search */
+  .search{display:flex; gap:8px; flex-wrap:wrap}
+  .search input{
+    flex:1 1 220px; font:15px/1 inherit; padding:12px 14px; border-radius:9px;
+    border:1px solid var(--rule); background:var(--panel); color:var(--ink);
+  }
+  .search input:focus-visible{outline:2px solid var(--act); outline-offset:1px}
+  .search button{
+    font:650 14px/1 inherit; padding:12px 18px; border-radius:9px; cursor:pointer;
+    background:var(--ink); color:var(--panel); border:1px solid var(--ink);
+  }
+  .search button:focus-visible{outline:2px solid var(--act); outline-offset:2px}
+  .hints{font-size:12.5px; color:var(--ink3)}
+  .hints button{
+    font:inherit; font-size:12.5px; background:none; border:0; padding:0 2px; cursor:pointer;
+    color:var(--ink2); text-decoration:underline; text-underline-offset:2px;
+  }
+
+  .results{display:flex; flex-direction:column; gap:0; border:1px solid var(--rule); border-radius:11px; overflow:hidden}
+  .results button{
+    display:block; width:100%; text-align:left; font:inherit; cursor:pointer;
+    background:var(--panel); border:0; border-bottom:1px solid var(--rule); padding:12px 15px; color:var(--ink);
+  }
+  .results button:last-child{border-bottom:0}
+  .results button:hover,.results button:focus-visible{background:var(--ground); outline:none}
+  .results .nm{font-weight:650; font-size:14.5px}
+  .results .ad{font-size:12.5px; color:var(--ink2)}
+
+  .panel{background:var(--panel); border:1px solid var(--rule); border-radius:14px; box-shadow:var(--shadow); overflow:hidden}
+  .zone{padding:17px 20px; border-bottom:1px solid var(--rule)}
+  .zone:last-child{border-bottom:0}
+
+  .ctx .what{font-size:16px; font-weight:660; letter-spacing:-.01em}
+  .ctx .dir{font-size:13.5px; color:var(--ink2); margin-top:2px}
+
+  .track{position:relative; height:32px; margin:14px 0 6px}
+  .rail{position:absolute; left:0; right:0; top:13px; height:6px; background:var(--track); border-radius:3px}
+  .seg3{position:absolute; top:13px; height:6px}
+  .mark{position:absolute; top:3px; width:3px; height:26px; border-radius:2px; background:var(--ink)}
+  .mark::after{content:attr(data-v); position:absolute; top:-16px; left:50%; transform:translateX(-50%);
+    font:650 11px/1 ui-monospace,Menlo,monospace; color:var(--ink)}
+  .ends{display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink3)}
+
+  .bignum{display:flex; align-items:baseline; gap:10px; margin-top:16px; flex-wrap:wrap}
+  .bignum .n{font-size:58px; font-weight:720; letter-spacing:-.035em; line-height:.95;
+    font-variant-numeric:tabular-nums; font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .bignum .of{font-size:14px; color:var(--ink3)}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:999px;
+    font-size:12px; font-weight:660; border:1px solid currentColor}
+  .pill .dot{width:7px; height:7px; border-radius:50%; background:currentColor}
+  .says{margin-top:11px; font-size:14px; color:var(--ink2)}
+  .says b{color:var(--ink); font-weight:640}
+
+  .warn{
+    margin-top:13px; padding:11px 13px; border-radius:9px; font-size:13.5px; line-height:1.45;
+    border:1px solid var(--watch); color:var(--ink);
+  }
+  .warn b{color:var(--watch)}
+
+  /* history */
+  .hist{display:flex; flex-direction:column; gap:7px; margin-top:11px}
+  .hrow{display:grid; grid-template-columns:86px 1fr auto; gap:10px; align-items:center; font-size:13px}
+  .hrow .hd{color:var(--ink2)}
+  .hbar{height:15px; background:var(--track); border-radius:3px; position:relative; overflow:hidden}
+  .hbar i{display:block; height:100%; border-radius:3px}
+  .hrow .hs{font-weight:650; font-variant-numeric:tabular-nums; font-family:ui-monospace,Menlo,monospace;
+    text-align:right; white-space:nowrap}
+  .hrow.cur .hd{color:var(--ink); font-weight:650}
+
+  /* violations */
+  .grp{margin-top:14px}
+  .grp:first-of-type{margin-top:6px}
+  .grp h5{margin:0 0 3px; font-size:13px; font-weight:670; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+  .grp .cnt{font-size:11px; font-weight:600; color:var(--ink3)}
+  .grp p{margin:0 0 8px; font-size:12px; color:var(--ink3)}
+  .v{display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--rule); font-size:13px; line-height:1.4}
+  .v .code{flex:none; font-size:11px; font-weight:650; color:var(--ink3); width:38px;
+    font-family:ui-monospace,Menlo,monospace; padding-top:1px}
+  .v .crit{flex:none; font-size:9.5px; font-weight:680; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--act); border:1px solid var(--act); border-radius:3px; padding:1px 4px; height:fit-content;
+    white-space:nowrap; margin-top:1px}
+
+  .fresh{display:flex; gap:9px; font-size:12.5px; color:var(--ink2); align-items:flex-start}
+  .fresh.stale{color:var(--watch)}
+  .fresh b{color:inherit; font-weight:650}
+
+  .limits{font-size:12.5px; color:var(--ink2)}
+  .limits li{margin-bottom:6px}
+  .limits ul{margin:6px 0 0; padding-left:17px}
+
+  .msg{padding:14px 16px; border:1px dashed var(--rule); border-radius:10px; font-size:13.5px; color:var(--ink2)}
+  .msg.err{border-color:var(--act); color:var(--act)}
+
+  .foot{font-size:12px; color:var(--ink3); line-height:1.55}
+  .foot a{color:var(--ink2)}
+  .foot code{font-size:11.5px}
+
+  @media (max-width:520px){
+    .bignum .n{font-size:48px}
+    .zone{padding:15px 16px}
+    .hrow{grid-template-columns:74px 1fr auto; font-size:12.5px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div>
+    <p style="margin:0 0 10px"><a href="index.html" style="font-size:13px;color:var(--ink2)">&larr; back to the DataHub</a></p>
+    <h1>What does that grade in the window actually mean?</h1>
+    <p class="sub">Type any NYC restaurant. This reads the city's live inspection record and shows you what the
+       score is made of &mdash; because a good number and a fixed building are not the same thing.</p>
+  </div>
+
+  <form class="search" id="form">
+    <input id="q" type="search" placeholder="Restaurant name, e.g. Joe&rsquo;s Pizza" autocomplete="off" aria-label="Restaurant name">
+    <button type="submit">Look it up</button>
+  </form>
+  <div class="hints">
+    Try
+    <button type="button" data-ex="EL SOL DE MEXICO">El Sol de Mexico</button>&middot;
+    <button type="button" data-ex="JOES PIZZA">Joe&rsquo;s Pizza</button>&middot;
+    <button type="button" data-ex="SHAKE SHACK">Shake Shack</button>
+  </div>
+
+  <div id="out"></div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+(() => {
+  const API = "https://data.cityofnewyork.us/resource/43nn-pn8j.json";
+  const $  = s => document.querySelector(s);
+  const out = $("#out");
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const titleCase = s => String(s ?? "").toLowerCase().replace(/\b[a-z]/g, m => m.toUpperCase());
+
+  // DOHMH's own published cut points. Not ours.
+  const BANDS = [{g:"A", lo:0,  hi:13, c:"ok"},
+                 {g:"B", lo:14, hi:27, c:"watch"},
+                 {g:"C", lo:28, hi:100, c:"act"}];
+  const bandFor = s => BANDS.find(b => s >= b.lo && s <= b.hi) || BANDS[2];
+
+  // Our grouping, not DOHMH's. Built from the paired-inspection work: what a
+  // restaurant fixes with a staff meeting vs what needs a contractor.
+  const GROUPS = [
+    { key:"building", h:"Pests and the building",
+      note:"Needs money and a contractor. In 6,990 paired NYC inspections we matched, these came back at the "
+         + "re-inspection about 4 times in 10.",
+      test: c => /^(04[KLMN]|08[AB]|10[A-J])/.test(c) },
+    { key:"handling", h:"Food handling and staff",
+      note:"Fixable by next shift. In the same paired inspections, roughly 1 in 4 of these came back.",
+      test: c => /^(02|03|04[A-J]|05|06|09)/.test(c) },
+    { key:"admin", h:"Paperwork, signage and everything else",
+      note:"Administrative findings. They add points but say little about the kitchen.",
+      test: () => true },
+  ];
+
+  const fmtDate = iso => new Date(iso).toLocaleDateString("en-US",
+    {year:"numeric", month:"short", day:"numeric", timeZone:"UTC"});
+  const daysAgo = iso => Math.floor((Date.now() - new Date(iso)) / 864e5);
+
+  async function api(params){
+    const u = new URL(API);
+    for (const [k,v] of Object.entries(params)) u.searchParams.set(k, v);
+    const r = await fetch(u);
+    if (!r.ok) throw new Error(`The city's API returned ${r.status}. Nothing to show until it answers.`);
+    return { rows: await r.json(), modified: r.headers.get("Last-Modified") };
+  }
+
+  async function search(term){
+    const t = term.toUpperCase().replace(/'/g, "''");
+    out.innerHTML = `<div class="msg">Asking the city&rsquo;s API for &ldquo;${esc(term)}&rdquo;&hellip;</div>`;
+    try{
+      const {rows, modified} = await api({
+        "$select":"camis,dba,boro,building,street",
+        "$where":`upper(dba) like '%${t}%'`,
+        "$group":"camis,dba,boro,building,street",
+        "$limit":"15",
+      });
+      stampFoot(modified);
+      if (!rows.length){
+        out.innerHTML = `<div class="msg">No NYC restaurant matched &ldquo;${esc(term)}&rdquo;.
+          The city stores names in caps and often without punctuation, so try a shorter piece of the name.</div>`;
+        return;
+      }
+      if (rows.length === 1) return show(rows[0].camis);
+      out.innerHTML = `<div class="results">` + rows.map(r =>
+        `<button data-camis="${esc(r.camis)}">
+           <div class="nm">${esc(titleCase(r.dba))}</div>
+           <div class="ad">${esc(titleCase(`${r.building||""} ${r.street||""}`))} &middot; ${esc(r.boro)}</div>
+         </button>`).join("") + `</div>`;
+    }catch(e){ out.innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+  }
+
+  async function show(camis){
+    out.innerHTML = `<div class="msg">Loading the inspection history&hellip;</div>`;
+    try{
+      const {rows, modified} = await api({
+        "camis":camis,
+        "$select":"camis,dba,boro,building,street,cuisine_description,inspection_date,score,grade,action,"
+                + "violation_code,violation_description,critical_flag,inspection_type",
+        "$order":"inspection_date DESC",
+        "$limit":"400",
+      });
+      stampFoot(modified);
+      if (!rows.length){ out.innerHTML = `<div class="msg">The city has no inspection rows for this record.</div>`; return; }
+      render(rows, modified);
+    }catch(e){ out.innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+  }
+
+  function render(rows, modified){
+    const head = rows[0];
+    // one inspection = one camis + date. Rows are violations within it.
+    const byDate = new Map();
+    for (const r of rows){
+      const d = (r.inspection_date || "").slice(0,10);
+      if (!d || d === "1900-01-01") continue;      // the city's null-date sentinel
+      if (!byDate.has(d)) byDate.set(d, []);
+      byDate.get(d).push(r);
+    }
+    const dates = [...byDate.keys()].sort().reverse();
+    if (!dates.length){ out.innerHTML = `<div class="msg">Every inspection on this record carries the city&rsquo;s placeholder date, so there is nothing datable to show.</div>`; return; }
+
+    const cur = byDate.get(dates[0]);
+    const scoreRaw = cur.find(r => r.score != null)?.score;
+    const score = scoreRaw == null ? null : Number(scoreRaw);
+    const grade = cur.find(r => r.grade)?.grade || null;
+    const action = cur.find(r => r.action)?.action || null;
+    const itype  = cur.find(r => r.inspection_type)?.inspection_type || null;
+
+    // real violations only - an action-only row has no violation code
+    const viols = cur.filter(r => r.violation_code);
+    const crit  = viols.filter(r => r.critical_flag === "Critical").length;
+
+    const band = score == null ? null : bandFor(score);
+    const gradeWord = {A:"A", B:"B", C:"C", Z:"Grade pending", N:"Not yet graded", P:"Re-opening pending"}[grade] || null;
+    // A pending grade or a visit with no recorded violations is not a verdict
+    // on the kitchen - the pill must never dress it in a verdict's colour.
+    const caveat = ["Z","N","P"].includes(grade) || viols.length === 0;
+
+    // ---- context first, then the number -------------------------------
+    let html = `<div class="panel">
+      <div class="zone ctx">
+        <div class="what">${esc(titleCase(head.dba))}</div>
+        <div class="dir">${esc(titleCase(`${head.building||""} ${head.street||""}`))} &middot; ${esc(head.boro)}${
+          head.cuisine_description ? " &middot; " + esc(head.cuisine_description) : ""}</div>
+      </div>
+
+      <div class="zone">
+        <div class="what" style="font-size:15px;font-weight:660">Lower is better. Points are bad.</div>
+        <div class="dir" style="font-size:13.5px;color:var(--ink2);margin-top:2px">
+          The city gives an <b>A at 13 points or fewer</b>, a B up to 27, a C at 28 and above.</div>`;
+
+    if (score == null){
+      html += `<div class="bignum"><span class="n">&mdash;</span>
+                 <span class="of">the city recorded no score for this visit</span></div>`;
+    } else {
+      const pos = Math.min(score, 100);
+      html += `
+        <div class="track">
+          <div class="rail"></div>
+          <div class="seg3" style="left:0%;width:13%;background:var(--ok);border-radius:3px 0 0 3px"></div>
+          <div class="seg3" style="left:14%;width:13%;background:var(--watch)"></div>
+          <div class="seg3" style="left:28%;width:72%;background:var(--act);border-radius:0 3px 3px 0"></div>
+          <div class="mark" style="left:${pos}%" data-v="${score}"></div>
+        </div>
+        <div class="ends"><span class="mono">0 &middot; A</span><span class="mono">14 &middot; B</span>
+          <span class="mono">28+ &middot; C</span><span class="mono">100</span></div>
+        <div class="bignum">
+          <span class="n">${score}</span><span class="of">points</span>
+          <span class="pill" style="color:var(--${caveat ? "watch" : band.c})"><span class="dot"></span>${
+            caveat ? "Not a full inspection"
+                   : gradeWord ? esc(gradeWord) : "in the " + band.g + " range"}</span>
+        </div>`;
+    }
+
+    html += `<div class="says">Inspected <b>${fmtDate(dates[0])}</b> &mdash; ${daysAgo(dates[0])} days ago${
+      itype ? ` &middot; ${esc(itype)}` : ""}.</div>`;
+
+    // The single most important piece of context on the whole screen: a low
+    // score from a re-opening visit is not a clean bill of health.
+    if (action && !/violations were cited/i.test(action)){
+      html += `<div class="warn"><b>Read this before you read the number.</b><br>
+        The city logged this visit as: &ldquo;${esc(action)}&rdquo;${
+          viols.length === 0 ? ", and recorded no violations at all" : ""}.
+        ${score === 0 || viols.length === 0
+          ? "A visit like that is not a full inspection, so a low score here does not mean the kitchen was re-checked top to bottom."
+          : ""}</div>`;
+    }
+    html += `</div>`;
+
+    // ---- compared to what: this restaurant's own history ---------------
+    const hist = dates.slice(0,6).map(d => {
+      const rs = byDate.get(d);
+      const s = rs.find(r => r.score != null)?.score;
+      return {d, s: s == null ? null : Number(s), g: rs.find(r => r.grade)?.grade || null};
+    });
+    const maxS = Math.max(30, ...hist.map(h => h.s ?? 0));
+    html += `<div class="zone">
+      <div class="lab">This restaurant&rsquo;s own last ${hist.length} visit${hist.length>1?"s":""}</div>
+      <div class="hist">` + hist.map((h,i) => {
+        const c = h.s == null ? "ink3" : bandFor(h.s).c;
+        return `<div class="hrow${i===0?" cur":""}">
+          <span class="hd">${fmtDate(h.d)}</span>
+          <span class="hbar"><i style="width:${h.s==null?0:Math.max(2,h.s/maxS*100)}%;background:var(--${c})"></i></span>
+          <span class="hs" style="color:var(--${c})">${h.s == null ? "no score" : h.s + (h.g?` &middot; ${esc(h.g)}`:"")}</span>
+        </div>`;
+      }).join("") + `</div>
+      ${hist.length < 2 ? `<p style="margin:9px 0 0;font-size:12.5px;color:var(--ink3)">
+        Only one dated visit is on file, so there is nothing to compare this against yet.</p>` : ""}
+    </div>`;
+
+    // ---- what the score is made of ------------------------------------
+    html += `<div class="zone">
+      <div class="lab">What this visit found</div>`;
+    if (!viols.length){
+      html += `<p style="margin:7px 0 0;font-size:13.5px;color:var(--ink2)">
+        No violations were recorded on this visit${action ? ` &mdash; the city logged it as &ldquo;${esc(action)}&rdquo;` : ""}.
+        That is not the same as a kitchen that was checked and found clean.</p>`;
+    } else {
+      html += `<div class="says" style="margin:2px 0 4px">
+        <b>${viols.length}</b> violation${viols.length>1?"s":""} cited, <b>${crit}</b> of them critical.</div>`;
+      const seen = new Set();
+      for (const g of GROUPS){
+        const mine = viols.filter(v => !seen.has(v) && g.test(v.violation_code || ""));
+        mine.forEach(v => seen.add(v));
+        if (!mine.length) continue;
+        html += `<div class="grp"><h5>${g.h}<span class="cnt">${mine.length} of ${viols.length}</span></h5>
+          <p>${g.note}</p>` + mine.map(v => `
+          <div class="v">
+            <span class="code">${esc(v.violation_code)}</span>
+            ${v.critical_flag === "Critical" ? `<span class="crit">critical</span>` : ""}
+            <span>${esc(v.violation_description || "(the city recorded no description)")}</span>
+          </div>`).join("") + `</div>`;
+      }
+    }
+    html += `</div>`;
+
+    // ---- freshness -----------------------------------------------------
+    const age = daysAgo(dates[0]);
+    const stale = age > 365;
+    html += `<div class="zone">
+      <div class="fresh${stale?" stale":""}">
+        <span>${stale
+          ? `<b>This is ${Math.floor(age/365)} year${age>=730?"s":""} old.</b> The city has not published a newer
+             inspection for this restaurant, so nothing here describes the kitchen today.`
+          : `Newest inspection on file is <b>${age} days</b> old. The dataset itself was last updated
+             <b>${modified ? esc(modified) : "at a time the API did not disclose"}</b>.`}</span>
+      </div>
+    </div>
+
+    <div class="zone limits">
+      <div class="lab">What this screen cannot tell you</div>
+      <ul>
+        <li><b>How the points were added up.</b> The city publishes the total and the violations, but not how many
+            points each violation carried. So we can show you what was found, never the arithmetic.</li>
+        <li><b>Whether it is clean right now.</b> Every line here is a record of one day an inspector visited.</li>
+        <li><b>Anything about places that closed.</b> Only active restaurants are in this dataset, so the failures
+            were removed before we ever saw them.</li>
+      </ul>
+    </div></div>`;
+
+    out.innerHTML = html;
+  }
+
+  function stampFoot(modified){
+    $("#foot").innerHTML =
+      `Live from NYC OpenData, DOHMH Restaurant Inspection Results (<code>43nn-pn8j</code>), fetched in your browser
+       when you searched. Publisher&rsquo;s last-modified stamp: <b>${modified ? esc(modified) : "not disclosed"}</b>.
+       No API key is used or needed &mdash; a key embedded in a public page would be a key you have given away.
+       Grade cut points (A 0&ndash;13, B 14&ndash;27, C 28+) are the city&rsquo;s. The grouping of violations into
+       building versus handling is ours. Part of the <a href="index.html">DataHub</a>.`;
+  }
+
+  $("#form").addEventListener("submit", e => {
+    e.preventDefault();
+    const v = $("#q").value.trim();
+    if (v) search(v);
+  });
+  out.addEventListener("click", e => {
+    const b = e.target.closest("button[data-camis]");
+    if (b) show(b.dataset.camis);
+  });
+  document.querySelectorAll("[data-ex]").forEach(b =>
+    b.addEventListener("click", () => { $("#q").value = b.dataset.ex; search(b.dataset.ex); }));
+
+  search("EL SOL DE MEXICO");
+})();
+</script>

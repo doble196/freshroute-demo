@@ -1,6 +1,22 @@
 {
-  "app": "Open Data \u2014 findings that state their own limits",
-  "tagline": "Every chart here declares what one row counts, what it cannot answer, and which choices were made in framing it. Adding a dataset is one JSON file \u2014 no code changes.",
+  "app": "DataHub",
+  "tagline": "Live public data, presented so you can trust it: every tool fetches from the source API in your browser, and every chart declares what one row counts, what it cannot answer, and which framing choices were made. Adding a dataset is one JSON file. Adding a tool is one HTML file and one manifest line.",
+  "tools": [
+    {
+      "badge": "Live · fetches the city's API when you search",
+      "title": "What does that grade in the window actually mean?",
+      "blurb": "Type any NYC restaurant. See the score, this restaurant's own history, and what was found — split into what a staff meeting fixes and what needs a contractor.",
+      "cta": "Check a restaurant",
+      "href": "check.html"
+    },
+    {
+      "badge": "Interactive · scroll-driven",
+      "title": "Watch a true chart become a false one",
+      "blurb": "One chart, pinned to your screen, spun one display lever at a time. No number changes at any point — that is the lesson.",
+      "cta": "Watch the transformation",
+      "href": "spin-scrolly.html"
+    }
+  ],
   "datasets": [
     "nyc-restaurant-inspections.json",
     "chart-spin.json",

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Open Data — findings that state their own limits</title>
-<meta name="description" content="Public-data findings where every chart declares what one row counts, what the data cannot answer, and which framing choices were made.">
+<title>DataHub — live public data that states its own limits</title>
+<meta name="description" content="Live tools and public-data findings where every screen declares what one row counts, what the data cannot answer, and which framing choices were made.">
 <style>
 /* Grounded in NYC municipal signage — Helvetica (a system face, so nothing
    loads and nothing can silently fall back), high contrast, dense tabular
@@ -61,6 +61,10 @@ a.storycard .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--accent);font-weight:700;margin:0 0 6px}
 a.storycard .t{font-size:18px;font-weight:700;letter-spacing:-.2px;margin:0 0 6px;text-wrap:balance}
 a.storycard .go{color:var(--link);font-size:14px;font-weight:600}
+.toolgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;margin:26px 0 4px}
+.toolgrid .storycard .blurb{font-size:13.5px;color:var(--dim);margin:0 0 8px}
+.toollab{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
+  font-weight:700;margin:30px 0 0}
 ul.limits{margin:6px 0 0;padding-left:20px}
 ul.limits li{font-size:14px;color:var(--dim);margin:7px 0}
 .src{font-size:13px;color:var(--dim)}
@@ -78,11 +82,15 @@ footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-si
   <nav class="tabs" id="tabs" role="tablist"></nav>
 </div></header>
 
-<div class="wrap"><main id="main" aria-live="polite"></main>
+<div class="wrap">
+  <section id="toolsRow" aria-label="Live tools"></section>
+  <main id="main" aria-live="polite"></main>
   <footer>
     Every figure is generated from source by a script; none is hand-drawn or hand-edited.
-    Adding a dataset to this app is one JSON file in <code>data-app/datasets/</code> plus its
-    images — no code changes. · <a href="../index.html">FreshRoute inventory board</a>
+    The tools fetch the source API live, in your browser, with no key.
+    Adding a dataset is one JSON file in <code>data-app/datasets/</code> plus its images;
+    adding a tool is one HTML file plus one manifest line — no code changes either way.
+    · <a href="../index.html">FreshRoute inventory board</a>
   </footer>
 </div>
 
@@ -150,6 +158,17 @@ function render(){
     const man = await (await fetch("datasets/manifest.json", {cache:"no-store"})).json();
     $("#appTitle").textContent = man.app;
     $("#appTagline").textContent = man.tagline;
+    if (man.tools && man.tools.length){
+      $("#toolsRow").innerHTML =
+        `<p class="toollab">Tools — live data, fetched when you use them</p>
+         <div class="toolgrid">` + man.tools.map(t => `
+          <a class="storycard" href="${esc(t.href)}">
+            <p class="k">${esc(t.badge)}</p>
+            <p class="t">${esc(t.title)}</p>
+            <p class="blurb">${esc(t.blurb)}</p>
+            <p class="go">${esc(t.cta)} →</p>
+          </a>`).join("") + `</div>`;
+    }
     SETS = await Promise.all(man.datasets.map(f =>
       fetch("datasets/" + f, {cache:"no-store"}).then(r => r.json())));
     $("#tabs").innerHTML = SETS.map((d,i) =>
