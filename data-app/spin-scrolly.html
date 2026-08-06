@@ -101,9 +101,9 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--pa
 <section class="intro">
   <h1>Six display levers, pulled one at a time, in front of you</h1>
   <p>On the chart-spin tab there are two renders of the same query — an honest one
-     that says <b>Brooklyn is flat</b>, and a spun one that shouts a surge. A gallery
-     can only assert they're the same data. This page demonstrates it: one chart,
-     pinned to your screen, transformed by scrolling. <b>No number changes at any
+     that says <b>Brooklyn is flat</b>, and a spun one that shouts a surge. The gallery
+     can only tell you they're the same data. This page shows you: one chart, pinned
+     to your screen, changed only by scrolling. <b>No number changes at any
      point.</b> Scroll back up whenever you don't believe it.</p>
   <p class="mono" style="font-size:13px">rate = violation citations ÷ distinct inspections · NYC DOHMH · live from the API</p>
 </section>
@@ -138,9 +138,9 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--pa
     </div>
     <div class="step" data-i="3">
       <p class="k">Lever 3 — aspect ratio</p>
-      <p>Squeeze the panel tall and narrow. Every slope on screen steepens —
+      <p>Squeeze the panel tall and narrow. Every slope on screen gets steeper —
          the data hasn't moved.</p>
-      <p>Nobody audits aspect ratio.</p>
+      <p>Nobody ever checks aspect ratio.</p>
     </div>
     <div class="step" data-i="4">
       <p class="k">Lever 4 — smoothing</p>
@@ -152,15 +152,17 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--pa
       <p class="k">Levers 5 + 6 — color and the title</p>
       <p>Alarm red, and a headline that states the conclusion. This is the spun render
          from the gallery, rebuilt in front of you.</p>
-      <p>Each of the six choices could be defended in a meeting by citing a real principle.
-         That's what makes this the realistic failure mode.</p>
+      <p>Every one of the six choices can be defended in a meeting by pointing at a
+         real rule. That's how charts lie in real life — nobody fakes a number.
+         They pick a frame.</p>
     </div>
     <div class="step" data-i="6">
       <p class="k">Now reverse everything at once</p>
       <p>Brooklyn: <b class="n" data-f="hFirst"></b> → <b class="n" data-f="hLast"></b>.
          Same numbers, start to finish. You watched a true chart become a false one —
          and there was no single moment it stopped being true.</p>
-      <p>That's why the method has to travel with the image. The image can't testify.</p>
+      <p>That's why the method has to travel with the image. The picture can't tell
+         you what was done to it.</p>
     </div>
   </div>
 
@@ -179,10 +181,10 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--pa
 </section>
 
 <section class="outro">
-  <p><b>What this piece fired:</b> six of the seven levers documented on the chart-spin
+  <p><b>What this piece fired:</b> six of the seven levers listed on the chart-spin
      tab — window, baseline, aspect ratio, smoothing, color, caption. The seventh,
-     encoding (changing the chart form itself), is covered by the map and bump-chart
-     exhibits there.</p>
+     encoding (changing the chart form itself), is covered by the map and bump
+     charts there.</p>
   <div class="card" id="provenance">Loading provenance…</div>
   <div class="card">
     <b>Machinery.</b> Scroll triggering is <a href="https://github.com/russellsamora/scrollama">scrollama.js</a>
@@ -190,9 +192,9 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--pa
     open-source library behind their scroll-driven visual essays; this page follows their
     sticky-graphic pattern. The chart itself is hand-rolled SVG rendered from
     <code>datasets/borough-series.json</code>, exported by the same guarded pull that
-    drew the static PNGs. <b>Sequencing is a display choice too</b> — showing the levers
-    one at a time argues they're separable, when in the wild they arrive together.
-    The final step reverses all of them at once as the check that no data changed.
+    drew the static PNGs. <b>The order is a display choice too</b> — we fire the levers
+    one at a time so you can see each one, but in a real spun chart they all hit at
+    once. The final step reverses everything at once as the check that no data changed.
   </div>
   <p><a href="index.html">← back to the data app</a> ·
      <a href="assets/comparison.png">static side-by-side (the no-JS fallback)</a></p>

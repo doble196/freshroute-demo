@@ -1,14 +1,14 @@
 {
   "id": "chart-spin",
   "title": "Chart Spin — the same numbers, both ways",
-  "subtitle": "One query, two opposite arguments — plus four more ways a technically correct chart misleads: raw counts, rank encoding, the wrong form, and axis order",
+  "subtitle": "One query, two opposite stories — plus four more ways a technically correct chart can lie: raw counts, rank charts, the wrong chart type, and axis order",
   "source": {
     "publisher": "Same DOHMH data as the Inspections tab — that is the point",
     "id": "43nn-pn8j",
     "url": "https://data.cityofnewyork.us/resource/43nn-pn8j.json",
     "pulled": "2026-08-05",
     "watermark": "Tue, 04 Aug 2026 22:04:51 GMT",
-    "note": "Both charts below are produced by one script in one run from one API call. No data was added, removed, or altered between them. Everything that differs is a display choice."
+    "note": "One script, one run, one API call made both charts below. Nothing in the data was added, removed, or changed between them. Every difference is a display choice."
   },
   "grain": {
     "row_is": "one violation citation, rated per inspection",
@@ -26,78 +26,78 @@
         "n": 7
       }
     ],
-    "note": "The honest chart's window was fixed by the question before looking. The spun chart's window was chosen by searching all 15 possible 12-month starts for the one that maximized Brooklyn's slope — a choice that leaves no visual trace whatsoever. The last two charts widen the lesson past framing into form itself — a denominator that ranks population, a rank encoding that hides magnitude, and a map for a pattern with no geography."
+    "note": "The honest chart's window was fixed by the question before we looked at any data. The spun chart's window was hunted: we tried all 15 possible 12-month starts and kept the one that made Brooklyn's climb steepest. That choice leaves no trace in the picture. The last two charts push the lesson past framing into the chart itself — a raw count that ranks population, a rank chart that hides how big the gaps really are, and a map for a pattern with no geography."
   },
   "charts": [
     {
       "title": "The honest render",
       "img": "assets/honest.png",
-      "insight": "Brooklyn's violations-per-inspection went 3.67 → 3.67 over the last twelve complete months. Flat. Its annualized drift (+0.19/yr) ranks third behind the Bronx (+0.32) and Manhattan (+0.23), and all five boroughs sit inside a narrow band.",
-      "form": "Multi-line, zero baseline, one accented series",
-      "form_why": "The claim under test was about change over time across groups, so time goes on x and every borough shares one y-scale. Graying four series and accenting one is emphasis — it directs attention without altering what any line shows.",
-      "method": "y-axis from zero so visible change equals real change. Window = last 12 complete calendar months, fixed by the question before any data was seen. No smoothing. Identical treatment for every line. Partial current month excluded.",
-      "caution": "This chart's headline is that a premise handed to us — 'Brooklyn is steadily rising while others stay flat' — turned out to be false. The honest render could not make that claim, so it doesn't."
+      "insight": "Brooklyn is flat. Violations per inspection went 3.67 → 3.67 over the last twelve complete months. Its yearly drift (+0.19/yr) only ranks third, behind the Bronx (+0.32) and Manhattan (+0.23). All five boroughs sit inside one narrow band.",
+      "form": "Multi-line chart, zero baseline, one borough highlighted",
+      "form_why": "The claim was about change over time across boroughs, so time goes on x and every borough shares one y-scale. Highlighting Brooklyn and graying the rest is just emphasis. It points your eye without changing what any line shows.",
+      "method": "y-axis starts at zero so visible change equals real change. Window = last 12 complete calendar months, fixed by the question before we saw any data. No smoothing. Every line gets identical treatment. Partial current month excluded.",
+      "caution": "The real headline: the premise we were handed — 'Brooklyn is steadily rising while others stay flat' — turned out to be false. An honest chart can't make that claim, so this one doesn't."
     },
     {
       "title": "The spun render — same data, four levers moved",
       "img": "assets/misleading.png",
-      "insight": "'BROOKLYN VIOLATIONS SURGE 12 MONTHS RUNNING.' Manufactured from a 14% wobble in a dataset where the honest answer was +0.00. Nothing here is fabricated; every plotted value is real.",
+      "insight": "'BROOKLYN VIOLATIONS SURGE 12 MONTHS RUNNING.' We built that headline from a 14% wobble in a dataset where the honest answer was +0.00. Nothing is made up. Every plotted value is real.",
       "form": "The same multi-line chart, reframed",
-      "form_why": "Identical form, opposite conclusion — which is the whole demonstration. Spin does not require a different chart type or a false number. It requires four defensible-sounding choices.",
-      "method": "1) Window cherry-picked as the max-slope option out of 15 candidates, starting at Brooklyn's trough. 2) y-axis zoomed to Brooklyn's own range, so a 14% change fills 100% of panel height — hiding behind the true rule that line charts need not start at zero. 3) Tall-narrow aspect ratio amplifies any slope; nobody audits aspect ratio. 4) Three-month smoothing applied to Brooklyn ONLY (disclosed at 5.5pt), so its cleaned line reads as signal while the raw grays read as noise.",
-      "caution": "Every individual choice here has a legitimate use, and each could be defended in a meeting by citing a real principle. That is what makes this the realistic failure mode — far more common than fabricated data, and much harder to catch."
+      "form_why": "Same chart, opposite conclusion — that's the whole point. Spin doesn't need a different chart type or a false number. It needs four choices that each sound defensible.",
+      "method": "1) We cherry-picked the window: the max-slope option out of 15 candidates, starting at Brooklyn's trough. 2) We zoomed the y-axis to Brooklyn's own range, so a 14% change fills 100% of the panel — hiding behind the true rule that line charts don't have to start at zero. 3) We made the panel tall and narrow, which steepens any slope. Nobody audits aspect ratio. 4) We smoothed Brooklyn ONLY, with a three-month average (disclosed at 5.5pt), so its clean line reads as signal while the raw grays read as noise.",
+      "caution": "Every one of these choices has a legitimate use, and each could be defended in a meeting by quoting a real principle. That's how charts lie in real life — far more common than fake data, and much harder to catch."
     },
     {
       "title": "Watch it happen — the honest chart becomes the spun one, one lever at a time",
       "interactive": "spin-scrolly.html",
-      "insight": "The two renders above are separated by six display decisions and nothing else. This piece pins one chart to your screen and fires the levers in sequence as you scroll — baseline, window, aspect, smoothing, color, title. Brooklyn is 3.67 → 3.67 the entire time, and the final step reverses everything at once to prove it.",
-      "form": "Scrollytelling — a pinned chart the reader transforms by scrolling",
-      "form_why": "A gallery can only assert that the honest and spun charts are the same data; a scroll piece demonstrates it, because the reader watches the transformation happen and can scroll back to any point. The pattern and the trigger library (scrollama.js, MIT) come from The Pudding, who open-source the machinery behind their visual essays.",
-      "method": "The chart renders client-side from borough-series.json — the same numbers the PNGs were drawn from, exported by the same guarded pull under the same watermark. Six of this tab's seven levers fire one per step; encoding, the seventh, is covered by the map and bump-chart exhibits below. Falls back to the static side-by-side when JavaScript is off.",
-      "caution": "Sequencing is itself a display choice. Showing the levers one at a time argues they are separable, when in a real spun chart they arrive together and reinforce each other — the piece says so on the page rather than leaving it implicit."
+      "insight": "Six display decisions separate the two charts above. Nothing else. This piece pins one chart to your screen and fires the levers one by one as you scroll — baseline, window, aspect, smoothing, color, title. Brooklyn stays 3.67 → 3.67 the whole time. The last step undoes everything at once to prove it.",
+      "form": "Scrollytelling — a pinned chart you transform by scrolling",
+      "form_why": "A gallery can only tell you the honest and spun charts share the same data. A scroll piece shows you: you watch the change happen, and you can scroll back to any point. The pattern and the trigger library (scrollama.js, MIT) come from The Pudding, who open-source the machinery behind their visual essays.",
+      "method": "The chart renders in your browser from borough-series.json — the same numbers the PNGs were drawn from, exported by the same guarded pull under the same watermark. Six of this tab's seven levers fire, one per step. The seventh — how the data gets drawn — is covered by the map and bump chart below. JavaScript off? You get the static side-by-side instead.",
+      "caution": "The order of the steps is itself a display choice. Firing the levers one at a time suggests they work alone. In a real spun chart they arrive together and reinforce each other — and the piece says so right on the page instead of leaving it unsaid."
     },
     {
       "title": "Side by side — every axis labeled, and the right panel still lies",
       "img": "assets/comparison.png",
-      "insight": "Both panels carry full axis labels and their own disclosure line. The deception survives anyway, because it lives in the frame rather than in anything a label can name.",
+      "insight": "Labels don't save you. Both panels carry full axis labels and their own disclosure line, and the deception survives anyway. It lives in the frame, not in anything a label can name.",
       "form": "Paired panels, equal size",
-      "form_why": "Equal panels isolate the levers under study. An earlier version drew the spun panel narrower — preserving the aspect trick — which confounded 'the y-axis is zoomed' with 'the panel is squished' and made the comparison itself guilty of the thing it teaches.",
-      "method": "Left and right render from the same array of numbers in the same script execution. The only differences are y-range, window, and which series got smoothed.",
-      "caution": "'The axes are labeled, just read them' is the standard defense of a spun chart. This image is the counterexample. Window, y-range, aspect ratio and asymmetric smoothing have no axis labels — so a reader who checks only the labels has audited nothing."
+      "form_why": "Equal panels keep the comparison about the levers and nothing else. An earlier version drew the spun panel narrower — keeping its aspect trick — so you couldn't tell 'the y-axis is zoomed' apart from 'the panel is squished'. The comparison was guilty of the very thing it teaches.",
+      "method": "Left and right render from the same array of numbers in the same script run. Only three things differ: y-range, window, and which line got smoothed.",
+      "caution": "'The axes are labeled, just read them' is the standard defense of a spun chart. This image breaks it. Window, y-range, aspect ratio, and one-sided smoothing have no axis labels — so a reader who checks only the labels has checked nothing."
     },
     {
-      "title": "Raw counts rank by size — and rank encoding hides how small the gap is",
+      "title": "Raw counts rank by size — and rank charts hide how small the gap is",
       "img": "assets/queens_bump.png",
-      "insight": "A founder claimed Queens had the worst inspection problem 'because it recorded the most critical violations.' Manhattan actually has the most (18,487 vs 13,253). Queens does lead both fair metrics — but the four other boroughs cluster within 3% of each other, and Queens sits only 9% above that cluster.",
-      "form": "Bump chart across three denominators",
-      "form_why": "On the findings tab this chart answers whether the claim survives. Here it demonstrates two display traps at once. First, the founder's own chart — a bar of raw counts — was a population census wearing a problem's clothes: a raw count across groups of different sizes ranks the sizes. Second, and more uncomfortable, THIS chart has its own failure mode: bump charts encode rank, and rank makes a hairline gap look like a landslide. A 2% difference and a 40% difference produce identical line crossings.",
-      "method": "Values print at every node specifically to defuse the rank illusion, and the caption is computed from the cluster shape rather than the global max-minus-min — so 'Queens is rank 1' and 'the lead is modest' cannot contradict each other on the same image. An earlier draft used a global spread statistic and produced exactly that contradiction.",
-      "caution": "Correcting a distortion can introduce its opposite. The founder's raw count exaggerated Queens's problem; a rank-only chart would have exaggerated its refutation. Neither denominator here is automatically fairer either — per-inspection reflects enforcement policy, per-restaurant confounds exposure time. The denominator has to follow the decision being made."
+      "insight": "The claim wasn't even right on its own terms. A founder said Queens had the worst inspection problem 'because it recorded the most critical violations.' Manhattan actually has the most (18,487 vs 13,253). Queens does lead both fair metrics — but the other four boroughs sit within 3% of each other, and Queens is only 9% above that cluster.",
+      "form": "Bump chart across three ways of counting",
+      "form_why": "On the findings tab this chart answers whether the claim survives. Here it shows two display traps at once. First, the founder's own chart — a bar of raw counts — was a population census dressed up as a problem: count raw totals across groups of different sizes and you rank the sizes. Second, and more uncomfortable: THIS chart has its own trap. Bump charts show rank, and rank makes a hairline gap look like a landslide. A 2% difference and a 40% difference draw the exact same line crossing.",
+      "method": "We print the value at every node to defuse the rank illusion. We build the caption from the cluster shape, not from the single biggest gap, so 'Queens is rank 1' and 'the lead is modest' can't contradict each other on the same image. An earlier draft used a global spread stat and hit exactly that contradiction.",
+      "caution": "Fixing one distortion can create the opposite one. The founder's raw count oversold Queens's problem; a rank-only chart would have oversold the correction. And neither way of dividing is automatically fairer — per-inspection reflects enforcement policy, per-restaurant mixes in how long each place has been around to be inspected. What you divide by has to follow the decision you're making."
     },
     {
       "title": "The wrong form: a map for a pattern that isn't spatial",
       "img": "assets/residual_map.png",
-      "insight": "A stakeholder requested a map titled 'Where frequent inspections cause worse outcomes.' The association turned out to be 98% non-geographic — pooled slope +5.75, zip-demeaned slope +5.64 — so neighborhoods explain about 2% of it. The requested map would have shown a 'where' for something that has no where.",
-      "form": "Residual scatter map — a deliberate demotion",
-      "form_why": "Maps are persuasive because every dot is real, and that persuasiveness is exactly the risk: a map can show WHERE things coincide but never WHY, and this claim was entirely a why-claim. Rather than refuse the map, it was demoted to the one job a map can honestly do here — display what geography still explains AFTER cuisine and neighborhood means are removed. It renders as salt-and-pepper with no clusters, and that emptiness is the answer.",
-      "method": "Severity minus cuisine mean minus neighborhood mean, plotted per restaurant. 20,092 restaurants; 313 excluded for missing or (0,0) coordinates and counted rather than silently dropped. Aspect ratio set to roughly cos(latitude) so New York is not stretched — an unconsidered aspect ratio is itself a distortion.",
-      "caution": "The requested title contained the word 'cause' before any analysis had earned it — and in this domain the arrow runs backward, since risk-based enforcement assigns more inspections to worse restaurants. A title that names its conclusion in advance turns the chart into an illustration of a decision already made."
+      "insight": "This pattern has no 'where.' A stakeholder asked for a map titled 'Where frequent inspections cause worse outcomes.' But the link is 98% non-geographic — pooled slope +5.75, zip-demeaned slope +5.64 — so neighborhoods explain about 2% of it. The map they asked for would have put a 'where' on something that has no where.",
+      "form": "Residual scatter map — a map demoted on purpose",
+      "form_why": "Maps persuade because every dot is real — and that's exactly the risk. A map can show WHERE things line up, never WHY, and this claim was pure why. So instead of refusing the map, we demoted it to the one job it can honestly do here: show what geography still explains after cuisine and neighborhood averages are removed. It comes out salt-and-pepper, no clusters. That emptiness is the answer.",
+      "method": "Severity minus the cuisine average minus the neighborhood average, one dot per restaurant. 20,092 restaurants; 313 excluded for missing or (0,0) coordinates — counted, not silently dropped. Aspect ratio set to roughly cos(latitude) so New York isn't stretched. An ignored aspect ratio is its own distortion.",
+      "caution": "The requested title said 'cause' before any analysis had earned it. Worse, the arrow runs backward here: risk-based enforcement sends more inspections to worse restaurants. A title that names its conclusion in advance turns the chart into an illustration of a decision already made."
     },
     {
       "title": "Axis order is a causal claim — even when the title says otherwise",
       "img": "assets/axis_swap.png",
-      "insight": "Restaurants scoring in the A range (0–13) receive 1.04 inspections on average; those scoring 41+ receive 2.18. The jump begins right at 14, which is where DOHMH's re-inspection rule fires. Scoring worse gets you inspected more.",
+      "insight": "Scoring worse gets you inspected more. Restaurants in the A range (0–13) average 1.04 inspections; those scoring 41+ average 2.18. The jump starts right at 14 — exactly where DOHMH's re-inspection rule kicks in.",
       "form": "Bucketed line, cause on x and effect on y",
-      "form_why": "Readers parse x → y as cause → effect in the first two seconds, before any title is read. The Inspections tab's facet chart plots inspections on x and score on y, so its LAYOUT argues 'inspections make restaurants worse' — the reverse of the measured mechanism. Rewriting that chart's title fixed the words; this chart fixes the grammar. Same data, same window, same grain: only the axis assignment changed.",
-      "method": "One point per restaurant — its worst score and how many inspections it received — bucketed into DOHMH's own grading bands rather than invented cut points. n printed at every point. Zero baseline, deliberately: an earlier render started the y-axis at 1.0 and let a 1.04→2.18 climb fill the whole panel, which is the y-zoom lever two charts above this one.",
-      "caution": "Swapping axes does NOT establish causality. It aligns the visual grammar with a mechanism already known from the written enforcement rule. Absent that rule, this chart would imply the reverse just as readily — the honesty comes from the documented policy, not from the axis order."
+      "form_why": "You read x → y as cause → effect in the first two seconds, before any title. The Inspections tab's facet chart puts inspections on x and score on y, so its LAYOUT argues 'inspections make restaurants worse' — backwards from what actually drives it. Rewriting that chart's title fixed the words. This chart fixes the grammar. Same data, same window, same grain: only the axes swapped.",
+      "method": "One point per restaurant — its worst score and its inspection count — bucketed into DOHMH's own grading bands, not cut points we invented. n printed at every point. Zero baseline, on purpose: an earlier render started the y-axis at 1.0 and let the 1.04→2.18 climb fill the whole panel. That's the y-zoom lever from two charts above this one.",
+      "caution": "Swapping the axes does NOT prove cause. It just lines the chart's grammar up with a mechanism we already know from the written enforcement rule. Without that rule, this chart would imply the reverse just as easily. The honesty comes from the documented policy, not the axis order."
     }
   ],
   "cannot_answer": [
-    "Whether any particular published chart was spun deliberately. These four levers are also the everyday choices of honest charting; intent is not visible in the output, which is precisely why disclosure matters more than motive.",
-    "Whether a chart is trustworthy from the chart alone. Two of these levers — the window search and the asymmetric smoothing — leave no visual trace at all. You need the method, not just the image.",
-    "How to make an unambiguously neutral chart, because there isn't one. Every chart chooses a window, a baseline, an aspect ratio, a smoothing policy, a color assignment and a caption. The honest ones disclose those choices; they do not avoid making them.",
-    "Whether these five exhaust the ways a chart misleads. They do not — they are the ones encountered while building this site, including two the author introduced and had to fix."
+    "Whether any particular published chart was spun on purpose. These four levers are also the everyday choices of honest charting. Intent doesn't show up in the output — which is exactly why disclosure matters more than motive.",
+    "Whether a chart is trustworthy from the chart alone. Two of these levers — the window hunt and the one-sided smoothing — leave no visible trace at all. You need the method, not just the image.",
+    "How to make a truly neutral chart. There isn't one. Every chart picks a window, a baseline, an aspect ratio, a smoothing policy, colors, and a caption. Honest charts disclose those choices — they don't avoid making them.",
+    "Whether these five are all the ways a chart can mislead. They aren't. They're the ones we hit while building this site — including two we introduced ourselves and had to fix."
   ],
   "reproduce": "python3 data/socrata/viz_borough_trend.py — writes honest.png, misleading.png and comparison.png in a single run · python3 data/socrata/export_scrolly.py — writes the series JSON the scroll piece renders from"
 }

@@ -1,67 +1,76 @@
 {
   "id": "nyc-restaurant-inspections",
   "title": "NYC Restaurant Inspections",
-  "subtitle": "DOHMH violation citations for active NYC restaurants",
+  "subtitle": "DOHMH violation citations, active NYC restaurants only",
   "source": {
     "publisher": "NYC Department of Health and Mental Hygiene, via NYC OpenData",
     "id": "43nn-pn8j",
     "url": "https://data.cityofnewyork.us/resource/43nn-pn8j.json",
     "pulled": "2026-08-05",
     "watermark": "Tue, 04 Aug 2026 22:04:51 GMT",
-    "note": "Pulled live from the SODA API on every rebuild. The watermark is the publisher's own last-modified stamp — it is checked on every page of every request, so a dataset that changes mid-pull raises rather than silently blending two states."
+    "note": "Pulled live from the SODA API on every rebuild. The watermark is the publisher's own last-modified stamp. We check it on every page of every request — if the dataset changes mid-pull, the build fails loudly instead of quietly blending two states."
   },
   "grain": {
     "row_is": "one violation citation",
     "counts": [
-      { "label": "violation citations (rows)", "n": 295054 },
-      { "label": "inspections (camis + date)", "n": 87660 },
-      { "label": "restaurants (camis)", "n": 31194 }
+      {
+        "label": "violation citations (rows)",
+        "n": 295054
+      },
+      {
+        "label": "inspections (camis + date)",
+        "n": 87660
+      },
+      {
+        "label": "restaurants (camis)",
+        "n": 31194
+      }
     ],
-    "note": "3.37 violations per inspection · 2.81 inspections per restaurant. A row count reported as a restaurant count is wrong by 9.5×. All three numbers are true and answer different questions."
+    "note": "Three true counts, three different questions. 3.37 violations per inspection · 2.81 inspections per restaurant. Report a row count as a restaurant count and you're off by 9.5×."
   },
   "charts": [
     {
       "title": "Restaurants that score worse get inspected more",
       "img": "assets/freq_severity.png",
-      "insight": "Median inspection score climbs from 12 at one inspection to ~30 at six or more, and the climb repeats in every cuisine.",
+      "insight": "More inspections, worse scores. The median climbs from 12 at one inspection to ~30 at six or more — and it repeats in every cuisine.",
       "form": "Bucketed median lines",
-      "form_why": "The x-variable is discrete (you can have 1 or 2 inspections, never 1.6), so four computed points beat a fitted curve. The first version of this chart used a regression line that extrapolated to x=8 where almost no restaurants exist — technically a correct least-squares fit, visually a claim about data that isn't there.",
-      "method": "Median not mean (score tops out at 214; outliers drag an average). n printed at every point. Nothing under n=25 is drawn — the line ends where the evidence ends. The citywide panel splits 4/5/6+ because n supports it there (207/57/25); the cuisine facets pool at 4+ because American has 2 restaurants at 6 inspections and Mexican has 1.",
-      "caution": "The x-axis is the OUTCOME of enforcement policy, not its cause. DOHMH re-inspects any initial scoring ≥14 by written rule — measured: restaurants that ever scored ≥14 average 1.69 inspections vs 1.04 for those that never did. The correlation exists partly by construction."
+      "form_why": "Points beat a curve here. You can have 1 or 2 inspections, never 1.6, so we plot four computed points instead of fitting a line. The first version used a regression that ran out to x=8, where almost no restaurants exist — a correct least-squares fit, drawing a claim about data that isn't there.",
+      "method": "Median, not mean — the score tops out at 214 and outliers drag an average. n printed at every point. Nothing under n=25 is drawn: the line ends where the evidence ends. The citywide panel splits 4/5/6+ because n supports it there (207/57/25); the cuisine facets pool at 4+ because American has 2 restaurants at 6 inspections and Mexican has 1.",
+      "caution": "The x-axis is the OUTCOME of enforcement policy, not its cause. DOHMH's written rule: any initial inspection scoring ≥14 gets re-inspected. We measured it — restaurants that ever scored ≥14 average 1.69 inspections vs 1.04 for those that never did. Part of this correlation is built in by the rule."
     },
     {
       "title": "One dataset, two arguments",
       "img": "assets/comparison.png",
       "insight": "This is how you flip an outcome without touching a single number. Left panel: Brooklyn is flat (+0.00). Right panel: BROOKLYN SURGES. Same query, same data, every axis labeled on both — and the right one still lies.",
       "form": "Side-by-side line charts, equal panels",
-      "form_why": "Equal panel sizes isolate the levers under study. An earlier version drew the spun panel narrower — preserving the aspect-ratio trick — which confounded 'the y-axis is zoomed' with 'the panel is squished' and made the comparison itself guilty of the thing it teaches.",
-      "method": "Left: y from zero, window fixed by the question before looking, no smoothing, identical treatment for every line. Right: y zoomed to Brooklyn's range, window cherry-picked as the max-slope choice out of 15 candidate starts, Brooklyn smoothed with a 3-month average while other boroughs stay raw.",
-      "caution": "'Read the axes' is the standard defense of a spun chart. This pair is the counterexample: window, y-range, aspect and asymmetric smoothing have no axis labels. The frame does the lying."
+      "form_why": "Equal panels keep the tricks the only difference. An earlier version drew the spun panel narrower to keep the aspect-ratio trick — but then 'the y-axis is zoomed' blurred into 'the panel is squished', and the comparison was guilty of the thing it teaches.",
+      "method": "Left, the honest recipe: y from zero, window fixed by the question before looking, no smoothing, every line treated the same. Right, the spin recipe: y zoomed to Brooklyn's range, window cherry-picked for max slope out of 15 candidate starts, Brooklyn smoothed with a 3-month average while the other boroughs stay raw.",
+      "caution": "'Read the axes' is the usual defense of a spun chart. It fails here: the window, the y-range, the aspect ratio and the one-sided smoothing have no axis labels. The frame does the lying."
     },
     {
-      "title": "Does 'Queens is worst' survive a denominator?",
+      "title": "Queens is 'worst' — but per what?",
       "img": "assets/queens_bump.png",
-      "insight": "A claim that Queens has the worst inspection problem 'because it recorded the most critical violations' turns out right by accident — Manhattan has the most raw criticals (18,487 vs 13,253), but Queens leads both fair metrics. Rank walk: 2 → 1 → 1.",
+      "insight": "Right claim, wrong evidence. Queens was called worst 'because it recorded the most critical violations' — but Manhattan has the most raw criticals (18,487 vs 13,253). Queens still leads both fair metrics, so the claim was right by accident. Rank walk: 2 → 1 → 1.",
       "form": "Bump chart across three metrics",
-      "form_why": "The claim was a ranking claim, and the finding is a rank reversal — a bump chart is a rank reversal drawn. The leftmost column is deliberately the claimant's own metric, so each step right walks their evidence through a fairer denominator.",
-      "method": "Raw count → per 100 inspections → per restaurant, last 12 complete months. Values print at every node because rank encoding erases magnitude. The caption is computed from the cluster shape, not the global range, so 'rank 1' and 'modest lead' can't contradict each other on the same image.",
-      "caution": "Neither denominator is automatically fairer — per-inspection reflects enforcement policy, per-restaurant confounds exposure time. The denominator must follow the decision being made."
+      "form_why": "A bump chart is a rank flip, drawn — and this claim was about rank. The leftmost column is the claimant's own metric on purpose; each step to the right divides their evidence by something fairer.",
+      "method": "Raw count → per 100 inspections → per restaurant, last 12 complete months. Values print at every node because rank alone hides how big the gaps are. The caption comes from the cluster shape, not the global range, so 'rank 1' and 'modest lead' can't contradict each other on the same image.",
+      "caution": "Neither way of dividing is automatically fairer. Per-inspection carries enforcement policy inside it. Per-restaurant mixes in how long each place has been open. What you divide by has to follow the decision you're making."
     },
     {
       "title": "The map, demoted to what a map can say",
       "img": "assets/residual_map.png",
-      "insight": "A stakeholder asked for a map titled 'where frequent inspections cause worse outcomes.' The association is 98% non-geographic — the pooled slope is +5.75 and the zip-demeaned slope is +5.64, so neighborhoods explain 2%.",
+      "insight": "The pattern isn't on the map. A stakeholder asked for a map titled 'where frequent inspections cause worse outcomes' — but 98% of the link has nothing to do with geography. Pooled slope +5.75, zip-demeaned slope +5.64: neighborhoods explain 2%.",
       "form": "Residual scatter map",
-      "form_why": "A choropleth of the raw relationship would have shown 'where' for a pattern that isn't spatial. Mapping residuals — severity minus cuisine and neighborhood means — shows only what geography still explains after the confounders have spoken. It renders as salt-and-pepper, which is the answer.",
-      "method": "20,092 restaurants, 313 excluded for missing or (0,0) coordinates and counted. Aspect ratio set to ~cos(latitude) so NYC isn't stretched.",
-      "caution": "The requested title contained 'cause' before any analysis had earned it, and in this domain the arrow runs backward: risk-based enforcement assigns more inspections to worse restaurants."
+      "form_why": "We map the leftovers, not the raw pattern. A colored-in map of the raw link would show 'where' for a pattern that isn't about place. So each dot is severity minus its cuisine and neighborhood averages — only what geography still explains after those are stripped out. It renders as salt-and-pepper. That's the answer.",
+      "method": "20,092 restaurants. 313 dropped for missing or (0,0) coordinates — dropped and counted. Aspect ratio set to ~cos(latitude) so NYC isn't stretched.",
+      "caution": "The requested title said 'cause' before any analysis had earned it. And here the arrow runs backward: risk-based enforcement sends more inspections to worse restaurants."
     }
   ],
   "cannot_answer": [
-    "Whether restaurants are actually cleaner or dirtier — this records citations, which are inspector observations under a policy, not measurements of hygiene.",
-    "Anything about restaurants that failed and closed. Only ACTIVE establishments are included, so the failures were removed and any 'do bad inspections predict closure' question is unanswerable by construction.",
-    "Long-run trends. The dataset is a rolling window of roughly three years prior to each restaurant's most recent inspection, so multi-year trends are artifacts of the window.",
-    "Whether more inspections cause worse outcomes. The enforcement rule creates the correlation; separating it would need a design this observational data cannot supply."
+    "Whether restaurants are actually cleaner or dirtier. Citations are what inspectors wrote down under a policy — not measurements of hygiene.",
+    "Anything about restaurants that failed and closed. Only ACTIVE restaurants are in the data — the failures were removed before we ever saw them. So 'do bad inspections predict closure' has no possible answer here.",
+    "Long-run trends. The data is a rolling window — roughly three years before each restaurant's most recent inspection. Any multi-year 'trend' is really the window moving.",
+    "Whether more inspections cause worse outcomes. The enforcement rule creates the correlation, and untangling it would take a controlled study — this data only watches; it can't run one."
   ],
   "reproduce": "python3 data/socrata/viz_freq_severity.py · viz_borough_trend.py · viz_queens_bump.py"
 }
