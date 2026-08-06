@@ -182,12 +182,16 @@
                  {g:"C", lo:28, hi:100, c:"act"}];
   const bandFor = s => BANDS.find(b => s >= b.lo && s <= b.hi) || BANDS[2];
 
-  // Our grouping, not DOHMH's. Built from the paired-inspection work: what a
-  // restaurant fixes with a staff meeting vs what needs a contractor.
+  // Our grouping, not DOHMH's. Built from the paired-inspection work. The
+  // "needs money and a contractor" explanation was TESTED against each
+  // building's own DOB record (dob_contractor_test.py): persistence is
+  // identical in troubled and clean buildings, so the copy below claims
+  // the measured fact and not the money story.
   const GROUPS = [
     { key:"building", h:"Pests and the building",
-      note:"Needs money and a contractor. In 6,990 paired NYC inspections we matched, these came back at the "
-         + "re-inspection about 4 times in 10.",
+      note:"The slow kind. In 6,990 paired NYC inspections, about 4 in 10 of these were still there "
+         + "at the re-inspection. We tested whether buildings with open DOB violations explain it - "
+         + "they don't. Something makes these stick, and the data hasn't told us what yet.",
       test: c => /^(04[KLMN]|08[AB]|10[A-J])/.test(c) },
     { key:"handling", h:"Food handling and staff",
       note:"Fixable by next shift. In the same paired inspections, roughly 1 in 4 of these came back.",
