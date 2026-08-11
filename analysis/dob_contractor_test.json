@@ -1,0 +1,25 @@
+{
+  "pre_cutoff": "20230801",
+  "window_days": 120,
+  "pairs": 6975,
+  "no_bin": 86,
+  "troubled_restaurants": 3249,
+  "clean_restaurants": 2481,
+  "rates": {
+    "facility": {
+      "troubled": 0.2958060126190771,
+      "clean": 0.29728841413311424,
+      "troubled_n": 8083,
+      "clean_n": 6085
+    },
+    "practice": {
+      "troubled": 0.18929607171104668,
+      "clean": 0.18757633920781713,
+      "troubled_n": 7586,
+      "clean_n": 5731
+    }
+  },
+  "facility_diff": -0.0014824015140371682,
+  "practice_diff": 0.001719732503229543,
+  "verdict": "NOT SUPPORTED: facility persistence does not move >= 5pp with prior building trouble. The published hedge stays."
+}

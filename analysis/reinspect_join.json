@@ -1,0 +1,514 @@
+{
+  "pairs": 6960,
+  "unpaired_initials": 11589,
+  "median_gap_days": 54,
+  "window_days": 120,
+  "facility": {
+    "rate": 0.29641784791564835,
+    "persisted": 4245,
+    "cited": 14321,
+    "codes": 20
+  },
+  "practice": {
+    "rate": 0.18791697553743514,
+    "persisted": 2535,
+    "cited": 13490,
+    "codes": 25
+  },
+  "other": {
+    "rate": 0.3728014714334981,
+    "persisted": 3243,
+    "cited": 8699,
+    "codes": 25
+  },
+  "ratio": 1.5773872853578288,
+  "per_code": [
+    {
+      "code": "08A",
+      "class": "facility",
+      "cited": 3872,
+      "persist_rate": 0.4331095041322314,
+      "desc": "Facility not vermin proof. Harborage or conditions conducive to vermin exist."
+    },
+    {
+      "code": "10F",
+      "class": "other",
+      "cited": 3645,
+      "persist_rate": 0.5344307270233196,
+      "desc": "Non-food contact surface or equipment made of unacceptable material, not kept cl"
+    },
+    {
+      "code": "02G",
+      "class": "practice",
+      "cited": 3173,
+      "persist_rate": 0.2927828553419477,
+      "desc": "Cold TCS food item held above 41 \u00b0F; smoked or processed fish held above 38 \u00b0F; "
+    },
+    {
+      "code": "02B",
+      "class": "other",
+      "cited": 2409,
+      "persist_rate": 0.33416355334163556,
+      "desc": "Hot TCS food item not held at or above 140 \u00b0F."
+    },
+    {
+      "code": "06C",
+      "class": "practice",
+      "cited": 2384,
+      "persist_rate": 0.24958053691275167,
+      "desc": "Food, supplies, or equipment not protected from potential source of contaminatio"
+    },
+    {
+      "code": "06D",
+      "class": "practice",
+      "cited": 2368,
+      "persist_rate": 0.2563344594594595,
+      "desc": "Food contact surface not properly washed, rinsed and sanitized after each use an"
+    },
+    {
+      "code": "04L",
+      "class": "facility",
+      "cited": 2169,
+      "persist_rate": 0.4103273397879207,
+      "desc": "Evidence of mice or live mice present in facility's food and/or non-food areas."
+    },
+    {
+      "code": "10B",
+      "class": "facility",
+      "cited": 2009,
+      "persist_rate": 0.27426580388252864,
+      "desc": "Plumbing not properly installed or maintained: anti-siphonage or backflow preven"
+    },
+    {
+      "code": "04N",
+      "class": "facility",
+      "cited": 1713,
+      "persist_rate": 0.29830706363105663,
+      "desc": "Filth flies or food/refuse/sewage associated with (FRSA) flies or other nuisance"
+    },
+    {
+      "code": "04A",
+      "class": "other",
+      "cited": 1185,
+      "persist_rate": 0.30548523206751055,
+      "desc": "Food Protection Certificate not held by supervisor of food operations."
+    },
+    {
+      "code": "04H",
+      "class": "practice",
+      "cited": 1010,
+      "persist_rate": 0.09900990099009901,
+      "desc": "Raw, cooked or prepared food is adulterated, contaminated, cross-contaminated, o"
+    },
+    {
+      "code": "05D",
+      "class": "facility",
+      "cited": 984,
+      "persist_rate": 0.06910569105691057,
+      "desc": "No hand washing facility in or adjacent to toilet room or within 25 feet of a fo"
+    }
+  ],
+  "min_cited": 50,
+  "per_code_all": [
+    {
+      "code": "10F",
+      "class": "other",
+      "cited": 3645,
+      "persisted": 1948,
+      "persist_rate": 0.5344307270233196,
+      "lo": 0.5182092979211439,
+      "hi": 0.5505796569076982,
+      "desc": "Non-food contact surface or equipment made of unacceptable material, not kept clean, or not properly sealed, raised, spaced or movable to allow accessibility for cleaning on all sides, above and underneath the unit."
+    },
+    {
+      "code": "08A",
+      "class": "facility",
+      "cited": 3872,
+      "persisted": 1677,
+      "persist_rate": 0.4331095041322314,
+      "lo": 0.417575773852286,
+      "hi": 0.44877583349926314,
+      "desc": "Facility not vermin proof. Harborage or conditions conducive to vermin exist."
+    },
+    {
+      "code": "04L",
+      "class": "facility",
+      "cited": 2169,
+      "persisted": 890,
+      "persist_rate": 0.4103273397879207,
+      "lo": 0.38980231079103034,
+      "hi": 0.4311694526361795,
+      "desc": "Evidence of mice or live mice present in facility's food and/or non-food areas."
+    },
+    {
+      "code": "02B",
+      "class": "other",
+      "cited": 2409,
+      "persisted": 805,
+      "persist_rate": 0.33416355334163556,
+      "lo": 0.3156042047914023,
+      "hi": 0.3532509740980863,
+      "desc": "Hot TCS food item not held at or above 140 \u00b0F."
+    },
+    {
+      "code": "04A",
+      "class": "other",
+      "cited": 1185,
+      "persisted": 362,
+      "persist_rate": 0.30548523206751055,
+      "lo": 0.279922605781405,
+      "hi": 0.33230496095246426,
+      "desc": "Food Protection Certificate not held by supervisor of food operations."
+    },
+    {
+      "code": "04N",
+      "class": "facility",
+      "cited": 1713,
+      "persisted": 511,
+      "persist_rate": 0.29830706363105663,
+      "lo": 0.2771117215870396,
+      "hi": 0.3204050207845338,
+      "desc": "Filth flies or food/refuse/sewage associated with (FRSA) flies or other nuisance pests in establishment\u2019s food and/or non-food areas. FRSA flies include house flies, blow flies, bottle flies, flesh flies, drain flies, Phorid flies and fruit flies."
+    },
+    {
+      "code": "02G",
+      "class": "practice",
+      "cited": 3173,
+      "persisted": 929,
+      "persist_rate": 0.2927828553419477,
+      "lo": 0.2772077686774383,
+      "hi": 0.3088590972311422,
+      "desc": "Cold TCS food item held above 41 \u00b0F; smoked or processed fish held above 38 \u00b0F; intact raw eggs held above 45 \u00b0F; or reduced oxygen packaged (ROP) TCS foods held above required temperatures except during active necessary preparation."
+    },
+    {
+      "code": "10B",
+      "class": "facility",
+      "cited": 2009,
+      "persisted": 551,
+      "persist_rate": 0.27426580388252864,
+      "lo": 0.25520123611435125,
+      "hi": 0.29419201966891556,
+      "desc": "Plumbing not properly installed or maintained: anti-siphonage or backflow prevention device not provide wher required: equipment or floor not properly drained: sewage disposal system in disrepair or not functioning properly."
+    },
+    {
+      "code": "06D",
+      "class": "practice",
+      "cited": 2368,
+      "persisted": 607,
+      "persist_rate": 0.2563344594594595,
+      "lo": 0.23915331840212875,
+      "hi": 0.2743049159082908,
+      "desc": "Food contact surface not properly washed, rinsed and sanitized after each use and following any activity when contamination may have occurred."
+    },
+    {
+      "code": "06C",
+      "class": "practice",
+      "cited": 2384,
+      "persisted": 595,
+      "persist_rate": 0.24958053691275167,
+      "lo": 0.23262030037202983,
+      "hi": 0.267346531598734,
+      "desc": "Food, supplies, or equipment not protected from potential source of contamination during storage, preparation, transportation, display, service or from customer\u2019s refillable, reusable container. Condiments not in single-service containers or dispensed directly by the vendor."
+    },
+    {
+      "code": "04K",
+      "class": "facility",
+      "cited": 427,
+      "persisted": 104,
+      "persist_rate": 0.24355971896955503,
+      "lo": 0.205250823436277,
+      "hi": 0.286441715074396,
+      "desc": "Evidence of rats or live rats present in facility's food and/or non-food areas."
+    },
+    {
+      "code": "04M",
+      "class": "facility",
+      "cited": 831,
+      "persisted": 192,
+      "persist_rate": 0.23104693140794225,
+      "lo": 0.20366514506791245,
+      "hi": 0.26090394204993134,
+      "desc": "Live roaches present in facility's food and/or non-food areas."
+    },
+    {
+      "code": "05H",
+      "class": "other",
+      "cited": 163,
+      "persisted": 24,
+      "persist_rate": 0.147239263803681,
+      "lo": 0.1009830173186305,
+      "hi": 0.2097404473328713,
+      "desc": "Written Standard Operating Procedure (SOP) approved by the Department for refillable, reusable containers not available at the time of inspection.  Container construction improper"
+    },
+    {
+      "code": "10G",
+      "class": "facility",
+      "cited": 856,
+      "persisted": 124,
+      "persist_rate": 0.14485981308411214,
+      "lo": 0.1228675285947658,
+      "hi": 0.17002548797944975,
+      "desc": "Non-food contact surface improperly constructed. Unacceptable material used. Non-food contact surface or equipment improperly maintained."
+    },
+    {
+      "code": "03I",
+      "class": "facility",
+      "cited": 74,
+      "persisted": 9,
+      "persist_rate": 0.12162162162162163,
+      "lo": 0.0653224180677459,
+      "hi": 0.2152679089553369,
+      "desc": "Juice packaged on premises with no or incomplete label, no warning statement"
+    },
+    {
+      "code": "10D",
+      "class": "facility",
+      "cited": 118,
+      "persisted": 14,
+      "persist_rate": 0.11864406779661017,
+      "lo": 0.0720033998019242,
+      "hi": 0.18933262992847985,
+      "desc": "Mechanical or natural ventilation system not provided,  improperly installed, in disrepair and/or fails to prevent excessive build-up of grease, heat, steam condensation vapors, odors, smoke, and fumes."
+    },
+    {
+      "code": "28-05",
+      "class": "other",
+      "cited": 85,
+      "persisted": 10,
+      "persist_rate": 0.11764705882352941,
+      "lo": 0.06517287423683975,
+      "hi": 0.20318789369169823,
+      "desc": "Food adulterated or misbranded. Adulterated or misbranded food possessed, being manufactured, produced, packed, sold, offered for sale, delivered or given away"
+    },
+    {
+      "code": "03A",
+      "class": "facility",
+      "cited": 213,
+      "persisted": 23,
+      "persist_rate": 0.107981220657277,
+      "lo": 0.07303742371724502,
+      "hi": 0.1568151506965206,
+      "desc": "Food, prohibited, from unapproved or unknown source, home canned or home prepared. Animal slaughtered, butchered or dressed (eviscerated, skinned) in establishment. Reduced Oxygen Packaged (ROP) fish not frozen before processing. ROP food prepared on premises transported to another site."
+    },
+    {
+      "code": "28-06",
+      "class": "facility",
+      "cited": 256,
+      "persisted": 27,
+      "persist_rate": 0.10546875,
+      "lo": 0.07350142195414594,
+      "hi": 0.1491018871387784,
+      "desc": "Contract with a pest management professional not in place. Record of extermination activities not kept on premises."
+    },
+    {
+      "code": "04H",
+      "class": "practice",
+      "cited": 1010,
+      "persisted": 100,
+      "persist_rate": 0.09900990099009901,
+      "lo": 0.08208135211181565,
+      "hi": 0.11897727479795014,
+      "desc": "Raw, cooked or prepared food is adulterated, contaminated, cross-contaminated, or not discarded in accordance with HACCP plan."
+    },
+    {
+      "code": "08C",
+      "class": "other",
+      "cited": 683,
+      "persisted": 67,
+      "persist_rate": 0.09809663250366032,
+      "lo": 0.07798612135109372,
+      "hi": 0.12270294582247293,
+      "desc": "Pesticide use not in accordance with label or applicable laws. Prohibited chemical used/stored. Open bait station used."
+    },
+    {
+      "code": "06A",
+      "class": "practice",
+      "cited": 656,
+      "persisted": 62,
+      "persist_rate": 0.09451219512195122,
+      "lo": 0.07442705381137019,
+      "hi": 0.11931883914233263,
+      "desc": "Personal cleanliness is inadequate. Outer garment soiled with possible contaminant. Effective hair restraint not worn where required. Jewelry worn on hands or arms. Fingernail polish worn or fingernails not kept clean and trimmed."
+    },
+    {
+      "code": "04O",
+      "class": "facility",
+      "cited": 85,
+      "persisted": 8,
+      "persist_rate": 0.09411764705882353,
+      "lo": 0.04846448154841264,
+      "hi": 0.17487233363726615,
+      "desc": "Live animals other than fish in tank or service animal present in facility's food and/or non-food areas."
+    },
+    {
+      "code": "09C",
+      "class": "facility",
+      "cited": 471,
+      "persisted": 41,
+      "persist_rate": 0.0870488322717622,
+      "lo": 0.06481421320480125,
+      "hi": 0.11596522987684954,
+      "desc": "Food contact surface not properly maintained."
+    },
+    {
+      "code": "06F",
+      "class": "practice",
+      "cited": 760,
+      "persisted": 62,
+      "persist_rate": 0.08157894736842106,
+      "lo": 0.06415785110613435,
+      "hi": 0.10320878616525804,
+      "desc": "Wiping cloths soiled or not stored in sanitizing solution."
+    },
+    {
+      "code": "06E",
+      "class": "practice",
+      "cited": 613,
+      "persisted": 50,
+      "persist_rate": 0.08156606851549755,
+      "lo": 0.06241566974240656,
+      "hi": 0.10592835893529613,
+      "desc": "Sanitized equipment or utensil, including in-use food dispensing utensil, improperly used or stored."
+    },
+    {
+      "code": "10H",
+      "class": "practice",
+      "cited": 386,
+      "persisted": 29,
+      "persist_rate": 0.07512953367875648,
+      "lo": 0.05281625716090215,
+      "hi": 0.10581637722188307,
+      "desc": "Single service article not provided. Single service article reused or not protected from contamination when transported, stored, dispensed. Drinking straws not completely enclosed in wrapper or dispensed from a sanitary device."
+    },
+    {
+      "code": "02H",
+      "class": "practice",
+      "cited": 482,
+      "persisted": 36,
+      "persist_rate": 0.07468879668049792,
+      "lo": 0.05443456693152495,
+      "hi": 0.10166898616067631,
+      "desc": "Food not cooled by an approved method whereby the internal product temperature is reduced from 140\u00ba F to 70\u00ba F or less within 2  hours, and from 70\u00ba F to 41\u00ba F or less within 4 additional hours."
+    },
+    {
+      "code": "05D",
+      "class": "facility",
+      "cited": 984,
+      "persisted": 68,
+      "persist_rate": 0.06910569105691057,
+      "lo": 0.05487603882063108,
+      "hi": 0.08668673804561956,
+      "desc": "No hand washing facility in or adjacent to toilet room or within 25 feet of a food preparation, food service or ware washing area. Hand washing facility not accessible, obstructed or used for non-hand washing purposes. No hot and cold running water or water at inadequate pressure. No soap or acceptable hand-drying device."
+    },
+    {
+      "code": "09B",
+      "class": "practice",
+      "cited": 334,
+      "persisted": 23,
+      "persist_rate": 0.0688622754491018,
+      "lo": 0.04632123496468008,
+      "hi": 0.10120825814688465,
+      "desc": "Thawing procedures improper."
+    },
+    {
+      "code": "04J",
+      "class": "practice",
+      "cited": 240,
+      "persisted": 13,
+      "persist_rate": 0.05416666666666667,
+      "lo": 0.03192488207932074,
+      "hi": 0.09045620465895526,
+      "desc": "Properly scaled and calibrated thermometer or thermocouple not provided or not readily accessible in food preparation and hot/cold holding areas to measure temperatures of TCS foods during cooking, cooling, reheating, and holding."
+    },
+    {
+      "code": "10A",
+      "class": "facility",
+      "cited": 84,
+      "persisted": 4,
+      "persist_rate": 0.047619047619047616,
+      "lo": 0.01867144465444291,
+      "hi": 0.11613484302702005,
+      "desc": "Toilet facility not maintained or provided with toilet paper, waste receptacle or self-closing door."
+    },
+    {
+      "code": "06B",
+      "class": "other",
+      "cited": 154,
+      "persisted": 7,
+      "persist_rate": 0.045454545454545456,
+      "lo": 0.02218975107015281,
+      "hi": 0.09084508892133232,
+      "desc": "Tobacco use, eating, or drinking from open container in food preparation, food storage or dishwashing area observed."
+    },
+    {
+      "code": "10E",
+      "class": "practice",
+      "cited": 237,
+      "persisted": 10,
+      "persist_rate": 0.04219409282700422,
+      "lo": 0.023077630252304453,
+      "hi": 0.07591523476769209,
+      "desc": "Accurate thermometer not provided or properly located in refrigerated, cold storage or hot holding equipment"
+    },
+    {
+      "code": "05F",
+      "class": "practice",
+      "cited": 156,
+      "persisted": 6,
+      "persist_rate": 0.038461538461538464,
+      "lo": 0.017744190180119704,
+      "hi": 0.08136392685574578,
+      "desc": "Insufficient or no refrigerated or hot holding equipment to keep potentially hazardous foods at required temperatures."
+    },
+    {
+      "code": "08B",
+      "class": "other",
+      "cited": 183,
+      "persisted": 7,
+      "persist_rate": 0.03825136612021858,
+      "lo": 0.018650132009463204,
+      "hi": 0.07684037973952632,
+      "desc": "Garbage receptacle not pest or water resistant, with tight-fitting lids, and covered except while in active use. Garbage receptacle and cover not cleaned after emptying and prior to reuse. Garbage, refuse and other solid and liquid waste not collected, stored, removed and disposed of so as to prevent a nuisance."
+    },
+    {
+      "code": "05C",
+      "class": "facility",
+      "cited": 65,
+      "persisted": 2,
+      "persist_rate": 0.03076923076923077,
+      "lo": 0.008478819400945354,
+      "hi": 0.10542905025926008,
+      "desc": "Food contact surface, refillable, reusable containers, or equipment improperly constructed, placed or maintained. Unacceptable material used. Culinary sink or other acceptable method not provided for washing food."
+    },
+    {
+      "code": "09E",
+      "class": "practice",
+      "cited": 229,
+      "persisted": 5,
+      "persist_rate": 0.021834061135371178,
+      "lo": 0.009361274885895589,
+      "hi": 0.05008514705932382,
+      "desc": "Wash hands sign not posted near or above hand washing sink."
+    },
+    {
+      "code": "09A",
+      "class": "practice",
+      "cited": 114,
+      "persisted": 1,
+      "persist_rate": 0.008771929824561403,
+      "lo": 0.0015501030386822772,
+      "hi": 0.04802152531666931,
+      "desc": "Swollen, leaking, rusted or otherwise damaged canned food to be returned to distributor not segregated from intact product and clearly labeled DO NOT USE"
+    },
+    {
+      "code": "04C",
+      "class": "practice",
+      "cited": 120,
+      "persisted": 1,
+      "persist_rate": 0.008333333333333333,
+      "lo": 0.001472517830674953,
+      "hi": 0.045697415374322405,
+      "desc": "Food worker/food vendor does not use utensil or other barrier to eliminate bare hand contact with food that will not receive adequate additional heat treatment."
+    }
+  ]
+}

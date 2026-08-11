@@ -1,4 +1,105 @@
-# Morning triage — FreshRoute inventory
+# Two working data apps
+
+Both read real data. Both state their own limits on screen rather than in a
+footnote. Neither has a build step.
+
+| | What it is | Live |
+|---|---|---|
+| **NYC DataHub** | Three tools over the city's restaurant-inspection API, fetched in your browser at the moment you search | **[/data-app/](https://doble196.github.io/freshroute-demo/data-app/)** |
+| **FreshRoute morning triage** | An inventory coordinator's board over a real 4,325-row dairy export | [/](https://doble196.github.io/freshroute-demo/) |
+
+---
+
+## NYC DataHub — [live](https://doble196.github.io/freshroute-demo/data-app/)
+
+No snapshot, no fixture, no API key. Every number on screen came from the
+city's API in that session. A key embedded in a public page is a key you have
+given away, and this dataset does not need one.
+
+### [You failed the inspection. What do you fix first?](https://doble196.github.io/freshroute-demo/data-app/operator.html)
+
+For the operator holding a failed inspection. Your open violations ranked by
+how often **that exact violation code** was still there at the re-inspection —
+measured across 6,960 paired NYC inspections, each rate shipped with its sample
+size and 95% interval.
+
+The spread is the product: **53.4% down to 0.8%.** That is the difference
+between "fix everything" and "fix these three." It also surfaces something an
+operator would otherwise get backwards — the stickiest code on a typical sheet
+carries **no critical flag**. The city's flag answers *how dangerous*, not
+*will this still be here in 54 days*, and only one of those is the question you
+have a re-inspection to answer.
+
+What it refuses to do: **price the fixes.** The city publishes your total and
+your violations but never the points each one carried. So it ranks by whether
+an item tends to still be there, never by what clearing it saves you.
+
+### [What does that grade in the window actually mean?](https://doble196.github.io/freshroute-demo/data-app/check.html)
+
+For anyone standing outside. Type a restaurant, see what the score is made of —
+because a good number and a fixed building are not the same thing. A score of 0
+from a re-opening visit gets an amber warning *above* the number.
+
+### [Watch a true chart become a false one](https://doble196.github.io/freshroute-demo/data-app/spin-scrolly.html)
+
+One chart, pinned, spun one display lever at a time. No number changes at any
+point — that is the lesson.
+
+### The five ways a live fetch fails
+
+A one-time fetch on page load and a user-triggered fetch are not the same
+problem. On load, the request and the page are the same event: if the fetch
+dies, nothing renders and the failure is obvious. **Afterwards the page
+outlives the request**, so a dead request leaves a live page that is fully
+capable of looking correct while being wrong.
+
+Both live tools handle each shape separately, because only one of them looks
+like the 503 everybody tests:
+
+| Failure | What the screen says |
+|---|---|
+| no network | "Could not reach the city's API at all." |
+| HTTP error | "The city's API answered with an error: 503 Service Unavailable." |
+| malformed body | "The city's API answered, but what came back was not data." |
+| wrong-shape 200 | "The city's API rejected the query: *<their message>*" |
+| hang | "The city's API did not answer within 12 seconds." (button recovers) |
+
+The fourth one is why this matters. Socrata returns its own errors as a JSON
+**object**, and an object has no `.length` — so before the shape check, an
+outage rendered on screen as **"No NYC restaurant matched"**. An error printed
+as reassurance.
+
+Two rules hold across all five: **an error never deletes a true answer** (the
+previous result stays, dimmed and labelled as belonging to the earlier search),
+and **the footer stamp always describes what is actually on screen**, so a real
+timestamp never vouches for the wrong result.
+
+An empty result gets the same treatment — it names *both* causes, including the
+one that flatters us less: this dataset holds only restaurants that are still
+open, so a restaurant that failed hard and shut down looks identical to one
+that never existed.
+
+### Check the work — [`/analysis/`](analysis/)
+
+Every number on those pages is produced by a script that ships next to it.
+
+```bash
+cd analysis && python3 gates_app_test.py     # 15 gates, no setup, no API key
+```
+
+It reads the actual shipped pages and fails if any of them drifted from the
+analysis — including a gate that fails the build if `operator.html` is still
+quoting rates the analysis no longer produces.
+
+The folder also holds `dob_contractor_test.py`: a **pre-registered test of our
+own favourite explanation**, which came back `NOT SUPPORTED` and took a
+sentence off the live page the same afternoon. The pattern it was explaining
+survived and got *stronger*; the explanation did not. See
+[`analysis/README.md`](analysis/README.md).
+
+---
+
+## FreshRoute morning triage
 
 An Inventory Coordinator's morning board. Reads a real 4,325-row dairy
 distribution export and shows the handful of items that need action today,
