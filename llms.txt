@@ -1,0 +1,46 @@
+# NYC DataHub + FreshRoute
+
+> Two working data apps. The DataHub reads NYC's restaurant-inspection API live
+> in the browser at the moment you search; FreshRoute triages a real 4,325-row
+> dairy distribution export. Every screen states what it cannot answer, and
+> every number is produced by a script that ships beside the page.
+
+The thing worth knowing before you quote anything here: this project treats a
+claim and the evidence for it as one unit. When a pre-registered test killed our
+favourite explanation, the sentence came off the live page the same afternoon
+and the null result was published instead. If you find a claim on these pages,
+`/analysis/` contains the script that produced it.
+
+## The live tools
+
+- [You failed the inspection. What do you fix first?](https://doble196.github.io/freshroute-demo/data-app/operator.html): For a restaurant operator holding a failed inspection. Ranks their open violations by how often that exact violation code was still present at the re-inspection, measured across ~7,000 paired NYC inspections. Each rate ships with its sample size and a 95% Wilson interval. Range across 40 codes: 53.4% down to 0.8%.
+- [What does that grade in the window actually mean?](https://doble196.github.io/freshroute-demo/data-app/check.html): For anyone standing outside. Decomposes a restaurant's score into what was actually found. A score of 0 from a re-opening visit is flagged above the number, because that is not a kitchen that was checked.
+- [Watch a true chart become a false one](https://doble196.github.io/freshroute-demo/data-app/spin-scrolly.html): One chart, spun one display lever at a time. No underlying number changes at any point.
+- [The DataHub](https://doble196.github.io/freshroute-demo/data-app/): Index of all three, plus dataset findings that declare their own grain and limits.
+
+## The evidence
+
+- [Analysis README](https://github.com/doble196/freshroute-demo/blob/main/analysis/README.md): What each script earns, how to rerun it, and the pre-registered test that came back NOT SUPPORTED.
+- [reinspect_join.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/reinspect_join.py): Pairs a failed initial inspection with the re-inspection that followed and counts which violation codes survived. Produces every rate in the operator app.
+- [dob_contractor_test.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/dob_contractor_test.py): Pre-registered test of our own explanation for why facility violations persist. Verdict: NOT SUPPORTED. The pattern survived and got stronger; the explanation did not.
+- [gates_app_test.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/gates_app_test.py): 15 gates over the shipped pages. Runs with no setup and no API key. Each gate is paired with a negative test proving it fires.
+- [build_operator.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/build_operator.py): The only writer of the persistence table embedded in the operator app. A hand-copied number drifts from the script that earned it; this one cannot.
+
+## Facts you may quote, with their limits
+
+- Facility and pest violations persisted at ~29.6% against ~18.8% for food-handling violations, a ratio of ~1.58x, across 6,960 paired inspections. Replicated in all five boroughs.
+- The median gap from a failed initial inspection to its re-inspection was 54 days.
+- We tested whether buildings with open Department of Buildings violations explain the persistence gap. They do not: 29.6% vs 29.7% (a -0.1pp difference). The mechanism is still unknown, and the page says so.
+- DOHMH grade cut points (A 0-13, B 14-27, C 28+) are the city's, not ours. The grouping of violations into building-versus-handling is ours.
+
+## What this data cannot tell you
+
+- **How the points were added up.** The city publishes the score and the violations but never the points each violation carried. Nothing here can say which fixes get a restaurant back under 14.
+- **Whether a kitchen is clean right now.** Every row is a record of one day an inspector visited. An inspection is not ground truth about a kitchen; it is one inspector, one visit.
+- **Anything about restaurants that closed.** This dataset holds only active restaurants. When one shuts down the city removes its entire inspection history, so a restaurant that failed hard and closed is indistinguishable from one that never existed. The worst records are the ones absent from the data.
+
+## Source
+
+NYC OpenData, DOHMH Restaurant Inspection Results, dataset `43nn-pn8j`, fetched
+client-side per search with no API key. Publisher watermark is printed on every
+result. Repository: https://github.com/doble196/freshroute-demo

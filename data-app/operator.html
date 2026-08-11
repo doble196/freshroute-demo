@@ -1,4 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>You failed the inspection. What do you fix first?</title>
+<meta name="description" content="Your open NYC health violations ranked by how often that exact violation code was still there at the re-inspection. Measured across ~7,000 paired inspections, each rate with its sample size and 95% interval.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="canonical" href="https://doble196.github.io/freshroute-demo/data-app/operator.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="You failed the inspection. What do you fix first?">
+<meta property="og:description" content="Open NYC health violations ranked by measured persistence: which ones actually come back at the re-inspection.">
+<meta property="og:url" content="https://doble196.github.io/freshroute-demo/data-app/operator.html">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "You failed the inspection. What do you fix first?",
+  "url": "https://doble196.github.io/freshroute-demo/data-app/operator.html",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern browser",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "description": "Ranks a restaurant's open health violations by how often that exact violation code was still present at the re-inspection, measured across roughly 7,000 paired NYC inspections. Each rate is published with its sample size and a 95% Wilson interval. Cannot rank by points, because the city does not publish points per violation.",
+  "isBasedOn": {
+    "@type": "Dataset",
+    "name": "DOHMH New York City Restaurant Inspection Results",
+    "identifier": "43nn-pn8j",
+    "url": "https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j",
+    "creator": {"@type": "GovernmentOrganization", "name": "NYC Department of Health and Mental Hygiene"},
+    "isAccessibleForFree": true
+  },
+  "citation": "https://github.com/doble196/freshroute-demo/blob/main/analysis/README.md"
+}
+</script>
 <style>
   :root{
     --ground:#faf9f7; --panel:#fff; --ink:#171614; --ink2:#5f5c56; --ink3:#8a8580;
@@ -147,6 +181,8 @@
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
+</head>
+<body>
 <div class="wrap">
   <div>
     <p style="margin:0 0 10px"><a href="index.html" style="font-size:13px;color:var(--ink2)">&larr; back to the DataHub</a></p>
@@ -599,3 +635,5 @@
   search("SHAXIAN DELICACIES");
 })();
 </script>
+</body>
+</html>

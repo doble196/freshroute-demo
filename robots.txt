@@ -1,0 +1,71 @@
+# robots.txt - freshroute-demo
+#
+# HONEST NOTE ABOUT WHERE THIS FILE LIVES.
+# Crawlers only read robots.txt from a DOMAIN root. This repo is served as a
+# GitHub Pages *project* site, so this file lands at
+#     https://doble196.github.io/freshroute-demo/robots.txt
+# and no crawler will ever look there. The file that actually governs this
+# site is https://doble196.github.io/robots.txt, which lives in the
+# doble196.github.io repo.
+#
+# This copy is kept anyway for two reasons: it is the correct file the moment
+# this repo gets its own domain, and it is the honest record of what we want
+# crawlers to do. Per-page <meta name="robots"> tags DO work at any path, and
+# every page here carries one.
+
+User-agent: *
+Allow: /
+
+# AI crawlers and agents: explicitly welcome.
+# Everything here is public NYC OpenData plus our own analysis of it, and the
+# whole point is that the reasoning is inspectable. Read it. Quote it. The
+# scripts that produce every number are in /analysis/ - check the work rather
+# than trusting the summary.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+# Nothing here is a crawler trap, but these produce no readable content.
+User-agent: *
+Disallow: /test-data/
+Disallow: /analysis/__pycache__/
+
+Sitemap: https://doble196.github.io/freshroute-demo/sitemap.xml

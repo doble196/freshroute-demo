@@ -1,4 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>What does that grade in the window actually mean?</title>
+<meta name="description" content="Type any NYC restaurant. Reads the city's live inspection record and shows what the score is made of, because a good number and a fixed building are not the same thing.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="canonical" href="https://doble196.github.io/freshroute-demo/data-app/check.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="What does that grade in the window actually mean?">
+<meta property="og:description" content="What a NYC restaurant grade is actually made of, read live from the city's API when you search.">
+<meta property="og:url" content="https://doble196.github.io/freshroute-demo/data-app/check.html">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "What does that grade in the window actually mean?",
+  "url": "https://doble196.github.io/freshroute-demo/data-app/check.html",
+  "applicationCategory": "ReferenceApplication",
+  "operatingSystem": "Any modern browser",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "description": "Decomposes a NYC restaurant inspection score into what was actually found, read live from the city's API at the moment you search. Flags a low score that came from a re-opening visit rather than a full inspection. Cannot show points per violation, because the city does not publish them.",
+  "isBasedOn": {
+    "@type": "Dataset",
+    "name": "DOHMH New York City Restaurant Inspection Results",
+    "identifier": "43nn-pn8j",
+    "url": "https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j",
+    "creator": {"@type": "GovernmentOrganization", "name": "NYC Department of Health and Mental Hygiene"},
+    "isAccessibleForFree": true
+  },
+  "citation": "https://github.com/doble196/freshroute-demo/blob/main/analysis/README.md"
+}
+</script>
 <style>
   :root{
     --ground:#faf9f7; --panel:#fff; --ink:#171614; --ink2:#5f5c56; --ink3:#8a8580;
@@ -157,6 +191,8 @@
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
+</head>
+<body>
 <div class="wrap">
   <div>
     <p style="margin:0 0 10px"><a href="index.html" style="font-size:13px;color:var(--ink2)">&larr; back to the DataHub</a></p>
@@ -621,3 +657,5 @@
   search("EL SOL DE MEXICO");
 })();
 </script>
+</body>
+</html>
