@@ -1,0 +1,62 @@
+{
+  "paired": 25103,
+  "censored": 19672,
+  "fail_score": 14,
+  "fail_rate": 0.34462016492052744,
+  "fail_lo": 0.33876525091821547,
+  "fail_hi": 0.3505226282867897,
+  "failed_n": 8651,
+  "median_next_score": 12.0,
+  "c_band_share": 0.15006174560809465,
+  "by_gap": {
+    "under 6 months": {
+      "n": 785,
+      "fail_rate": 0.44331210191082804,
+      "lo": 0.40891962221608463,
+      "hi": 0.47825671331185926
+    },
+    "6-10 months": {
+      "n": 1244,
+      "fail_rate": 0.43810289389067525,
+      "lo": 0.41076364069311955,
+      "hi": 0.4658232594390767
+    },
+    "10-13 months": {
+      "n": 3888,
+      "fail_rate": 0.31738683127572015,
+      "lo": 0.30294217485657843,
+      "hi": 0.33219199915502573
+    },
+    "over 13 months": {
+      "n": 19186,
+      "fail_rate": 0.3400396122172417,
+      "lo": 0.33336894626884306,
+      "hi": 0.3467743228658016
+    }
+  },
+  "by_origin": {
+    "initial": {
+      "n": 14097,
+      "fail_rate": 0.2793502163580904
+    },
+    "re-inspection": {
+      "n": 7244,
+      "fail_rate": 0.4487852015461071
+    },
+    "other": {
+      "n": 3762,
+      "fail_rate": 0.38862307283359915
+    }
+  },
+  "staleness_spread_pp": -10.327248969358632,
+  "prereg": {
+    "predict_min_fail": 0.2,
+    "falsify_max_fail": 0.1,
+    "placebo_min_spread_pp": 5.0
+  },
+  "verdict": {
+    "prediction_met": true,
+    "falsifier_triggered": false,
+    "placebo_holds": false
+  }
+}
