@@ -1,0 +1,601 @@
+<title>You failed the inspection. What do you fix first?</title>
+<style>
+  :root{
+    --ground:#faf9f7; --panel:#fff; --ink:#171614; --ink2:#5f5c56; --ink3:#8a8580;
+    --rule:#e6e2da; --track:#eceae4; --band:#dcd8cf;
+    --ok:#2f7d5d; --watch:#b07407; --act:#bd3f1e;
+    --shadow:0 1px 2px rgba(23,22,20,.05), 0 8px 24px -12px rgba(23,22,20,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ground:#131211; --panel:#1c1a18; --ink:#f2efe9; --ink2:#a8a29a; --ink3:#7d7871;
+      --rule:#302d2a; --track:#2a2724; --band:#3b3733;
+      --ok:#5cb98e; --watch:#e0a63c; --act:#ee7a55;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#131211; --panel:#1c1a18; --ink:#f2efe9; --ink2:#a8a29a; --ink3:#7d7871;
+    --rule:#302d2a; --track:#2a2724; --band:#3b3733;
+    --ok:#5cb98e; --watch:#e0a63c; --act:#ee7a55;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+  :root[data-theme="light"]{
+    --ground:#faf9f7; --panel:#fff; --ink:#171614; --ink2:#5f5c56; --ink3:#8a8580;
+    --rule:#e6e2da; --track:#eceae4; --band:#dcd8cf;
+    --ok:#2f7d5d; --watch:#b07407; --act:#bd3f1e;
+    --shadow:0 1px 2px rgba(23,22,20,.05), 0 8px 24px -12px rgba(23,22,20,.18);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:26px 18px 70px; background:var(--ground); color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  .wrap{max-width:660px; margin:0 auto; display:flex; flex-direction:column; gap:20px}
+  .mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace; font-variant-numeric:tabular-nums}
+  .lab{font-size:10.5px; font-weight:650; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3)}
+
+  h1{font-size:23px; font-weight:700; letter-spacing:-.02em; margin:0 0 5px; text-wrap:balance}
+  .sub{font-size:14px; color:var(--ink2); margin:0}
+
+  .search{display:flex; gap:8px; flex-wrap:wrap}
+  .search input{
+    flex:1 1 220px; font:15px/1 inherit; padding:12px 14px; border-radius:9px;
+    border:1px solid var(--rule); background:var(--panel); color:var(--ink);
+  }
+  .search input:focus-visible{outline:2px solid var(--act); outline-offset:1px}
+  .search button{
+    font:650 14px/1 inherit; padding:12px 18px; border-radius:9px; cursor:pointer;
+    background:var(--ink); color:var(--panel); border:1px solid var(--ink);
+  }
+  .search button:focus-visible{outline:2px solid var(--act); outline-offset:2px}
+  .search button[disabled]{opacity:.55; cursor:default}
+  .hints{font-size:12.5px; color:var(--ink3)}
+  .hints button{
+    font:inherit; font-size:12.5px; background:none; border:0; padding:0 2px; cursor:pointer;
+    color:var(--ink2); text-decoration:underline; text-underline-offset:2px;
+  }
+
+  .results{display:flex; flex-direction:column; gap:0; border:1px solid var(--rule); border-radius:11px; overflow:hidden}
+  .results button{
+    display:block; width:100%; text-align:left; font:inherit; cursor:pointer;
+    background:var(--panel); border:0; border-bottom:1px solid var(--rule); padding:12px 15px; color:var(--ink);
+  }
+  .results button:last-child{border-bottom:0}
+  .results button:hover,.results button:focus-visible{background:var(--ground); outline:none}
+  .results .nm{font-weight:650; font-size:14.5px}
+  .results .ad{font-size:12.5px; color:var(--ink2)}
+
+  .panel{background:var(--panel); border:1px solid var(--rule); border-radius:14px; box-shadow:var(--shadow); overflow:hidden}
+  .zone{padding:17px 20px; border-bottom:1px solid var(--rule)}
+  .zone:last-child{border-bottom:0}
+
+  .ctx .what{font-size:16px; font-weight:660; letter-spacing:-.01em}
+  .ctx .dir{font-size:13.5px; color:var(--ink2); margin-top:2px}
+
+  /* the clock */
+  .clock{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-top:4px}
+  .clock .n{font-size:40px; font-weight:720; letter-spacing:-.03em; line-height:1;
+    font-variant-numeric:tabular-nums; font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .clock .of{font-size:13.5px; color:var(--ink2)}
+  .gap{position:relative; height:26px; margin:13px 0 4px}
+  .gap .rail{position:absolute; left:0; right:0; top:11px; height:6px; background:var(--track); border-radius:3px}
+  .gap .med{position:absolute; top:5px; width:2px; height:18px; background:var(--ink2)}
+  .gap .med::after{content:"median day " attr(data-d); position:absolute; top:-13px; left:50%;
+    transform:translateX(-50%); white-space:nowrap; font:600 10px/1 ui-monospace,Menlo,monospace; color:var(--ink3)}
+  .gap .you{position:absolute; top:3px; width:3px; height:22px; border-radius:2px; background:var(--act)}
+  .gap .you::after{content:"you, day " attr(data-d); position:absolute; top:-13px; left:50%;
+    transform:translateX(-50%); white-space:nowrap; font:680 10px/1 ui-monospace,Menlo,monospace; color:var(--act)}
+
+  .says{margin-top:11px; font-size:14px; color:var(--ink2)}
+  .says b{color:var(--ink); font-weight:640}
+
+  .warn{
+    margin-top:13px; padding:11px 13px; border-radius:9px; font-size:13.5px; line-height:1.45;
+    border:1px solid var(--watch); color:var(--ink);
+  }
+  .warn b{color:var(--watch)}
+
+  /* the triage rows */
+  .fix{display:flex; flex-direction:column; gap:0; margin-top:10px}
+  .row{display:grid; grid-template-columns:1fr; gap:5px; padding:12px 0; border-top:1px solid var(--rule)}
+  .row:first-child{border-top:0}
+  .rtop{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap}
+  .rate{font:720 19px/1 ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums;
+    letter-spacing:-.02em; min-width:58px}
+  .rlab{font-size:12.5px; color:var(--ink2)}
+  .code{font:650 11px/1 ui-monospace,Menlo,monospace; color:var(--ink3); border:1px solid var(--rule);
+    border-radius:3px; padding:2px 5px}
+  .crit{font-size:9.5px; font-weight:680; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--act); border:1px solid var(--act); border-radius:3px; padding:1px 4px; white-space:nowrap}
+  .rbar{height:7px; background:var(--track); border-radius:4px; overflow:hidden}
+  .rbar i{display:block; height:100%; border-radius:4px}
+  .rdesc{font-size:13px; line-height:1.42}
+  .rci{font-size:11.5px; color:var(--ink3); font-family:ui-monospace,Menlo,monospace}
+
+  .nomeasure{margin-top:6px; font-size:13px; color:var(--ink2)}
+  .nomeasure .v{display:flex; gap:9px; padding:6px 0; border-top:1px solid var(--rule); font-size:12.5px}
+
+  .limits{font-size:12.5px; color:var(--ink2)}
+  .limits li{margin-bottom:6px}
+  .limits ul{margin:6px 0 0; padding-left:17px}
+
+  .msg{padding:14px 16px; border:1px dashed var(--rule); border-radius:10px; font-size:13.5px; color:var(--ink2)}
+  .msg.err{border-style:solid; border-color:var(--act); color:var(--act)}
+  .msg.err .hdr{display:block; font-weight:670; margin-bottom:4px}
+  .msg.err .why{display:block; color:var(--ink2); margin-top:5px}
+  .msg.good{border-style:solid; border-color:var(--ok); color:var(--ink)}
+  .msg.good .hdr{display:block; font-weight:670; color:var(--ok); margin-bottom:4px}
+  /* the previous answer stays on screen while the next one loads, and survives
+     an error - it is still exactly as true as it was a second ago */
+  #out.loading{opacity:.35; transition:opacity .12s ease; pointer-events:none}
+  #out.stale{opacity:.62}
+  .notice{padding:12px 14px; border:1px solid var(--watch); border-radius:9px;
+    font-size:13.5px; color:var(--ink); margin-bottom:12px; line-height:1.45}
+  .notice b{color:var(--watch)}
+
+  .foot{font-size:12px; color:var(--ink3); line-height:1.55}
+  .foot a{color:var(--ink2)}
+  .foot code{font-size:11.5px}
+
+  @media (max-width:520px){
+    .zone{padding:15px 16px}
+    .clock .n{font-size:34px}
+    .rate{font-size:17px; min-width:52px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div>
+    <p style="margin:0 0 10px"><a href="index.html" style="font-size:13px;color:var(--ink2)">&larr; back to the DataHub</a></p>
+    <h1>You failed the inspection. What do you fix first?</h1>
+    <p class="sub">Not everything on that sheet comes back. We paired thousands of failed NYC
+       inspections with the re-inspection that followed and counted which violations were still
+       there. Your open items, ranked worst-sticking first &mdash; read live from the city when you search.</p>
+  </div>
+
+  <form class="search" id="form">
+    <input id="q" type="search" placeholder="Your restaurant name" autocomplete="off" aria-label="Restaurant name">
+    <button type="submit">Look it up</button>
+  </form>
+  <div class="hints">
+    Try
+    <button type="button" data-ex="SHAXIAN DELICACIES">Shaxian Delicacies</button>&middot;
+    <button type="button" data-ex="JOES PIZZA">Joe&rsquo;s Pizza</button>&middot;
+    <button type="button" data-ex="SHAKE SHACK">Shake Shack</button>
+  </div>
+
+  <div id="status" aria-live="polite"></div>
+  <div id="out"></div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+(() => {
+  const API = "https://data.cityofnewyork.us/resource/43nn-pn8j.json";
+  const $  = s => document.querySelector(s);
+  const out = $("#out");
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const titleCase = s => String(s ?? "").toLowerCase().replace(/\b[a-z]/g, m => m.toUpperCase());
+  const pct = x => (100 * x).toFixed(1) + "%";
+
+  // ---- BEGIN GENERATED by build_operator.py - do not hand-edit ----
+  // Source: reinspect_join.json, written by reinspect_join.py.
+  // 40 codes with at least 50 citations across 6,960 paired inspections.
+  const PERSIST = {"facilityRate":0.2964,"medianGapDays":54,"minCited":50,"pairs":6960,"practiceRate":0.1879,"ratio":1.577,"windowDays":120};
+  PERSIST.codes = {"02B":{"hi":0.3533,"lo":0.3156,"n":2409,"rate":0.3342},"02G":{"hi":0.3089,"lo":0.2772,"n":3173,"rate":0.2928},"02H":{"hi":0.1017,"lo":0.0544,"n":482,"rate":0.0747},"03A":{"hi":0.1568,"lo":0.073,"n":213,"rate":0.108},"03I":{"hi":0.2153,"lo":0.0653,"n":74,"rate":0.1216},"04A":{"hi":0.3323,"lo":0.2799,"n":1185,"rate":0.3055},"04C":{"hi":0.0457,"lo":0.0015,"n":120,"rate":0.0083},"04H":{"hi":0.119,"lo":0.0821,"n":1010,"rate":0.099},"04J":{"hi":0.0905,"lo":0.0319,"n":240,"rate":0.0542},"04K":{"hi":0.2864,"lo":0.2053,"n":427,"rate":0.2436},"04L":{"hi":0.4312,"lo":0.3898,"n":2169,"rate":0.4103},"04M":{"hi":0.2609,"lo":0.2037,"n":831,"rate":0.231},"04N":{"hi":0.3204,"lo":0.2771,"n":1713,"rate":0.2983},"04O":{"hi":0.1749,"lo":0.0485,"n":85,"rate":0.0941},"05C":{"hi":0.1054,"lo":0.0085,"n":65,"rate":0.0308},"05D":{"hi":0.0867,"lo":0.0549,"n":984,"rate":0.0691},"05F":{"hi":0.0814,"lo":0.0177,"n":156,"rate":0.0385},"05H":{"hi":0.2097,"lo":0.101,"n":163,"rate":0.1472},"06A":{"hi":0.1193,"lo":0.0744,"n":656,"rate":0.0945},"06B":{"hi":0.0908,"lo":0.0222,"n":154,"rate":0.0455},"06C":{"hi":0.2673,"lo":0.2326,"n":2384,"rate":0.2496},"06D":{"hi":0.2743,"lo":0.2392,"n":2368,"rate":0.2563},"06E":{"hi":0.1059,"lo":0.0624,"n":613,"rate":0.0816},"06F":{"hi":0.1032,"lo":0.0642,"n":760,"rate":0.0816},"08A":{"hi":0.4488,"lo":0.4176,"n":3872,"rate":0.4331},"08B":{"hi":0.0768,"lo":0.0187,"n":183,"rate":0.0383},"08C":{"hi":0.1227,"lo":0.078,"n":683,"rate":0.0981},"09A":{"hi":0.048,"lo":0.0016,"n":114,"rate":0.0088},"09B":{"hi":0.1012,"lo":0.0463,"n":334,"rate":0.0689},"09C":{"hi":0.116,"lo":0.0648,"n":471,"rate":0.087},"09E":{"hi":0.0501,"lo":0.0094,"n":229,"rate":0.0218},"10A":{"hi":0.1161,"lo":0.0187,"n":84,"rate":0.0476},"10B":{"hi":0.2942,"lo":0.2552,"n":2009,"rate":0.2743},"10D":{"hi":0.1893,"lo":0.072,"n":118,"rate":0.1186},"10E":{"hi":0.0759,"lo":0.0231,"n":237,"rate":0.0422},"10F":{"hi":0.5506,"lo":0.5182,"n":3645,"rate":0.5344},"10G":{"hi":0.17,"lo":0.1229,"n":856,"rate":0.1449},"10H":{"hi":0.1058,"lo":0.0528,"n":386,"rate":0.0751},"28-05":{"hi":0.2032,"lo":0.0652,"n":85,"rate":0.1176},"28-06":{"hi":0.1491,"lo":0.0735,"n":256,"rate":0.1055}};
+  // ---- END GENERATED ----
+
+  // B-or-worse on the initial is what triggers the re-inspection cycle. Same
+  // constant as FAIL_SCORE in reinspect_join.py - the pairing that produced
+  // every rate on this page only looked at initials at or above it.
+  const FAIL_SCORE = 14;
+
+  const fmtDate = iso => new Date(iso).toLocaleDateString("en-US",
+    {year:"numeric", month:"short", day:"numeric", timeZone:"UTC"});
+  const daysAgo = iso => Math.floor((Date.now() - new Date(iso)) / 864e5);
+
+  // A fetch that never returns is worse than one that fails: the page waits
+  // forever and the button stays dead. Twelve seconds is past the point where
+  // anyone is still waiting, so we stop waiting for them.
+  const TIMEOUT_MS = 12000;
+
+  // Every failure carries a kind, because these are not one event. "You are
+  // offline", "the city is refusing", and "the city sent us something that is
+  // not data" are three different facts, and only one of them is about the
+  // reader's connection. Collapsing them into one catch is how an outage ends
+  // up printed as "no restaurant matched".
+  const fail = (kind, message) => Object.assign(new Error(message), {kind});
+
+  // The request currently holding a socket. A newer search cuts it loose.
+  let inflight = null;
+
+  async function api(params){
+    const u = new URL(API);
+    for (const [k,v] of Object.entries(params)) u.searchParams.set(k, v);
+
+    if (inflight) inflight.abort();          // the old question is no longer being asked
+    const ctl = inflight = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; ctl.abort(); }, TIMEOUT_MS);
+
+    // An abort surfaces the same way whether we timed it out or replaced it,
+    // so the reason has to be read off our own flags, never off the exception.
+    const aborted = err => {
+      if (timedOut) return fail("timeout",
+        `The city\u2019s API did not answer within ${TIMEOUT_MS/1000} seconds.`);
+      if (err && err.name === "AbortError") return fail("superseded", "Replaced by a newer search.");
+      return null;
+    };
+
+    try{
+      let r;
+      try{
+        r = await fetch(u, {signal: ctl.signal});
+      }catch(err){
+        // fetch() rejects for exactly two reasons here: we cancelled it, or
+        // the request never reached a server at all. A 503 does NOT land here.
+        throw aborted(err) || fail("offline", "Could not reach the city\u2019s API at all.");
+      }
+
+      if (!r.ok) throw fail("status",
+        `The city\u2019s API answered with an error: ${r.status} ${r.statusText || ""}`.trim() + ".");
+
+      let body;
+      try{
+        body = await r.json();
+      }catch(err){
+        // The status line said 200 and then the body was not JSON. Usually a
+        // gateway or an outage page answering in front of the real server.
+        throw aborted(err) || fail("badbody",
+          "The city\u2019s API answered, but what came back was not data.");
+      }
+
+      // A 200 is not a promise that the body is the thing we asked for. Socrata
+      // returns its own errors as a JSON object, and an object has no .length -
+      // so without this check a rejected query reads on screen as "no results".
+      if (!Array.isArray(body)){
+        const said = body && typeof body === "object" && typeof body.message === "string"
+          ? body.message : null;
+        throw fail("badshape", said
+          ? `The city\u2019s API rejected the query: \u201c${said}\u201d`
+          : "The city\u2019s API answered OK, but the body was not a list of inspection rows.");
+      }
+
+      return { rows: body, modified: r.headers.get("Last-Modified") };
+    }finally{
+      clearTimeout(timer);
+      if (inflight === ctl) inflight = null;
+    }
+  }
+
+  // Every fetch takes a ticket. A slow early request that lands after a fast
+  // later one must not overwrite the newer answer, so stale tickets return
+  // without touching the DOM.
+  let ticket = 0;
+
+  // #status and #out do two different jobs. #out holds the last answer the
+  // city actually gave us. #status holds what is happening right now. Keeping
+  // them apart is what makes it impossible for an error to delete a true
+  // result - setBusy never touches #out's contents, only its dimming.
+  function setBusy(on, msg){
+    const btn = document.querySelector("#form button");
+    btn.disabled = on;
+    btn.textContent = on ? "Looking\u2026" : "Look it up";
+    out.classList.toggle("loading", on);
+    if (on){
+      $("#status").innerHTML = `<div class="msg">${msg}</div>`;
+      // The footer stamps the provenance of what is ON SCREEN. Mid-fetch that
+      // is the OLD result, so the stamp must not read as current.
+      $("#foot").innerHTML =
+        `<span style="opacity:.55">Checking the city&rsquo;s API&hellip; the stamp below returns with the answer.</span>`;
+    }
+    // Deliberately does NOT clear #status on the way out: by then #status may
+    // be holding an error message that outlives the request that caused it.
+  }
+
+  // Every terminal answer comes through this one door: the status line clears,
+  // the stale mark comes off, and #out becomes the newest true thing we have.
+  function settle(html){
+    $("#status").innerHTML = "";
+    out.classList.remove("stale");
+    out.innerHTML = html;
+  }
+
+  // What each failure actually means, in the reader's terms. The rule for
+  // every line: say what happened, say whose fault it is, and never imply we
+  // learned anything about the restaurant - because we didn't.
+  const WHY = {
+    timeout:  "That is almost always the city\u2019s server being slow, not your connection. We stopped waiting rather than leave you on a spinner.",
+    offline:  "Either this device is offline or data.cityofnewyork.us is unreachable from here. Nothing was fetched, so nothing here changed.",
+    status:   "That is their server refusing, not your search. Worth trying again in a minute.",
+    badbody:  "Something answered in front of their server \u2014 usually a gateway or an outage page. We are not going to guess at what it meant.",
+    badshape: "We asked for a list of inspections and got something else back. That is not the same as finding nothing, so we are not going to show it as an empty result.",
+  };
+
+  // Provenance of whatever is sitting in #out right now.
+  let lastStamp = null;
+
+  function renderError(e){
+    const stale = out.innerHTML.trim().length > 0;
+    $("#status").innerHTML =
+      `<div class="msg err"><span class="hdr">${esc(e.message)}</span>
+         <span class="why">${esc(WHY[e.kind] || "")}</span>
+         ${stale ? `<span class="why">The result below is the answer to your <i>previous</i> search.
+           It is still true &mdash; it just is not the thing you asked for.</span>` : ""}</div>`;
+    if (stale){ out.classList.add("stale"); stampFoot(lastStamp, true); }
+    else $("#foot").innerHTML =
+      `<span style="opacity:.7">No stamp: nothing on this screen came from the city, so there is
+       no provenance to show.</span>`;
+  }
+
+  // Five words that are not restaurant names. This search matches dba (the
+  // business name), so "Brooklyn" returns Brooklyn Diner - not Brooklyn.
+  const BOROS = new Set(["BROOKLYN","QUEENS","MANHATTAN","BRONX","STATEN ISLAND","THE BRONX","NYC","NEW YORK"]);
+
+  async function search(term){
+    const t = term.toUpperCase().replace(/'/g, "''");
+    const my = ++ticket;
+    setBusy(true, `Asking the city&rsquo;s API for &ldquo;${esc(term)}&rdquo;&hellip;`);
+    try{
+      const {rows, modified} = await api({
+        "$select":"camis,dba,boro,building,street",
+        "$where":`upper(dba) like '%${t}%'`,
+        "$group":"camis,dba,boro,building,street",
+        "$limit":"15",
+      });
+      if (my !== ticket) return;          // a newer search already won
+      stampFoot(modified);
+
+      const boroNote = BOROS.has(term.trim().toUpperCase())
+        ? `<div class="notice"><b>&ldquo;${esc(term)}&rdquo; is a place, not a restaurant name.</b><br>
+             This box searches the name over the door, so these are restaurants with
+             &ldquo;${esc(term)}&rdquo; <i>in their name</i> &mdash; not the ones located there.</div>`
+        : "";
+
+      // Zero rows has two completely different causes and the screen cannot
+      // tell them apart, so it must not offer only the flattering one.
+      if (!rows.length){
+        settle(boroNote + `<div class="msg"><b>Nothing in the city&rsquo;s file matches
+          &ldquo;${esc(term)}&rdquo;.</b> Two very different things do that, and this screen
+          cannot tell you which one you hit.
+          <br><br><b>1. The spelling.</b> The city files names in caps and usually without
+          punctuation &mdash; Joe&rsquo;s Pizza is stored as JOES PIZZA. Try a shorter piece of the name.
+          <br><br><b>2. It closed.</b> This dataset only holds restaurants that are still open.
+          When one shuts down, the city takes its whole inspection history out with it. So a
+          restaurant that failed hard and closed looks identical to one that never existed: empty.</div>`);
+        return;
+      }
+      if (rows.length === 1 && !boroNote) return show(rows[0].camis);
+      settle(boroNote + `<div class="results">` + rows.map(r =>
+        `<button data-camis="${esc(r.camis)}">
+           <div class="nm">${esc(titleCase(r.dba))}</div>
+           <div class="ad">${esc(titleCase(`${r.building||""} ${r.street||""}`))} &middot; ${esc(r.boro)}</div>
+         </button>`).join("") + `</div>`);
+    }catch(e){
+      if (my !== ticket || e.kind === "superseded") return;
+      renderError(e);
+    }finally{
+      if (my === ticket) setBusy(false);
+    }
+  }
+
+  async function show(camis){
+    const my = ++ticket;
+    setBusy(true, "Reading the inspection off the city&rsquo;s API&hellip;");
+    try{
+      const {rows, modified} = await api({
+        "camis":camis,
+        "$select":"camis,dba,boro,building,street,cuisine_description,inspection_date,score,grade,action,"
+                + "violation_code,violation_description,critical_flag,inspection_type",
+        "$order":"inspection_date DESC",
+        "$limit":"400",
+      });
+      if (my !== ticket) return;          // superseded by a newer lookup
+      stampFoot(modified);
+      if (!rows.length){ settle(`<div class="msg">The city has no inspection rows for this record.</div>`); return; }
+      render(rows);
+    }catch(e){
+      if (my !== ticket || e.kind === "superseded") return;
+      renderError(e);
+    }finally{
+      if (my === ticket) setBusy(false);
+    }
+  }
+
+  // Colour by what the operator should do about it, not by how big the number
+  // looks: over a third came back = deal with it now.
+  const tone = r => r >= 0.33 ? "act" : r >= 0.15 ? "watch" : "ok";
+
+  function render(rows){
+    const head = rows[0];
+    const byDate = new Map();
+    for (const r of rows){
+      const d = (r.inspection_date || "").slice(0,10);
+      if (!d || d === "1900-01-01") continue;      // the city's null-date sentinel
+      if (!byDate.has(d)) byDate.set(d, []);
+      byDate.get(d).push(r);
+    }
+    const dates = [...byDate.keys()].sort().reverse();
+
+    const ctx = `<div class="zone ctx">
+        <div class="what">${esc(titleCase(head.dba))}</div>
+        <div class="dir">${esc(titleCase(`${head.building||""} ${head.street||""}`))} &middot; ${esc(head.boro)}${
+          head.cuisine_description ? " &middot; " + esc(head.cuisine_description) : ""}</div>
+      </div>`;
+
+    if (!dates.length){
+      settle(`<div class="panel">${ctx}<div class="zone"><div class="msg">Every inspection on this
+        record carries the city&rsquo;s placeholder date, so there is nothing to triage against.</div>
+        </div></div>`);
+      return;
+    }
+
+    const cur   = byDate.get(dates[0]);
+    const score = cur.find(r => r.score != null)?.score;
+    const scoreN = score == null ? null : Number(score);
+    const action = cur.find(r => r.action)?.action || null;
+    const itype  = cur.find(r => r.inspection_type)?.inspection_type || null;
+    const viols = cur.filter(r => r.violation_code);
+    const age   = daysAgo(dates[0]);
+
+    let html = `<div class="panel">${ctx}`;
+
+    // ---- the clock -----------------------------------------------------
+    const med = PERSIST.medianGapDays;
+    html += `<div class="zone">
+      <div class="lab">How long you have</div>
+      <div class="clock"><span class="n">${age}</span>
+        <span class="of">days since that inspection${itype ? ` &middot; ${esc(itype)}` : ""}
+          (${fmtDate(dates[0])})</span></div>`;
+    if (med){
+      const span = Math.max(age, med) * 1.25;
+      html += `<div class="gap">
+          <div class="rail"></div>
+          <div class="med" data-d="${med}" style="left:${(med/span*100).toFixed(1)}%"></div>
+          <div class="you" data-d="${age}" style="left:${(age/span*100).toFixed(1)}%"></div>
+        </div>
+        <div class="says">${age > med
+          ? `<b>You are past the typical gap.</b> Across ${PERSIST.pairs.toLocaleString()} paired
+             inspections the re-inspection landed a median of ${med} days after the first one.
+             You are on day ${age}.`
+          : `The re-inspection landed a median of <b>${med} days</b> after the first one, across
+             ${PERSIST.pairs.toLocaleString()} pairs. That is a median, not a schedule &mdash; the
+             city does not publish when yours is coming.`}</div>`;
+    }
+    html += `</div>`;
+
+    // A page that ranks "what comes back at the re-inspection" is answering a
+    // question this restaurant may not be asking. Say so rather than let the
+    // ranking imply a re-inspection is on its way.
+    if (scoreN != null && scoreN < FAIL_SCORE){
+      html += `<div class="zone"><div class="msg good"><span class="hdr">This visit scored
+        ${scoreN} &mdash; under ${FAIL_SCORE}.</span>Everything below still shows what tends to
+        come back, but a score under ${FAIL_SCORE} is not what triggers the re-inspection cycle
+        these numbers were measured on. Read it as maintenance, not as a countdown.</div></div>`;
+    }
+    if (action && !/violations were cited/i.test(action)){
+      html += `<div class="zone"><div class="warn"><b>Read the visit type first.</b><br>
+        The city logged this as: &ldquo;${esc(action)}&rdquo;. That is not a standard cycle
+        inspection, so the persistence rates below &mdash; measured on initial-to-re-inspection
+        pairs &mdash; are the wrong yardstick for it.</div></div>`;
+    }
+
+    // ---- the triage list ------------------------------------------------
+    html += `<div class="zone">
+      <div class="lab">What to fix first</div>`;
+
+    if (!viols.length){
+      html += `<div class="msg good" style="margin-top:9px"><span class="hdr">Nothing to triage.</span>
+        The city recorded no violations on this visit${action ? `, and logged it as
+        &ldquo;${esc(action)}&rdquo;` : ""}. That is the good outcome &mdash; but it is a record of
+        one day, not a statement about the kitchen today.</div>`;
+    } else {
+      // Rank by the code's own measured rate. Codes we never measured are not
+      // guessed at from their class: the class comes from a keyword classifier
+      // that runs in Python and not here, so pairing one with a measured number
+      // would attach real evidence to an assignment the evidence never made.
+      const scored = [], unscored = [];
+      for (const v of viols){
+        const p = PERSIST.codes[v.violation_code];
+        (p ? scored : unscored).push({v, p});
+      }
+      scored.sort((a,b) => b.p.rate - a.p.rate);
+
+      html += `<div class="says" style="margin:2px 0 0"><b>${viols.length}</b>
+        violation${viols.length>1?"s":""} cited${scoreN != null ? `, ${scoreN} points total` : ""}.
+        ${scored.length ? `Ranked by how often that exact code was still there at the
+          re-inspection.` : ""}</div>`;
+
+      if (scored.length){
+        html += `<div class="fix">` + scored.map(({v,p}) => {
+          const t = tone(p.rate);
+          return `<div class="row">
+            <div class="rtop">
+              <span class="rate" style="color:var(--${t})">${pct(p.rate)}</span>
+              <span class="rlab">came back at the re-inspection</span>
+              <span class="code">${esc(v.violation_code)}</span>
+              ${v.critical_flag === "Critical" ? `<span class="crit">critical</span>` : ""}
+            </div>
+            <div class="rbar"><i style="width:${Math.min(100, p.rate/0.60*100).toFixed(1)}%;
+              background:var(--${t})"></i></div>
+            <div class="rdesc">${esc(v.violation_description || "(the city recorded no description)")}</div>
+            <div class="rci">${p.n.toLocaleString()} citations &middot; 95% interval
+              ${pct(p.lo)}&ndash;${pct(p.hi)}</div>
+          </div>`;
+        }).join("") + `</div>`;
+      }
+
+      if (unscored.length){
+        html += `<div class="nomeasure" style="margin-top:${scored.length ? 16 : 8}px">
+          <div class="lab" style="margin-bottom:4px">No measured rate for these</div>
+          <p style="margin:0 0 2px;font-size:12.5px;color:var(--ink3)">Fewer than
+            ${PERSIST.minCited} citations in our pairs, so any rate we printed would be noise.
+            They are not ranked and they are not dismissed &mdash; we just do not know.</p>`
+          + unscored.map(({v}) => `<div class="v">
+              <span class="code">${esc(v.violation_code)}</span>
+              ${v.critical_flag === "Critical" ? `<span class="crit">critical</span>` : ""}
+              <span>${esc(v.violation_description || "(the city recorded no description)")}</span>
+            </div>`).join("") + `</div>`;
+      }
+
+      if (!scored.length){
+        html += `<div class="msg" style="margin-top:12px">None of the codes on this inspection
+          reached ${PERSIST.minCited} citations in our paired sample, so there is nothing here we
+          can honestly rank. The list above is the city&rsquo;s, in the city&rsquo;s order.</div>`;
+      }
+    }
+    html += `</div>`;
+
+    // ---- what this cannot do -------------------------------------------
+    html += `<div class="zone limits">
+      <div class="lab">What this cannot tell you</div>
+      <ul>
+        <li><b>Which fixes get you back under ${FAIL_SCORE}.</b> The city publishes your total and
+            your violations but never the points each one carried. So this ranks by whether an item
+            tends to still be there &mdash; never by how many points clearing it saves you.</li>
+        <li><b>Why the sticky ones stick.</b> We tested whether buildings with open DOB violations
+            explain it. They do not &mdash; persistence was the same in troubled and clean buildings.
+            The pattern is real and the reason is still unknown.</li>
+        <li><b>What happened to the ones that closed.</b> Only active restaurants are in this
+            dataset, so every restaurant that failed and shut down was removed before we counted.</li>
+      </ul>
+    </div></div>`;
+
+    settle(html);
+  }
+
+  function stampFoot(modified, stale){
+    // A stamp always describes what is IN #out. When an error left the previous
+    // answer on screen, the stamp still belongs to that older answer.
+    if (!stale) lastStamp = modified;
+    $("#foot").innerHTML = (stale
+      ? `<b style="color:var(--watch)">This stamp belongs to the result above, from the earlier
+         search.</b> The search that just failed produced nothing to stamp.<br>` : "") +
+      `Your inspection is read live from NYC OpenData, DOHMH Restaurant Inspection Results
+       (<code>43nn-pn8j</code>), fetched in your browser when you searched. Publisher&rsquo;s
+       last-modified stamp: <b>${modified ? esc(modified) : "not disclosed"}</b>.
+       The persistence rates are ours, measured by <code>reinspect_join.py</code> over
+       ${PERSIST.pairs ? PERSIST.pairs.toLocaleString() : "?"} paired inspections and embedded by
+       <code>build_operator.py</code> &mdash; a join that size is not something a browser tab can
+       run per search. No API key is used or needed. Part of the <a href="index.html">DataHub</a>.`;
+  }
+
+  $("#form").addEventListener("submit", e => {
+    e.preventDefault();
+    const v = $("#q").value.trim();
+    if (v) search(v);
+  });
+  out.addEventListener("click", e => {
+    const b = e.target.closest("button[data-camis]");
+    if (b) show(b.dataset.camis);
+  });
+  document.querySelectorAll("[data-ex]").forEach(b =>
+    b.addEventListener("click", () => { $("#q").value = b.dataset.ex; search(b.dataset.ex); }));
+
+  search("SHAXIAN DELICACIES");
+})();
+</script>

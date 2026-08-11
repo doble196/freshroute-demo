@@ -5,9 +5,16 @@
     {
       "badge": "Live · fetches the city's API when you search",
       "title": "What does that grade in the window actually mean?",
-      "blurb": "Type any NYC restaurant. See the score, this restaurant's own history, and what was found — split into what a staff meeting fixes and what needs a contractor.",
+      "blurb": "Type any NYC restaurant. See the score, this restaurant's own history, and what the inspector actually found — because a good number and a fixed building are not the same thing.",
       "cta": "Check a restaurant",
       "href": "check.html"
+    },
+    {
+      "badge": "Live · fetches the city's API when you search",
+      "title": "You failed the inspection. What do you fix first?",
+      "blurb": "Your open violations, ranked by how often that exact code was still there at the re-inspection. Measured across 6,960 paired NYC inspections — so the order is evidence, not a guess about what looks worst.",
+      "cta": "Rank my violations",
+      "href": "operator.html"
     },
     {
       "badge": "Interactive · scroll-driven",
