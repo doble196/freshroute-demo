@@ -21,14 +21,16 @@ page, a script in `analysis/` must produce it, and a gate must fail when the two
 disagree. Do not hand-copy a figure from a script's output into HTML. That copy
 drifts the first time either side changes, and nothing looks wrong when it does.
 
-`analysis/build_operator.py` is the *only* writer of the persistence table
-embedded in `data-app/operator.html`. Edit the block by hand and GUARD 12 fails.
+`analysis/build_pages.py` is the *only* writer of the figures embedded in
+`data-app/operator.html` and `data-app/check.html`. Edit a generated block by
+hand and GUARD 12 or GUARD 14 fails.
 
 ## Before you commit
 
 ```bash
-cd analysis && python3 gates_app_test.py        # must be 15 passed, 0 failed
-python3 build_operator.py --check               # embedded table must be current
+cd analysis && python3 gates_app_test.py        # must be 0 failed
+python3 build_pages.py --check                  # embedded figures must be current
+node agrade_flag_test.js                        # the re-inspection-A flag's behaviour
 python3 sync_public.py <war-room-path> --check  # if you have the private repo
 ```
 

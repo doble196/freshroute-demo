@@ -24,6 +24,40 @@ the analysis that earned it.
 | "about 4 in 10 of these were still there at the re-inspection" | `reinspect_join.py` — 6,975 initial→re-inspection pairs |
 | the building vs handling split | `reinspect_join.py`, classified from each violation's own description text |
 | "we tested whether buildings with open DOB violations explain it — they don't" | `dob_contractor_test.py` → `dob_contractor_test.json` |
+| "46.7% of the 4,110 A grades earned this way… compared with 28.9% of the 16,674" | `agrade_test.py` → `agrade_test.json`, embedded by `build_pages.py` |
+
+## The re-inspection-A flag
+
+Both a first-time A and an A earned by passing a re-inspection after failing
+the initial print the same letter in the window. They are not the same object:
+
+```
+A earned on an initial inspection    28.9% scored 14+ next time   (n=16,674)
+A earned on a re-inspection that
+  answered a FAILED initial          46.7% scored 14+ next time   (n= 4,110)
+```
+
+The flag says so, in observational language only. It states no prediction about
+the restaurant now, makes no causal claim, and prints both denominators plus the
+publisher stamp of the data it was measured from.
+
+**It withholds rather than guesses.** The flag appears only when the record
+*confirms* every step: the displayed visit is typed as a re-inspection, a parent
+initial exists within a 180-day lookback, and that initial carries a score at or
+above 14. Any unclassifiable visit in the chain, any missing score, any gap past
+the lookback — the flag stays off.
+
+That conservatism is why the statistic had to be re-cut. The first measurement
+put every A-on-a-re-inspection in one bucket and got 44.9%. That bucket silently
+included **3,985** cases where no failed initial could be confirmed. Flagging the
+narrow population while quoting the loose number would have printed a rate
+measured on somebody else. The unconfirmed stratum is now reported separately
+and never reaches the page.
+
+`gates_app_test.py` GUARD 14 covers it: the behavioural cases run in Node
+against the function as it actually ships (`agrade_flag_test.cjs`), the embedded
+figures must match `agrade_test.json`, the page's lookback must equal the one
+the rate was measured with, and the copy must still carry its disclaimers.
 
 ## The sentence this app used to say, and no longer does
 

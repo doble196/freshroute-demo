@@ -7,7 +7,7 @@ the pages it checks, and a reader can actually run it:
 
     python3 gates_app_test.py
 
-Three gates, each one a real failure that already happened:
+Five gates, each one a real failure that already happened:
 
   GUARD 10  check.html cannot import pull.Guarded, so its protections were
             hand-rewritten in JavaScript. Two implementations of one rule set
@@ -25,6 +25,15 @@ Three gates, each one a real failure that already happened:
             browser, so they ship EMBEDDED. Rerun the analysis, forget the
             page, and it keeps quoting last month's rates with this month's
             confidence. Nothing about the page would look wrong.
+
+  GUARD 13  llms.txt is what an AI reads INSTEAD of the pages, and it restates
+            measured figures in prose. Prose was the one ungated surface. It
+            also records REJECTED hypotheses, where dropping a minus sign
+            would turn a failed test into a supported one.
+
+  GUARD 14  the re-inspection-A flag prints a rate measured on one narrow
+            population. Show it to anybody else and the page is quoting a
+            number about somebody else.
 
 Every gate is paired with a negative test that proves it FIRES. A guard that
 only ever passes on clean input proves nothing (Cheatcode #22).
@@ -213,7 +222,7 @@ check("removing the timeout machinery is CAUGHT",
 # and check.html) and drifts for the same reason GUARD 10 exists.
 print("\n=== GUARD 12: operator.html embedded evidence and taxonomy ===")
 
-import build_operator as bo  # noqa: E402
+import build_pages as bp  # noqa: E402
 
 OP_HTML = find("operator.html")
 op = OP_HTML.read_text()
@@ -236,7 +245,7 @@ check("both pages name the SAME failure kinds", op_kinds == check_kinds,
       else f"checker {sorted(check_kinds)} vs operator {sorted(op_kinds)}")
 
 # The embedded table must be byte-for-byte what build_operator.py would emit.
-fresh_block = bo.block(joined)
+fresh_block = bp.operator_block(joined)
 check("embedded persistence table is current with reinspect_join.json",
       fresh_block in op,
       f"{len(joined['per_code_all'])} codes, min n={joined['min_cited']}, "
@@ -254,7 +263,7 @@ check("operator.html's failure threshold matches the pairing that measured it",
 stale_data = json.loads(json.dumps(joined))
 stale_data["per_code_all"][0]["persist_rate"] += 0.05
 check("a rate that moved in the JSON but not the page is CAUGHT",
-      bo.block(stale_data) not in op,
+      bp.operator_block(stale_data) not in op,
       "regenerated block no longer matches the shipped page")
 
 drifted = op.replace("const FAIL_SCORE = 14", "const FAIL_SCORE = 20")
@@ -280,7 +289,7 @@ print("\n=== GUARD 13: llms.txt figures vs the analysis that earned them ===")
 HEDGE = r"(?:roughly |about |around |nearly |approximately |~)"
 
 
-def llms_faults(text, truth):
+def llms_faults(text, truth, ag=None):
     """Numeric claims in llms.txt that the analysis no longer supports."""
     codes = truth["per_code_all"]
     claims = [
@@ -292,6 +301,21 @@ def llms_faults(text, truth):
         (r"(\d+\.\d)% down to",                 100 * codes[0]["persist_rate"],     "highest code rate"),
         (r"down to (\d+\.\d)%",                 100 * codes[-1]["persist_rate"],    "lowest code rate"),
     ]
+    if ag:
+        o = ag["by_origin"]
+        claims += [
+            (r"([\d,]+) A-graded inspections",           ag["paired"],                    "A grades paired"),
+            (r"(\d+\.\d)% were followed by a score",     100 * ag["fail_rate"],           "A-grade fail rate"),
+            (r"(\d+\.\d)% landed in the C band",         100 * ag["c_band_share"],        "A-grade C-band share"),
+            (r"answering a failed initial: (\d+\.\d)%",  100 * o["reinsp_after_fail"]["fail_rate"], "re-inspection A rate"),
+            (r"answering a failed initial: [\d.]+% \(n=([\d,]+)\)", o["reinsp_after_fail"]["n"], "re-inspection A n"),
+            (r"earned on an initial: (\d+\.\d)%",        100 * o["initial"]["fail_rate"], "initial A rate"),
+            (r"earned on an initial: [\d.]+% \(n=([\d,]+)\)", o["initial"]["n"],          "initial A n"),
+            # The failed placebo must keep its real magnitude AND its sign. A
+            # summary that drops the minus turns a rejected hypothesis into a
+            # supported one.
+            (r"FAILED, by (-?\d+\.\d)pp",                ag["staleness_spread_pp"],       "placebo spread"),
+        ]
     bad = []
     for pat, want, label in claims:
         for m in re.finditer(HEDGE + "?" + pat, text):
@@ -306,6 +330,9 @@ def llms_faults(text, truth):
 
 # llms.txt lives at the PUBLIC repo root, one level above analysis/. It is
 # absent in the war room, where these scripts sit beside the pages instead.
+agr_for_llms = json.loads((HERE / "agrade_test.json").read_text()) \
+    if (HERE / "agrade_test.json").exists() else None
+
 llms = next((p for p in (HERE.parent / "llms.txt", HERE / "llms.txt") if p.exists()), None)
 
 if llms is None:
@@ -313,7 +340,7 @@ if llms is None:
     check("llms.txt figures checked", True,
           "no llms.txt in this layout (war room) - this gate runs in the public repo")
 else:
-    lf = llms_faults(llms.read_text(), joined)
+    lf = llms_faults(llms.read_text(), joined, agr_for_llms)
     check(f"{llms.name} quotes only figures the analysis still produces", not lf,
           "; ".join(lf) if lf else
           f"pairs={joined['pairs']:,}, gap={joined['median_gap_days']}d, "
@@ -323,8 +350,105 @@ else:
     stale = llms.read_text().replace(f"{joined['pairs']:,} paired inspections",
                                      "9,999 paired inspections")
     check("a stale pair count in llms.txt is CAUGHT",
-          bool(llms_faults(stale, joined)),
-          "; ".join(llms_faults(stale, joined))[:90])
+          bool(llms_faults(stale, joined, agr_for_llms)),
+          "; ".join(llms_faults(stale, joined, agr_for_llms))[:90])
+
+    # Dropping the minus sign turns a REJECTED hypothesis into a supported
+    # one. That is the single most damaging edit anyone could make to this
+    # file, so it gets its own negative test.
+    flipped = llms.read_text().replace("FAILED, by -", "FAILED, by ")
+    check("flipping the failed placebo's sign in llms.txt is CAUGHT",
+          flipped != llms.read_text() and
+          any("placebo" in b for b in llms_faults(flipped, joined, agr_for_llms)),
+          "; ".join(llms_faults(flipped, joined, agr_for_llms))[:90])
+
+
+# ── GUARD 14: the re-inspection-A flag ───────────────────────────────────
+# This flag prints a rate measured on ONE population: A grades confirmed to
+# have been earned on a re-inspection answering a FAILED initial. Show it to
+# anybody else and the page is quoting a number about somebody else. The
+# 44.9% first measured was the loose stratum - it silently included 3,985
+# cases where no failed initial could be confirmed. Restricting the page
+# without restricting the statistic would have shipped that mismatch.
+print("\n=== GUARD 14: the re-inspection-A flag ===")
+
+import subprocess  # noqa: E402
+
+AG_JSON = HERE / "agrade_test.json"
+agr = json.loads(AG_JSON.read_text()) if AG_JSON.exists() else None
+
+# 1-4: behaviour, run against the function as it actually ships.
+r = subprocess.run(["node", str(HERE / "agrade_flag_test.cjs")],
+                   capture_output=True, text=True)
+tail = [l for l in r.stdout.strip().splitlines() if "passed" in l]
+check("agrade_flag_test.cjs passes in full (shown / absent / withheld cases)",
+      r.returncode == 0,
+      tail[-1] if tail else (r.stderr.strip()[:120] or r.stdout.strip()[-120:]))
+
+if agr is None:
+    check("flag figures checked", False, "agrade_test.json missing - run agrade_test.py")
+else:
+    # 5: the figures on the page are the ones the analysis produced.
+    fresh_ag = bp.check_block(agr)
+    check("check.html's A-grade figures are current with agrade_test.json",
+          fresh_ag in live,
+          f"reinsp {100*agr['by_origin']['reinsp_after_fail']['fail_rate']:.1f}% "
+          f"(n={agr['by_origin']['reinsp_after_fail']['n']:,}) vs initial "
+          f"{100*agr['by_origin']['initial']['fail_rate']:.1f}% "
+          f"(n={agr['by_origin']['initial']['n']:,})" if fresh_ag in live
+          else "STALE - run: python3 build_pages.py")
+
+    # The page must apply the SAME lookback the statistic was measured with.
+    m_py = re.search(r"^LOOKBACK_DAYS\s*=\s*(\d+)", (HERE / "agrade_test.py").read_text(), re.M)
+    check("the page's lookback matches the one the rate was measured with",
+          bool(m_py) and int(m_py.group(1)) == agr["lookback_days"],
+          f"agrade_test.py {m_py.group(1) if m_py else '?'} days, "
+          f"embedded {agr['lookback_days']} days")
+
+    # The unconfirmed stratum must never reach the page. It is a real rate for
+    # a real group - just not the group the flag labels.
+    check("the unconfirmed stratum is not embedded in the page",
+          "reinsp_unconfirmed" not in live and
+          str(agr["by_origin"]["reinsp_unconfirmed"]["n"]) not in
+          re.search(r"const AGRADE = \{.*?\};", live, re.S).group(0),
+          f"n={agr['by_origin']['reinsp_unconfirmed']['n']:,} withheld from the page")
+
+# The copy is observational. Asserting the DISCLAIMERS are present beats
+# banning words - "caused" appears inside "nothing here says ... caused", and a
+# naive word-ban would fire on the very sentence that makes the copy safe.
+flag = re.search(r"This A followed a re-inspection.*?</div>`;", live, re.S)
+flag_txt = flag.group(0) if flag else ""
+required = [
+    ("no prediction about now", "does not predict this restaurant"),
+    ("no causal claim",         "says the re-inspection caused"),
+    ("denominator, re-insp",    "AGRADE.reinspN"),
+    ("denominator, initial",    "AGRADE.initialN"),
+    ("source dataset",          "AGRADE.dataset"),
+    ("analysis stamp",          "AGRADE.watermark"),
+]
+missing = [lbl for lbl, needle in required if needle not in flag_txt]
+check("flag copy carries its disclaimers, denominators and source",
+      bool(flag_txt) and not missing,
+      "missing: " + ", ".join(missing) if missing else
+      "no-prediction + no-causation stated, both denominators and the source labelled")
+
+banned = [w for w in ("unsafe", "dangerous", "is dirty", "will fail", "proves")
+          if w in flag_txt.lower()]
+check("flag copy makes no safety or certainty claim", not banned,
+      "found: " + ", ".join(banned) if banned else "none of the banned assertions appear")
+
+# Each half must FIRE (Cheatcode #22).
+if agr is not None:
+    moved = json.loads(json.dumps(agr))
+    moved["by_origin"]["reinsp_after_fail"]["fail_rate"] += 0.05
+    check("a moved A-grade rate that the page did not pick up is CAUGHT",
+          bp.check_block(moved) not in live,
+          "regenerated block no longer matches the shipped page")
+
+check("stripping the no-causation disclaimer is CAUGHT",
+      "says the re-inspection caused" not in
+      flag_txt.replace("says the re-inspection caused", "shows the re-inspection caused"),
+      "the required disclaimer is matched exactly, not loosely")
 
 
 print(f"\n{P} passed, {F} failed")

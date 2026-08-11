@@ -36,19 +36,34 @@
   },
   "by_origin": {
     "initial": {
-      "n": 14097,
-      "fail_rate": 0.2793502163580904
+      "n": 16674,
+      "fail_rate": 0.28865299268321937,
+      "lo": 0.28182425042385045,
+      "hi": 0.29557909894001444
     },
-    "re-inspection": {
-      "n": 7244,
-      "fail_rate": 0.4487852015461071
+    "reinsp_after_fail": {
+      "n": 4110,
+      "fail_rate": 0.4666666666666667,
+      "lo": 0.45145249503556567,
+      "hi": 0.48194309316598294
     },
-    "other": {
-      "n": 3762,
-      "fail_rate": 0.38862307283359915
+    "reinsp_after_pass": {
+      "n": 327,
+      "fail_rate": 0.38837920489296635,
+      "lo": 0.3371404707980105,
+      "hi": 0.4422101308191985
+    },
+    "reinsp_unconfirmed": {
+      "n": 3985,
+      "fail_rate": 0.449435382685069,
+      "lo": 0.4340467355864233,
+      "hi": 0.46492142599713004
     }
   },
   "staleness_spread_pp": -10.327248969358632,
+  "lookback_days": 180,
+  "watermark": "Tue, 11 Aug 2026 22:11:54 GMT",
+  "dataset": "43nn-pn8j",
   "prereg": {
     "predict_min_fail": 0.2,
     "falsify_max_fail": 0.1,

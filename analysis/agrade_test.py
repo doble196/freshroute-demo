@@ -56,6 +56,12 @@ PREDICT_MIN_FAIL = 0.20      # >20% of As followed by a 14+ score
 FALSIFY_MAX_FAIL = 0.10      # <10% and the premise is dead
 PLACEBO_MIN_SPREAD = 5.0     # stale-vs-fresh must differ by >=5pp
 
+# How far back to look for the initial that a re-inspection answers. check.html
+# applies the SAME bound before it will show its flag - a page that flags a
+# narrower population than the statistic describes is quoting a number about
+# somebody else. gates_app_test.py fails the build if the two ever disagree.
+LOOKBACK_DAYS = 180
+
 GAP_BUCKETS = [(0, 180, "under 6 months"), (180, 300, "6-10 months"),
                (300, 400, "10-13 months"), (400, 10**6, "over 13 months")]
 
@@ -65,6 +71,39 @@ def bucket(days):
         if lo <= days < hi:
             return label
     return GAP_BUCKETS[-1][2]
+
+
+def earned_on(timeline, i):
+    """How the A at timeline[i] was earned.
+
+    Deliberately conservative: a re-inspection only counts as answering a
+    failed initial when that initial is actually in the record, inside
+    LOOKBACK_DAYS, and carries a score we can compare. Anything we cannot
+    confirm lands in 'reinsp_unconfirmed' and is reported separately rather
+    than folded into either headline - guessing here would put restaurants
+    into a bucket whose number was measured on a different population.
+    """
+    ev = timeline[i]
+    t = (ev["type"] or "").lower()
+    if not t:
+        return "unknown_type"
+    if "initial" in t:
+        return "initial"
+    if "re-inspection" not in t:
+        return "other"
+
+    for prev in reversed(timeline[:i]):
+        if (ev["date"] - prev["date"]).days > LOOKBACK_DAYS:
+            break                                    # too far back to be its parent
+        pt = (prev["type"] or "").lower()
+        if not pt:
+            return "reinsp_unconfirmed"              # unclassifiable visit in between
+        if "initial" not in pt:
+            continue                                 # keep walking past other visits
+        if prev["score"] is None:
+            return "reinsp_unconfirmed"              # cannot tell if it failed
+        return "reinsp_after_fail" if prev["score"] >= FAIL_SCORE else "reinsp_after_pass"
+    return "reinsp_unconfirmed"                      # no parent initial in range
 
 
 def main():
@@ -118,8 +157,7 @@ def main():
                 "gap": (nxt["date"] - ev["date"]).days,
                 "next_score": nxt["score"],
                 "next_grade": nxt["grade"],
-                "earned_on": "initial" if ev["type"] == INITIAL else
-                             ("re-inspection" if ev["type"] == REINSP else "other"),
+                "earned_on": earned_on(timeline, i),
             })
 
     n = len(paired)
@@ -161,15 +199,21 @@ def main():
               f"  ({100*blo:.1f}-{100*bhi:.1f}%)")
 
     # ── how the A was earned: same card, different event ──────────────
-    print(f"\n  how that A was earned:")
+    print(f"\n  how that A was earned (unconfirmed cases kept separate, not folded in):")
     per_origin = {}
-    for origin in ("initial", "re-inspection", "other"):
+    for origin in ("initial", "reinsp_after_fail", "reinsp_after_pass",
+                   "reinsp_unconfirmed", "other", "unknown_type"):
         grp = [p for p in paired if p["earned_on"] == origin]
         if len(grp) < 30:
+            if grp:
+                print(f"    {origin:<20} n={len(grp):<6} (too few to report)")
             continue
         f = sum(1 for p in grp if p["next_score"] >= FAIL_SCORE)
-        per_origin[origin] = {"n": len(grp), "fail_rate": f / len(grp)}
-        print(f"    {origin:<16} n={len(grp):<6} {100*f/len(grp):>5.1f}% failed next time")
+        olo, ohi = wilson(f, len(grp))
+        per_origin[origin] = {"n": len(grp), "fail_rate": f / len(grp),
+                              "lo": olo, "hi": ohi}
+        print(f"    {origin:<20} n={len(grp):<6} {100*f/len(grp):>5.1f}% failed next time"
+              f"   ({100*olo:.1f}-{100*ohi:.1f}%)")
 
     # ── the verdict, against bars set before the pull ──────────────────
     # The placebo needs a DIRECTION, not just a spread. Written as "spread
@@ -211,6 +255,9 @@ def main():
             "by_gap": per_bucket,
             "by_origin": per_origin,
             "staleness_spread_pp": spread,
+            "lookback_days": LOOKBACK_DAYS,
+            "watermark": next(iter(g.watermarks.values()), None),
+            "dataset": "43nn-pn8j",
             "prereg": {"predict_min_fail": PREDICT_MIN_FAIL,
                        "falsify_max_fail": FALSIFY_MAX_FAIL,
                        "placebo_min_spread_pp": PLACEBO_MIN_SPREAD},

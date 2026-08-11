@@ -19,7 +19,10 @@ That is the fastest way to check this work. It reads the actual shipped
 | `reinspect_join.json` | Its output: 40 codes with at least 50 citations, each with a Wilson 95% interval. |
 | `dob_contractor_test.py` | A pre-registered test of our own favourite explanation. |
 | `dob_contractor_test.json` | Its verdict: **NOT SUPPORTED**. |
-| `build_operator.py` | The only writer of the persistence table embedded in `operator.html`. |
+| `agrade_test.py` | Does the A in the window predict what the next inspection finds? Pre-registered; one of its three bars failed. |
+| `agrade_test.json` | Its output, including the split that drives the re-inspection-A flag. |
+| `agrade_flag_test.js` | Behavioural tests for that flag, run against the function as it ships. |
+| `build_pages.py` | The only writer of the figures embedded in both pages. |
 | `gates_app_test.py` | GUARDS 10&ndash;12. Each paired with a negative test that proves it fires. |
 | `pull.py` | The shared, guarded fetch layer every analysis script goes through. |
 | `CHECK-APP.md` | Traces each sentence printed on screen back to the script that earned it. |
@@ -28,7 +31,8 @@ That is the fastest way to check this work. It reads the actual shipped
 
 ```bash
 python3 reinspect_join.py --json reinspect_join.json   # ~28s against the live API
-python3 build_operator.py                              # re-embed into the page
+python3 agrade_test.py --json agrade_test.json         # ~12s
+python3 build_pages.py                                 # re-embed into both pages
 python3 gates_app_test.py                              # prove nothing drifted
 ```
 

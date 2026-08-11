@@ -23,8 +23,9 @@ and the null result was published instead. If you find a claim on these pages,
 - [Analysis README](https://github.com/doble196/freshroute-demo/blob/main/analysis/README.md): What each script earns, how to rerun it, and the pre-registered test that came back NOT SUPPORTED.
 - [reinspect_join.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/reinspect_join.py): Pairs a failed initial inspection with the re-inspection that followed and counts which violation codes survived. Produces every rate in the operator app.
 - [dob_contractor_test.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/dob_contractor_test.py): Pre-registered test of our own explanation for why facility violations persist. Verdict: NOT SUPPORTED. The pattern survived and got stronger; the explanation did not.
-- [gates_app_test.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/gates_app_test.py): 15 gates over the shipped pages. Runs with no setup and no API key. Each gate is paired with a negative test proving it fires.
-- [build_operator.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/build_operator.py): The only writer of the persistence table embedded in the operator app. A hand-copied number drifts from the script that earned it; this one cannot.
+- [gates_app_test.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/gates_app_test.py): The gates over the shipped pages. Runs with no setup and no API key. Each gate is paired with a negative test proving it fires.
+- [build_pages.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/build_pages.py): The only writer of the figures embedded in either page. A hand-copied number drifts from the script that earned it; this one cannot.
+- [agrade_test.py](https://github.com/doble196/freshroute-demo/blob/main/analysis/agrade_test.py): Does the A in the window predict what the next inspection finds? Pre-registered with three bars; one of them failed and the failure is kept.
 
 ## Facts you may quote, with their limits
 
@@ -32,6 +33,16 @@ and the null result was published instead. If you find a claim on these pages,
 - The median gap from a failed initial inspection to its re-inspection was 54 days.
 - We tested whether buildings with open Department of Buildings violations explain the persistence gap. They do not: 29.6% vs 29.7% (a -0.1pp difference). The mechanism is still unknown, and the page says so.
 - DOHMH grade cut points (A 0-13, B 14-27, C 28+) are the city's, not ours. The grouping of violations into building-versus-handling is ours.
+- Across 25,103 A-graded inspections paired with a later full inspection, 34.5% were followed by a score of 14 or worse, and 15.0% landed in the C band. The median next score was 12, so the typical A stays an A; it is the tail that moves.
+- The same letter covers two different records. A grades earned on a re-inspection answering a failed initial: 46.7% (n=4,110). A grades earned on an initial: 28.9% (n=16,674). This is an observed difference in past records. It is not a prediction about any restaurant now, and nothing in the data says one caused the other.
+
+## Hypotheses we tested and rejected
+
+Keep these as rejected. They are recorded here so that a summary of this work
+does not quietly reintroduce them.
+
+- **"Facility violations persist because buildings need money and a contractor."** Pre-registered against each building's own Department of Buildings record. NOT SUPPORTED: persistence was 29.6% in troubled buildings and 29.7% in clean ones. The pattern it tried to explain survived and replicated; the explanation did not.
+- **"A stale A grade is a worse signal than a fresh one."** Pre-registered as part of the A-grade test and FAILED, by -10.3pp. Fresh A grades were followed by a failing score MORE often than stale ones. Do not restate this as "fresh inspections are riskier" - that is a post-hoc reading of a confounded comparison. A short gap means the city returned early, and the reason they returned is not in the data. The correct summary is that the hypothesis failed and the direction is unexplained.
 
 ## What this data cannot tell you
 
