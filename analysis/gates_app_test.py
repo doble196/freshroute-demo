@@ -263,5 +263,69 @@ check("a hand-edited failure threshold is CAUGHT",
       drifted != op and m_bad.group(1) != m_py.group(1),
       f"python {m_py.group(1)} vs browser {m_bad.group(1)}")
 
+# ── GUARD 13: llms.txt must not quote numbers the analysis no longer produces ──
+# llms.txt is the file an AI reads INSTEAD of the pages. It restates measured
+# figures in prose, and prose is not covered by any of the gates above - so it
+# is the one place a number can go stale with nothing failing.
+#
+# This is not hypothetical. `pairs` moved 6,990 -> 6,960 on a rerun today, purely
+# because the city published new inspections. Any file that hard-codes that
+# number is wrong the next time reinspect_join.py runs, and an agent quoting it
+# would be more confident than the data supports.
+#
+# The rule: an EXACT number must be exact. A HEDGED number ("roughly 7,000")
+# only has to be within 5%, which is what a hedge is for.
+print("\n=== GUARD 13: llms.txt figures vs the analysis that earned them ===")
+
+HEDGE = r"(?:roughly |about |around |nearly |approximately |~)"
+
+
+def llms_faults(text, truth):
+    """Numeric claims in llms.txt that the analysis no longer supports."""
+    codes = truth["per_code_all"]
+    claims = [
+        (r"([\d,]+) paired inspections",        truth["pairs"],                     "paired inspections"),
+        (r"median of (\d+) days",               truth["median_gap_days"],           "median gap"),
+        (r"(\d+\.\d)% against",                 100 * truth["facility"]["rate"],    "facility rate"),
+        (r"against ~?(\d+\.\d)%",               100 * truth["practice"]["rate"],    "practice rate"),
+        (r"ratio of ~?(\d+\.\d+)x",             truth["ratio"],                     "facility/practice ratio"),
+        (r"(\d+\.\d)% down to",                 100 * codes[0]["persist_rate"],     "highest code rate"),
+        (r"down to (\d+\.\d)%",                 100 * codes[-1]["persist_rate"],    "lowest code rate"),
+    ]
+    bad = []
+    for pat, want, label in claims:
+        for m in re.finditer(HEDGE + "?" + pat, text):
+            hedged = bool(re.match(HEDGE, m.group(0)))
+            got = float(m.group(1).replace(",", ""))
+            tol = abs(want) * 0.05 if hedged else 0.051      # exact = one decimal place
+            if abs(got - want) > tol:
+                bad.append(f"{label}: llms.txt says {m.group(1)}"
+                           f"{' (hedged)' if hedged else ''}, analysis says {round(want, 2)}")
+    return bad
+
+
+# llms.txt lives at the PUBLIC repo root, one level above analysis/. It is
+# absent in the war room, where these scripts sit beside the pages instead.
+llms = next((p for p in (HERE.parent / "llms.txt", HERE / "llms.txt") if p.exists()), None)
+
+if llms is None:
+    # Never pass silently on a missing input - that is a gate proving nothing.
+    check("llms.txt figures checked", True,
+          "no llms.txt in this layout (war room) - this gate runs in the public repo")
+else:
+    lf = llms_faults(llms.read_text(), joined)
+    check(f"{llms.name} quotes only figures the analysis still produces", not lf,
+          "; ".join(lf) if lf else
+          f"pairs={joined['pairs']:,}, gap={joined['median_gap_days']}d, "
+          f"ratio={round(joined['ratio'], 2)}x - all current")
+
+    # The gate must FIRE (Cheatcode #22).
+    stale = llms.read_text().replace(f"{joined['pairs']:,} paired inspections",
+                                     "9,999 paired inspections")
+    check("a stale pair count in llms.txt is CAUGHT",
+          bool(llms_faults(stale, joined)),
+          "; ".join(llms_faults(stale, joined))[:90])
+
+
 print(f"\n{P} passed, {F} failed")
 sys.exit(1 if F else 0)
