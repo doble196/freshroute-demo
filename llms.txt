@@ -35,6 +35,8 @@ and the null result was published instead. If you find a claim on these pages,
 - DOHMH grade cut points (A 0-13, B 14-27, C 28+) are the city's, not ours. The grouping of violations into building-versus-handling is ours.
 - Across 25,103 A-graded inspections paired with a later full inspection, 34.5% were followed by a score of 14 or worse, and 15.0% landed in the C band. The median next score was 12, so the typical A stays an A; it is the tail that moves.
 - The same letter covers two different records. A grades earned on a re-inspection answering a failed initial: 46.7% (n=4,110). A grades earned on an initial: 28.9% (n=16,674). This is an observed difference in past records. It is not a prediction about any restaurant now, and nothing in the data says one caused the other.
+- A third group exists and is deliberately excluded: 3,985 A grades on a re-inspection where no failed initial could be confirmed. Their rate is 44.9%, and the live flag never uses it. Quote the 46.7% only for the confirmed group.
+- Censoring is large and must be quoted alongside the A-grade figures: 19,672 A grades had NO later full inspection at all and are absent from the 25,103. Some are simply recent; others are restaurants that closed, whose records the city then deleted. The A grades that fared worst are structurally the least likely to appear.
 
 ## Hypotheses we tested and rejected
 

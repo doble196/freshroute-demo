@@ -106,9 +106,48 @@ def earned_on(timeline, i):
     return "reinsp_unconfirmed"                      # no parent initial in range
 
 
+def find_qualifying(by_camis, limit, show_names, names):
+    """Restaurants whose NEWEST inspection would trigger check.html's flag.
+
+    Exists so the browser check is reproducible: run this, take a camis, load
+    the page, confirm the flag appears. The synthetic cases in
+    agrade_flag_test.cjs pin the LOGIC; this pins that real records still
+    reach it.
+
+    Prints camis and dates only unless --show-names is passed. Thousands of
+    restaurants qualify at any time, and a qualifying record is an ordinary,
+    common outcome - publishing one business's name in a test fixture would
+    single it out as though it were remarkable. It is not, and the flag copy
+    is careful to say the statistic predicts nothing about any one restaurant.
+    Naming one here would undo that care.
+    """
+    hits = []
+    for camis, tl in by_camis.items():
+        i = len(tl) - 1                       # the newest visit is what the page shows
+        if i < 1 or tl[i]["grade"] != "A":
+            continue
+        if earned_on(tl, i) != "reinsp_after_fail":
+            continue
+        parent = next((p for p in reversed(tl[:i])
+                       if "initial" in (p["type"] or "").lower()), None)
+        hits.append((camis, tl[i]["date"].date(), parent["score"] if parent else None,
+                     names.get(camis, "")))
+    hits.sort(key=lambda h: -h[1].toordinal())
+    print(f"\n=== restaurants whose newest inspection triggers the flag: {len(hits):,} ===")
+    print("(a common, ordinary outcome - names withheld unless --show-names)")
+    for camis, d, sc, nm in hits[:limit]:
+        print(f"  camis {camis}   re-inspection A on {d}, parent initial scored {sc:.0f}"
+              + (f"   {nm}" if show_names else ""))
+    return hits
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json")
+    ap.add_argument("--find-qualifying", type=int, metavar="N", default=0,
+                    help="print N camis whose newest inspection triggers the flag")
+    ap.add_argument("--show-names", action="store_true",
+                    help="include dba in --find-qualifying output (local use only)")
     a = ap.parse_args()
 
     g = Guarded("restaurants", strict=True)
@@ -118,18 +157,19 @@ def main():
     # fields. Grouping also dedupes the same-inspection-twice rows.
     rows = g.agg(**{
         "$select": ("camis, inspection_date, inspection_type, "
-                    "max(score) AS score_i, max(grade) AS grade_i"),
+                    "max(score) AS score_i, max(grade) AS grade_i, max(dba) AS dba_i"),
         "$where": "inspection_date IS NOT NULL",
         "$group": "camis, inspection_date, inspection_type",
     })
     print(f"inspection-grain rows: {len(rows):,}", file=sys.stderr)
 
-    by_camis = defaultdict(list)
+    by_camis, names = defaultdict(list), {}
     for r in rows:
         d = (r.get("inspection_date") or "")[:10]
         if not d or d == "1900-01-01":         # the city's null-date sentinel
             continue
         s = r.get("score_i")
+        names[r["camis"]] = r.get("dba_i") or ""
         by_camis[r["camis"]].append({
             "date": datetime.fromisoformat(d),
             "type": r.get("inspection_type") or "",
@@ -240,6 +280,9 @@ def main():
         print(f"             -> and it runs BACKWARDS: the freshest As fail most.")
         print(f"                Short gaps are not random - the city came back early")
         print(f"                for a reason. Gap is confounded by cause of visit.")
+
+    if a.find_qualifying:
+        find_qualifying(by_camis, a.find_qualifying, a.show_names, names)
 
     for src, wm in g.watermarks.items():
         print(f"\nwatermark {src}: {wm}" + (" - held" if not g.drift else f" DRIFT {g.drift}"))

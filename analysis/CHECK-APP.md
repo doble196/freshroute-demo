@@ -59,6 +59,34 @@ against the function as it actually ships (`agrade_flag_test.cjs`), the embedded
 figures must match `agrade_test.json`, the page's lookback must equal the one
 the rate was measured with, and the copy must still carry its disclaimers.
 
+### Reproducing the browser check
+
+The synthetic cases pin the *logic*. This pins that real records still reach it:
+
+```bash
+python3 agrade_test.py --find-qualifying 5     # camis only, names withheld
+```
+
+Roughly **3,000 restaurants** qualify at any moment. That is the point — it is
+an ordinary, common outcome, not a mark against any one business. No name is
+committed here, and `--show-names` exists for local use only. Publishing one
+business as *the* example would single it out as remarkable when the whole
+finding says the opposite, and would undercut the flag's own copy, which is at
+pains to say the statistic predicts nothing about any individual restaurant.
+
+### The first browser run looked like a bug and was not
+
+The flag failed to appear on the first live check. The cause was in the test,
+not the page: the search returned **five locations sharing one name**, the
+script clicked the first, and that location's newest inspection was an A earned
+on an *initial*. The flag was correctly withheld — case 2 behaving exactly as
+specified. Selecting the intended `camis` showed it immediately.
+
+Kept here as validation rather than filed as a defect. A flag that fires on the
+right record and stays off on a same-named neighbour is the behaviour the whole
+design is for, and it was confirmed by accident before it was confirmed on
+purpose.
+
 ## The sentence this app used to say, and no longer does
 
 It read: *"Needs money and a contractor."* That was an explanation for the
