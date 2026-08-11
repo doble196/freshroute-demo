@@ -130,7 +130,13 @@
   .limits ul{margin:6px 0 0; padding-left:17px}
 
   .msg{padding:14px 16px; border:1px dashed var(--rule); border-radius:10px; font-size:13.5px; color:var(--ink2)}
-  .msg.err{border-color:var(--act); color:var(--act)}
+  .msg.err{border-style:solid; border-color:var(--act); color:var(--act)}
+  .msg.err .hdr{display:block; font-weight:670; margin-bottom:4px}
+  .msg.err .why{display:block; color:var(--ink2); margin-top:5px}
+  /* An error does not delete a true answer. The previous result stays and is
+     marked as belonging to the previous search - it is still exactly as true
+     as it was a second ago, it just no longer answers the question on screen. */
+  #out.stale{opacity:.62}
   /* the previous answer stays on screen while the next one loads - wiping it
      costs the reader their context and collapses the page mid-scroll */
   #out.loading{opacity:.35; transition:opacity .12s ease; pointer-events:none}
@@ -213,12 +219,79 @@
     {year:"numeric", month:"short", day:"numeric", timeZone:"UTC"});
   const daysAgo = iso => Math.floor((Date.now() - new Date(iso)) / 864e5);
 
+  // A fetch that never returns is worse than one that fails: the page waits
+  // forever and the button stays dead. Twelve seconds is past the point where
+  // anyone is still waiting, so we stop waiting for them.
+  const TIMEOUT_MS = 12000;
+
+  // Every failure carries a kind, because these are not one event. "You are
+  // offline", "the city is refusing", and "the city sent us something that is
+  // not data" are three different facts, and only one of them is about the
+  // reader's connection. Collapsing them into one catch is how an outage ends
+  // up printed as "no restaurant matched".
+  const fail = (kind, message) => Object.assign(new Error(message), {kind});
+
+  // The request currently holding a socket. A newer search cuts it loose.
+  let inflight = null;
+
   async function api(params){
     const u = new URL(API);
     for (const [k,v] of Object.entries(params)) u.searchParams.set(k, v);
-    const r = await fetch(u);
-    if (!r.ok) throw new Error(`The city's API returned ${r.status}. Nothing to show until it answers.`);
-    return { rows: await r.json(), modified: r.headers.get("Last-Modified") };
+
+    if (inflight) inflight.abort();          // the old question is no longer being asked
+    const ctl = inflight = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; ctl.abort(); }, TIMEOUT_MS);
+
+    // An abort surfaces the same way whether we timed it out or replaced it,
+    // so the reason has to be read off our own flags, never off the exception.
+    const aborted = err => {
+      if (timedOut) return fail("timeout",
+        `The city\u2019s API did not answer within ${TIMEOUT_MS/1000} seconds.`);
+      if (err && err.name === "AbortError") return fail("superseded", "Replaced by a newer search.");
+      return null;
+    };
+
+    try{
+      let r;
+      try{
+        r = await fetch(u, {signal: ctl.signal});
+      }catch(err){
+        // fetch() rejects for exactly two reasons here: we cancelled it, or
+        // the request never reached a server at all. A 503 does NOT land here.
+        throw aborted(err) || fail("offline",
+          "Could not reach the city\u2019s API at all.");
+      }
+
+      if (!r.ok) throw fail("status",
+        `The city\u2019s API answered with an error: ${r.status} ${r.statusText || ""}`.trim() + ".");
+
+      let body;
+      try{
+        body = await r.json();
+      }catch(err){
+        // The status line said 200 and then the body was not JSON. Usually a
+        // gateway or an outage page answering in front of the real server.
+        throw aborted(err) || fail("badbody",
+          "The city\u2019s API answered, but what came back was not data.");
+      }
+
+      // A 200 is not a promise that the body is the thing we asked for. Socrata
+      // returns its own errors as a JSON object, and an object has no .length -
+      // so without this check a rejected query reads on screen as "no results".
+      if (!Array.isArray(body)){
+        const said = body && typeof body === "object" && typeof body.message === "string"
+          ? body.message : null;
+        throw fail("badshape", said
+          ? `The city\u2019s API rejected the query: \u201c${said}\u201d`
+          : "The city\u2019s API answered OK, but the body was not a list of inspection rows.");
+      }
+
+      return { rows: body, modified: r.headers.get("Last-Modified") };
+    }finally{
+      clearTimeout(timer);
+      if (inflight === ctl) inflight = null;
+    }
   }
 
   // Every fetch takes a ticket. A slow early request that lands after a fast
@@ -226,17 +299,60 @@
   // without touching the DOM.
   let ticket = 0;
 
+  // #status and #out do two different jobs. #out holds the last answer the
+  // city actually gave us. #status holds what is happening right now. Keeping
+  // them apart is what makes it impossible for an error to delete a true
+  // result - setBusy never touches #out's contents, only its dimming.
   function setBusy(on, msg){
     const btn = document.querySelector("#form button");
     btn.disabled = on;
     btn.textContent = on ? "Looking\u2026" : "Look it up";
     // The previous result stays put and dims; it is still true until replaced.
     out.classList.toggle("loading", on);
-    $("#status").innerHTML = on ? `<div class="msg">${msg}</div>` : "";
-    // The footer stamps the provenance of what is ON SCREEN. Mid-fetch that
-    // is the OLD result, so the stamp must not read as current.
-    if (on) $("#foot").innerHTML =
-      `<span style="opacity:.55">Checking the city&rsquo;s API&hellip; the stamp below returns with the answer.</span>`;
+    if (on){
+      $("#status").innerHTML = `<div class="msg">${msg}</div>`;
+      // The footer stamps the provenance of what is ON SCREEN. Mid-fetch that
+      // is the OLD result, so the stamp must not read as current.
+      $("#foot").innerHTML =
+        `<span style="opacity:.55">Checking the city&rsquo;s API&hellip; the stamp below returns with the answer.</span>`;
+    }
+    // Deliberately does NOT clear #status on the way out: by then #status may
+    // be holding an error message that outlives the request that caused it.
+  }
+
+  // Every terminal answer comes through this one door: the status line clears,
+  // the stale mark comes off, and #out becomes the newest true thing we have.
+  function settle(html){
+    $("#status").innerHTML = "";
+    out.classList.remove("stale");
+    out.innerHTML = html;
+  }
+
+  // What each failure actually means, in the reader's terms. The rule for
+  // every line: say what happened, say whose fault it is, and never imply we
+  // learned anything about the restaurant - because we didn't.
+  const WHY = {
+    timeout:  "That is almost always the city\u2019s server being slow, not your connection. We stopped waiting rather than leave you on a spinner.",
+    offline:  "Either this device is offline or data.cityofnewyork.us is unreachable from here. Nothing was fetched, so nothing here changed.",
+    status:   "That is their server refusing, not your search. Worth trying again in a minute.",
+    badbody:  "Something answered in front of their server \u2014 usually a gateway or an outage page. We are not going to guess at what it meant.",
+    badshape: "We asked for a list of inspections and got something else back. That is not the same as finding nothing, so we are not going to show it as an empty result.",
+  };
+
+  // Provenance of whatever is sitting in #out right now.
+  let lastStamp = null;
+
+  function renderError(e){
+    const stale = out.innerHTML.trim().length > 0;
+    $("#status").innerHTML =
+      `<div class="msg err"><span class="hdr">${esc(e.message)}</span>
+         <span class="why">${esc(WHY[e.kind] || "")}</span>
+         ${stale ? `<span class="why">The result below is the answer to your <i>previous</i> search. It is still true \u2014 it just is not the thing you asked for.</span>` : ""}</div>`;
+    // #out is untouched on purpose. But it must stop looking current.
+    if (stale){ out.classList.add("stale"); stampFoot(lastStamp, true); }
+    else $("#foot").innerHTML =
+      `<span style="opacity:.7">No stamp: nothing on this screen came from the city, so there is
+       no provenance to show.</span>`;
   }
 
   // Five words that are not restaurant names. This search matches dba (the
@@ -267,22 +383,31 @@
              it checks one restaurant at a time.</div>`
         : "";
 
+      // Zero rows has two completely different causes and the screen cannot
+      // tell them apart, so it must not offer only the flattering one. A place
+      // that failed and shut down is DELETED from this dataset - it comes back
+      // looking exactly like a place that never existed.
       if (!rows.length){
-        out.innerHTML = boroNote + `<div class="msg">No NYC restaurant matched &ldquo;${esc(term)}&rdquo;.
-          The city stores names in caps and often without punctuation, so try a shorter piece of the name.</div>`;
+        settle(boroNote + `<div class="msg"><b>Nothing in the city&rsquo;s file matches
+          &ldquo;${esc(term)}&rdquo;.</b> Two very different things do that, and this screen
+          cannot tell you which one you hit.
+          <br><br><b>1. The spelling.</b> The city files names in caps and usually without
+          punctuation &mdash; Joe&rsquo;s Pizza is stored as JOES PIZZA. Try a shorter piece of the name.
+          <br><br><b>2. It closed.</b> This dataset only holds restaurants that are still open.
+          When one shuts down, the city takes its whole inspection history out with it. So a
+          restaurant that failed hard and closed looks identical to a restaurant that never
+          existed: empty. The worst records are the ones you cannot see.</div>`);
         return;
       }
       if (rows.length === 1 && !boroNote) return show(rows[0].camis);
-      out.innerHTML = boroNote + `<div class="results">` + rows.map(r =>
+      settle(boroNote + `<div class="results">` + rows.map(r =>
         `<button data-camis="${esc(r.camis)}">
            <div class="nm">${esc(titleCase(r.dba))}</div>
            <div class="ad">${esc(titleCase(`${r.building||""} ${r.street||""}`))} &middot; ${esc(r.boro)}</div>
-         </button>`).join("") + `</div>`;
+         </button>`).join("") + `</div>`);
     }catch(e){
-      if (my !== ticket) return;
-      out.innerHTML = `<div class="msg err">${esc(e.message)}</div>`;
-      $("#foot").innerHTML = `<span style="opacity:.7">No stamp: the city&rsquo;s API did not answer,
-        so nothing on screen has provenance right now.</span>`;
+      if (my !== ticket || e.kind === "superseded") return;
+      renderError(e);
     }finally{
       if (my === ticket) setBusy(false);
     }
@@ -301,13 +426,11 @@
       });
       if (my !== ticket) return;          // superseded by a newer lookup
       stampFoot(modified);
-      if (!rows.length){ out.innerHTML = `<div class="msg">The city has no inspection rows for this record.</div>`; return; }
+      if (!rows.length){ settle(`<div class="msg">The city has no inspection rows for this record.</div>`); return; }
       render(rows, modified);
     }catch(e){
-      if (my !== ticket) return;
-      out.innerHTML = `<div class="msg err">${esc(e.message)}</div>`;
-      $("#foot").innerHTML = `<span style="opacity:.7">No stamp: the city&rsquo;s API did not answer,
-        so nothing on screen has provenance right now.</span>`;
+      if (my !== ticket || e.kind === "superseded") return;
+      renderError(e);
     }finally{
       if (my === ticket) setBusy(false);
     }
@@ -324,7 +447,7 @@
       byDate.get(d).push(r);
     }
     const dates = [...byDate.keys()].sort().reverse();
-    if (!dates.length){ out.innerHTML = `<div class="msg">Every inspection on this record carries the city&rsquo;s placeholder date, so there is nothing datable to show.</div>`; return; }
+    if (!dates.length){ settle(`<div class="msg">Every inspection on this record carries the city&rsquo;s placeholder date, so there is nothing datable to show.</div>`); return; }
 
     const cur = byDate.get(dates[0]);
     const scoreRaw = cur.find(r => r.score != null)?.score;
@@ -465,11 +588,17 @@
       </ul>
     </div></div>`;
 
-    out.innerHTML = html;
+    settle(html);
   }
 
-  function stampFoot(modified){
-    $("#foot").innerHTML =
+  function stampFoot(modified, stale){
+    // A stamp always describes what is IN #out. When an error left the previous
+    // answer on screen, the stamp still belongs to that older answer - so say so
+    // rather than let a real timestamp vouch for the wrong thing.
+    if (!stale) lastStamp = modified;
+    $("#foot").innerHTML = (stale
+      ? `<b style="color:var(--watch)">This stamp belongs to the result above, from the earlier
+         search.</b> The search that just failed produced nothing to stamp.<br>` : "") +
       `Live from NYC OpenData, DOHMH Restaurant Inspection Results (<code>43nn-pn8j</code>), fetched in your browser
        when you searched. Publisher&rsquo;s last-modified stamp: <b>${modified ? esc(modified) : "not disclosed"}</b>.
        No API key is used or needed &mdash; a key embedded in a public page would be a key you have given away.
