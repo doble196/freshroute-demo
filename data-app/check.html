@@ -131,6 +131,13 @@
 
   .msg{padding:14px 16px; border:1px dashed var(--rule); border-radius:10px; font-size:13.5px; color:var(--ink2)}
   .msg.err{border-color:var(--act); color:var(--act)}
+  /* the previous answer stays on screen while the next one loads - wiping it
+     costs the reader their context and collapses the page mid-scroll */
+  #out.loading{opacity:.35; transition:opacity .12s ease; pointer-events:none}
+  .search button[disabled]{opacity:.55; cursor:default}
+  .notice{padding:12px 14px; border:1px solid var(--watch); border-radius:9px;
+    font-size:13.5px; color:var(--ink); margin-bottom:12px; line-height:1.45}
+  .notice b{color:var(--watch)}
 
   .foot{font-size:12px; color:var(--ink3); line-height:1.55}
   .foot a{color:var(--ink2)}
@@ -163,6 +170,7 @@
     <button type="button" data-ex="SHAKE SHACK">Shake Shack</button>
   </div>
 
+  <div id="status" aria-live="polite"></div>
   <div id="out"></div>
 
   <div class="foot" id="foot"></div>
@@ -213,9 +221,33 @@
     return { rows: await r.json(), modified: r.headers.get("Last-Modified") };
   }
 
+  // Every fetch takes a ticket. A slow early request that lands after a fast
+  // later one must not overwrite the newer answer, so stale tickets return
+  // without touching the DOM.
+  let ticket = 0;
+
+  function setBusy(on, msg){
+    const btn = document.querySelector("#form button");
+    btn.disabled = on;
+    btn.textContent = on ? "Looking\u2026" : "Look it up";
+    // The previous result stays put and dims; it is still true until replaced.
+    out.classList.toggle("loading", on);
+    $("#status").innerHTML = on ? `<div class="msg">${msg}</div>` : "";
+    // The footer stamps the provenance of what is ON SCREEN. Mid-fetch that
+    // is the OLD result, so the stamp must not read as current.
+    if (on) $("#foot").innerHTML =
+      `<span style="opacity:.55">Checking the city&rsquo;s API&hellip; the stamp below returns with the answer.</span>`;
+  }
+
+  // Five words that are not restaurant names. This search matches dba (the
+  // business name), so "Brooklyn" returns Brooklyn Diner - not Brooklyn.
+  // Confidently wrong is worse than empty, so say so before showing results.
+  const BOROS = new Set(["BROOKLYN","QUEENS","MANHATTAN","BRONX","STATEN ISLAND","THE BRONX","NYC","NEW YORK"]);
+
   async function search(term){
     const t = term.toUpperCase().replace(/'/g, "''");
-    out.innerHTML = `<div class="msg">Asking the city&rsquo;s API for &ldquo;${esc(term)}&rdquo;&hellip;</div>`;
+    const my = ++ticket;
+    setBusy(true, `Asking the city&rsquo;s API for &ldquo;${esc(term)}&rdquo;&hellip;`);
     try{
       const {rows, modified} = await api({
         "$select":"camis,dba,boro,building,street",
@@ -223,23 +255,42 @@
         "$group":"camis,dba,boro,building,street",
         "$limit":"15",
       });
+      if (my !== ticket) return;          // a newer search already won
       stampFoot(modified);
+
+      // A borough typed into a name box matches names, not places. Name it.
+      const boroNote = BOROS.has(term.trim().toUpperCase())
+        ? `<div class="notice"><b>&ldquo;${esc(term)}&rdquo; is a place, not a restaurant name.</b><br>
+             This box searches the name over the door, so these are restaurants with
+             &ldquo;${esc(term)}&rdquo; <i>in their name</i> &mdash; not the ones located there.
+             Looking up a whole borough is a different question than this tool answers:
+             it checks one restaurant at a time.</div>`
+        : "";
+
       if (!rows.length){
-        out.innerHTML = `<div class="msg">No NYC restaurant matched &ldquo;${esc(term)}&rdquo;.
+        out.innerHTML = boroNote + `<div class="msg">No NYC restaurant matched &ldquo;${esc(term)}&rdquo;.
           The city stores names in caps and often without punctuation, so try a shorter piece of the name.</div>`;
         return;
       }
-      if (rows.length === 1) return show(rows[0].camis);
-      out.innerHTML = `<div class="results">` + rows.map(r =>
+      if (rows.length === 1 && !boroNote) return show(rows[0].camis);
+      out.innerHTML = boroNote + `<div class="results">` + rows.map(r =>
         `<button data-camis="${esc(r.camis)}">
            <div class="nm">${esc(titleCase(r.dba))}</div>
            <div class="ad">${esc(titleCase(`${r.building||""} ${r.street||""}`))} &middot; ${esc(r.boro)}</div>
          </button>`).join("") + `</div>`;
-    }catch(e){ out.innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+    }catch(e){
+      if (my !== ticket) return;
+      out.innerHTML = `<div class="msg err">${esc(e.message)}</div>`;
+      $("#foot").innerHTML = `<span style="opacity:.7">No stamp: the city&rsquo;s API did not answer,
+        so nothing on screen has provenance right now.</span>`;
+    }finally{
+      if (my === ticket) setBusy(false);
+    }
   }
 
   async function show(camis){
-    out.innerHTML = `<div class="msg">Loading the inspection history&hellip;</div>`;
+    const my = ++ticket;
+    setBusy(true, "Loading the inspection history&hellip;");
     try{
       const {rows, modified} = await api({
         "camis":camis,
@@ -248,10 +299,18 @@
         "$order":"inspection_date DESC",
         "$limit":"400",
       });
+      if (my !== ticket) return;          // superseded by a newer lookup
       stampFoot(modified);
       if (!rows.length){ out.innerHTML = `<div class="msg">The city has no inspection rows for this record.</div>`; return; }
       render(rows, modified);
-    }catch(e){ out.innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+    }catch(e){
+      if (my !== ticket) return;
+      out.innerHTML = `<div class="msg err">${esc(e.message)}</div>`;
+      $("#foot").innerHTML = `<span style="opacity:.7">No stamp: the city&rsquo;s API did not answer,
+        so nothing on screen has provenance right now.</span>`;
+    }finally{
+      if (my === ticket) setBusy(false);
+    }
   }
 
   function render(rows, modified){
