@@ -7,7 +7,7 @@ the pages it checks, and a reader can actually run it:
 
     python3 gates_app_test.py
 
-Five gates, each one a real failure that already happened:
+Six gates, each one a real failure that already happened:
 
   GUARD 10  check.html cannot import pull.Guarded, so its protections were
             hand-rewritten in JavaScript. Two implementations of one rule set
@@ -34,6 +34,11 @@ Five gates, each one a real failure that already happened:
   GUARD 14  the re-inspection-A flag prints a rate measured on one narrow
             population. Show it to anybody else and the page is quoting a
             number about somebody else.
+
+  GUARD 15  a gate is not portable because its LOGIC is portable. This file
+            ships to two repos; one has a package.json setting
+            "type":"module" and one has none, so an identical .js harness is
+            ESM in one and CommonJS in the other. Run it from both roots.
 
 Every gate is paired with a negative test that proves it FIRES. A guard that
 only ever passes on clean input proves nothing (Cheatcode #22).
@@ -449,6 +454,54 @@ check("stripping the no-causation disclaimer is CAUGHT",
       "says the re-inspection caused" not in
       flag_txt.replace("says the re-inspection caused", "shows the re-inspection caused"),
       "the required disclaimer is matched exactly, not loosely")
+
+
+# ── GUARD 15: a portable gate must be portable where it RUNS ─────────────
+# A gate is not portable because its logic is portable. agrade_flag_test passed
+# in the war room and failed in the public repo - same file, same node, one
+# directory apart. The war room has no package.json, so .js means CommonJS. The
+# public repo's package.json sets "type":"module", so the identical .js file is
+# ESM and require() is undefined.
+#
+# Nothing in the logic was wrong. The file was executed in only one of the two
+# places it ships to, so the gate was never proven where it mattered. The rule:
+# any Node harness that travels between repos states its module system in its
+# EXTENSION (.cjs / .mjs) instead of inheriting whatever package.json it lands
+# beside, and it is executed from every root it is expected to run in.
+print("\n=== GUARD 15: cross-repo harnesses are module-system explicit ===")
+
+gates_src = Path(__file__).read_text()
+harnesses = sorted(set(re.findall(r'HERE / "([\w.-]+\.(?:c|m)?js)"', gates_src)))
+
+def extension_faults(names):
+    return [n for n in names if not n.endswith((".cjs", ".mjs"))]
+
+bad_ext = extension_faults(harnesses)
+check("every Node harness the gates invoke declares its module system",
+      harnesses and not bad_ext,
+      f"{', '.join(harnesses)} - all extension-explicit" if not bad_ext
+      else f"ambiguous (.js inherits package.json): {', '.join(bad_ext)}")
+
+# What this layout would actually impose on a bare .js file.
+pkg = next((p for p in (HERE / "package.json", HERE.parent / "package.json")
+            if p.exists()), None)
+pkg_type = json.loads(pkg.read_text()).get("type", "commonjs") if pkg else None
+check("this layout's module semantics are known, not assumed", True,
+      f"{pkg.parent.name}/package.json says type={pkg_type!r} - a bare .js here "
+      f"would be {'ESM (require undefined)' if pkg_type == 'module' else 'CommonJS'}"
+      if pkg else "no package.json above this folder - a bare .js here would be CommonJS")
+
+# And it must genuinely execute from THIS root, not merely exist.
+for h in harnesses:
+    rc = subprocess.run(["node", str(HERE / h)], capture_output=True, text=True)
+    out = [l for l in rc.stdout.strip().splitlines() if "passed" in l]
+    check(f"{h} executes from this repository root", rc.returncode == 0,
+          out[-1] if out else rc.stderr.strip().splitlines()[-1][:100] if rc.stderr else "")
+
+# The gate must FIRE (Cheatcode #22).
+check("a bare .js harness name is CAUGHT",
+      extension_faults(harnesses + ["agrade_flag_test.js"]) == ["agrade_flag_test.js"],
+      "a .js harness inherits package.json semantics and breaks in one repo only")
 
 
 print(f"\n{P} passed, {F} failed")

@@ -45,6 +45,20 @@ python3 sync_public.py <war-room-path> --check  # if you have the private repo
   you add a failure mode to one, add it to the other.
 - **Never add an API key.** The dataset needs none, and a key in a public page
   is a key you have given away.
+- **A Node test harness that travels between repos must be `.cjs` or `.mjs`,
+  never a bare `.js`.** This repo's `package.json` sets `"type": "module"`, so a
+  `.js` file here is ESM and `require()` is undefined. The war room has no
+  `package.json`, so the identical file there is CommonJS. `agrade_flag_test`
+  passed in one and failed in the other — same file, same node, one directory
+  apart. Nothing was wrong with its logic; it had only ever been executed in one
+  of the two places it ships to.
+
+  **A gate is not portable because its logic is portable.** It is portable when
+  it has been run from every repository root it is expected to run in. Declare
+  the module system in the extension rather than inheriting whatever
+  `package.json` the file happens to land beside, and run the suite from both
+  roots before believing either result. GUARD 15 enforces both halves and prints
+  what each layout would impose, so the difference is visible instead of latent.
 
 ## Handling a live fetch
 
