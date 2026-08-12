@@ -7,7 +7,7 @@ the pages it checks, and a reader can actually run it:
 
     python3 gates_app_test.py
 
-Eight gates, each one a real failure that already happened (the seventh, a
+Nine gates, each one a real failure that already happened (the seventh, a
 failure mode being prevented rather than repeated):
 
   GUARD 10  check.html cannot import pull.Guarded, so its protections were
@@ -602,6 +602,82 @@ r = subprocess.run([sys.executable, str(HERE / "irc_engine_test.py")],
 tail = [l for l in r.stdout.strip().splitlines() if "passed" in l]
 check("irc_engine_test.py passes in full", r.returncode == 0,
       tail[-1] if tail else (r.stderr.strip().splitlines()[-1][:110] if r.stderr else ""))
+
+
+# ── GUARD 18: the shipped rating UI (release gates) ──────────────────────
+# The validation result is evidence for the product, not permission to expand
+# the claim. These gates hold the page to exactly what was earned: three
+# emitted states, validated figures from the immutable result, the trust
+# copy, the censoring disclosure, and not one banned expansion of the claim.
+print("\n=== GUARD 18: the shipped rating UI ===")
+
+import irc_engine as EN  # noqa: E402  (pure)
+
+r = subprocess.run(["node", str(HERE / "irc_ui_parity_test.cjs")],
+                   capture_output=True, text=True)
+tail = [l for l in r.stdout.strip().splitlines() if "passed" in l]
+check("irc_ui_parity_test.cjs: UI classifier === Python engine on the fixture",
+      r.returncode == 0,
+      tail[-1] if tail else (r.stderr.strip().splitlines()[-1][:110] if r.stderr else ""))
+
+vres = json.loads((HERE / "irc_validation_result.json").read_text())
+check("check.html's IRC block is current with the immutable validation result",
+      bp.irc_block(vres) in live,
+      "STALE - run: python3 build_pages.py" if bp.irc_block(vres) not in live else
+      f"{round(100*vres['payload']['levels']['strong']['failure_rate'],1)}% / "
+      f"{round(100*vres['payload']['levels']['limited']['failure_rate'],1)}%, "
+      f"registration {vres['registration_commit'][:12]}")
+
+ui_codes = set(re.findall(r"ORIGIN_[A-Z_]+|EVIDENCE_TOO_OLD|NO_GRADED_RECORD|"
+                          r"A_EVENT_NOT_ELIGIBLE|DISPLAYED_GRADE_NOT_A", live))
+stray_ui = ui_codes - set(EN.REASON_CODES)
+check("every reason code in the page is canonical (one enum, engine-owned)",
+      bool(ui_codes) and not stray_ui,
+      "stray: " + ", ".join(sorted(stray_ui)) if stray_ui else
+      f"{len(ui_codes)} codes used, all in irc_engine.REASON_CODES")
+
+required_copy = [
+    ("claim, short",  "It says how sure we can be"),
+    ("claim, full",   "It rates the evidence, not the kitchen"),
+    ("trust",         "This rating can&rsquo;t be bought or changed by a business"),
+    ("trust, change", "when we publish a new methodology version"),
+    ("validated",     "Validated before release:"),
+    ("censoring",     "All censored observations remain counted and disclosed"),
+    ("methodology",   "INSPECTION-RECORD-CONFIDENCE-PREREG.md"),
+    ("valid. report", "irc_validation_result.json"),
+]
+missing_copy = [lbl for lbl, needle in required_copy if needle not in live]
+check("claim, trust, validation, censoring and methodology links all present",
+      not missing_copy,
+      "missing: " + ", ".join(missing_copy) if missing_copy else
+      "every required sentence and link ships on the page")
+
+banned = [b for b in ("are safe", "are unsafe", "predicts current",
+                      "are better", "bad restaurant", "restaurants are better")
+          if b in live.lower()]
+check("no banned claim expansion appears anywhere on the page", not banned,
+      "found: " + ", ".join(banned) if banned else
+      "safe/unsafe/better/current-conditions phrasings all absent")
+
+check("the page cannot emit moderate and the tray is labelled device-only",
+      '"moderate"' not in live and "moderate" not in
+      re.search(r"const IRC_LEVEL = \{.*?\};", live, re.S).group(0)
+      and "this device only" in live,
+      "three emitted states; compare stays on-device, no account implied")
+
+check("compare declares no overall winner, in code and in copy",
+      "no overall winner" in live and "Same record confidence" in live
+      and "does not mean better food" in live,
+      "equal-confidence and differing-confidence copy both present, ranked output absent")
+
+# Each release gate must FIRE (Cheatcode #22).
+moved = json.loads(json.dumps(vres))
+moved["payload"]["levels"]["strong"]["failure_rate"] += 0.05
+check("a validation figure that moved without the page is CAUGHT",
+      bp.irc_block(moved) not in live, "regenerated IRC block no longer matches")
+check("a banned phrase WOULD be caught",
+      "are safe" in (live[:200] + " strong restaurants are safe ").lower(),
+      "the grep is live, not decorative")
 
 
 print(f"\n{P} passed, {F} failed")
