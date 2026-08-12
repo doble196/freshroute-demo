@@ -1,0 +1,57 @@
+{
+  "source": "fixture:synthetic-v1",
+  "source_data_cutoff": "2025-01-01",
+  "note": "Hand-authored rows exercising every registered branch and boundary. No real restaurant appears here. Expected classifications live in irc_engine_test.py so expectation drift shows in diffs.",
+  "rows": [
+    {"camis": "F01", "dba": "STRONG DINER", "inspection_date": "2023-05-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "10", "grade": "A"},
+    {"camis": "F01", "dba": "STRONG DINER", "inspection_date": "2023-11-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "20", "grade": null},
+
+    {"camis": "F02", "dba": "CONFIRMED CAFE", "inspection_date": "2023-02-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "24", "grade": null},
+    {"camis": "F02", "dba": "CONFIRMED CAFE", "inspection_date": "2023-03-15", "inspection_type": "Cycle Inspection / Re-inspection", "score": "9", "grade": "A"},
+    {"camis": "F02", "dba": "CONFIRMED CAFE", "inspection_date": "2024-01-10", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "8", "grade": "A"},
+
+    {"camis": "F03", "dba": "NOSCORE PARENT", "inspection_date": "2023-02-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": null, "grade": null},
+    {"camis": "F03", "dba": "NOSCORE PARENT", "inspection_date": "2023-03-15", "inspection_type": "Cycle Inspection / Re-inspection", "score": "9", "grade": "A"},
+
+    {"camis": "F04", "dba": "ORPHAN REINSP", "inspection_date": "2023-03-15", "inspection_type": "Cycle Inspection / Re-inspection", "score": "9", "grade": "A"},
+
+    {"camis": "F05", "dba": "BOUNDARY 180", "inspection_date": "2023-01-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "30", "grade": null},
+    {"camis": "F05", "dba": "BOUNDARY 180", "inspection_date": "2023-06-30", "inspection_type": "Cycle Inspection / Re-inspection", "score": "9", "grade": "A"},
+
+    {"camis": "F06", "dba": "BOUNDARY 181", "inspection_date": "2023-01-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "30", "grade": null},
+    {"camis": "F06", "dba": "BOUNDARY 181", "inspection_date": "2023-07-01", "inspection_type": "Cycle Inspection / Re-inspection", "score": "9", "grade": "A"},
+
+    {"camis": "F07", "dba": "MYSTERY VISIT", "inspection_date": "2023-02-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "30", "grade": null},
+    {"camis": "F07", "dba": "MYSTERY VISIT", "inspection_date": "2023-03-01", "inspection_type": "", "score": null, "grade": null},
+    {"camis": "F07", "dba": "MYSTERY VISIT", "inspection_date": "2023-04-01", "inspection_type": "Cycle Inspection / Re-inspection", "score": "9", "grade": "A"},
+
+    {"camis": "F08", "dba": "PASSED PARENT", "inspection_date": "2023-02-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "7", "grade": "A"},
+    {"camis": "F08", "dba": "PASSED PARENT", "inspection_date": "2023-03-15", "inspection_type": "Cycle Inspection / Re-inspection", "score": "9", "grade": "A"},
+
+    {"camis": "F09", "dba": "COMPLIANCE A", "inspection_date": "2023-05-01", "inspection_type": "Cycle Inspection / Compliance Inspection", "score": "5", "grade": "A"},
+
+    {"camis": "F10", "dba": "SLIPPED TO B", "inspection_date": "2023-01-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "10", "grade": "A"},
+    {"camis": "F10", "dba": "SLIPPED TO B", "inspection_date": "2023-06-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "20", "grade": "B"},
+
+    {"camis": "F11", "dba": "REOPENED ZERO", "inspection_date": "2023-05-01", "inspection_type": "Cycle Inspection / Reopening Inspection", "score": "0", "grade": "A"},
+
+    {"camis": "F12", "dba": "OLD FAITHFUL", "inspection_date": "2021-01-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "10", "grade": "A"},
+
+    {"camis": "F13", "dba": "CENSORED CORNER", "inspection_date": "2024-05-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "11", "grade": "A"},
+
+    {"camis": "F14A", "dba": "SAME NAME CAFE", "inspection_date": "2023-05-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "10", "grade": "A"},
+    {"camis": "F14B", "dba": "SAME NAME CAFE", "inspection_date": "2023-02-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "40", "grade": null},
+    {"camis": "F14B", "dba": "SAME NAME CAFE", "inspection_date": "2023-03-15", "inspection_type": "Cycle Inspection / Re-inspection", "score": "9", "grade": "A"},
+
+    {"camis": "F15", "dba": "DUPLICATE ROWS", "inspection_date": "2023-05-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "12", "grade": "A"},
+    {"camis": "F15", "dba": "DUPLICATE ROWS", "inspection_date": "2023-05-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "12", "grade": "A"},
+    {"camis": "F15", "dba": "DUPLICATE ROWS", "inspection_date": "2023-05-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": null, "grade": null},
+
+    {"camis": "F16", "dba": "FUTURE TRAP", "inspection_date": "2023-04-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "10", "grade": "A"},
+    {"camis": "F16", "dba": "FUTURE TRAP", "inspection_date": "2023-10-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "30", "grade": "B"},
+
+    {"camis": "F17", "dba": "NO GRADES YET", "inspection_date": "2023-05-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "22", "grade": null},
+
+    {"camis": "F18", "dba": "SENTINEL ROW", "inspection_date": "1900-01-01", "inspection_type": "Cycle Inspection / Initial Inspection", "score": "10", "grade": "A"}
+  ]
+}
