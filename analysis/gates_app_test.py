@@ -7,7 +7,8 @@ the pages it checks, and a reader can actually run it:
 
     python3 gates_app_test.py
 
-Six gates, each one a real failure that already happened:
+Seven gates, each one a real failure that already happened (the seventh, a
+failure mode being prevented rather than repeated):
 
   GUARD 10  check.html cannot import pull.Guarded, so its protections were
             hand-rewritten in JavaScript. Two implementations of one rule set
@@ -39,6 +40,12 @@ Six gates, each one a real failure that already happened:
             ships to two repos; one has a package.json setting
             "type":"module" and one has none, so an identical .js harness is
             ESM in one and CommonJS in the other. Run it from both roots.
+
+  GUARD 16  a pre-registration is only as strong as its pins. The IRC
+            registration was committed before its engine existed; this gate
+            keeps its frozen constants aligned with the code that must
+            consume them, and its honesty clauses (the preserved minus sign,
+            the no-search rule, age-is-not-risk) unremovable in silence.
 
 Every gate is paired with a negative test that proves it FIRES. A guard that
 only ever passes on clean input proves nothing (Cheatcode #22).
@@ -502,6 +509,86 @@ for h in harnesses:
 check("a bare .js harness name is CAUGHT",
       extension_faults(harnesses + ["agrade_flag_test.js"]) == ["agrade_flag_test.js"],
       "a .js harness inherits package.json semantics and breaks in one repo only")
+
+
+# ── GUARD 16: the pre-registration cannot drift from the code it governs ──
+# irc_prereg.json is the frozen registration for Inspection Record Confidence.
+# Its power is that it was committed before the engine existed - which is
+# worth nothing if the constants quietly diverge from the code that must
+# consume them, or if someone edits away the honesty clauses (the preserved
+# minus sign, the no-search rule, the age-is-not-risk rule). The engine, when
+# it is built, reads these values; this gate keeps them readable and true.
+print("\n=== GUARD 16: the IRC pre-registration is pinned ===")
+
+IRC = HERE / "irc_prereg.json"
+IRC_DOC = HERE / "INSPECTION-RECORD-CONFIDENCE-PREREG.md"
+
+if not IRC.exists():
+    check("irc_prereg.json present beside the gates", False, "registration sidecar missing")
+else:
+    reg = json.loads(IRC.read_text())
+
+    # Constants are read as TEXT, not imported. Importing agrade_test pulls in
+    # the live fetch layer, which does not ship to the public repo - the first
+    # draft of this gate crashed there for exactly that reason, one commit
+    # after GUARD 15 wrote down the rule it broke. Reading source text keeps
+    # this gate runnable anywhere the files are.
+    def prereg_faults(r):
+        py_fail = int(re.search(r"^FAIL_SCORE\s*=\s*(\d+)",
+                                (HERE / "reinspect_join.py").read_text(), re.M).group(1))
+        py_look = int(re.search(r"^LOOKBACK_DAYS\s*=\s*(\d+)",
+                                (HERE / "agrade_test.py").read_text(), re.M).group(1))
+        bad = []
+        if r["outcome"]["failure_threshold"] != py_fail:
+            bad.append(f"failure_threshold {r['outcome']['failure_threshold']} != "
+                       f"FAIL_SCORE {py_fail}")
+        if r["origin_lookback_days"] != py_look:
+            bad.append(f"origin_lookback_days {r['origin_lookback_days']} != "
+                       f"agrade_test.LOOKBACK_DAYS {py_look}")
+        if set(r["change_reasons"]) != {"NEW_CITY_DATA", "METHODOLOGY_VERSION_CHANGED",
+                                        "SOURCE_RECORD_CORRECTED"}:
+            bad.append("change-reason enum drifted")
+        if r["splitter_search_in_v1"] is not False:
+            bad.append("splitter_search_in_v1 flipped - the middle band is back on the menu")
+        if r["age_policy"]["age_is_risk_feature"] is not False:
+            bad.append("age became a risk feature despite the rejected -10.3pp hypothesis")
+        stale = next((x for x in r["attached_rejections"]
+                      if x["hypothesis"] == "stale_records_predict_worse_outcomes"), None)
+        if stale is None or stale["spread_pp"] >= 0:
+            bad.append("the failed staleness hypothesis lost its minus sign")
+        if r["samples"]["validation_runs_allowed"] != 1:
+            bad.append("validation_runs_allowed != 1 - touch-once rule weakened")
+        return bad
+
+    pf = prereg_faults(reg)
+    check("registered constants match the code that must consume them", not pf,
+          "; ".join(pf) if pf else
+          f"threshold=14, lookback=180d, no v1 search, age not risk, "
+          f"validation opens once")
+
+    check("the registration document ships beside the sidecar",
+          IRC_DOC.exists() and "no rating engine" in IRC_DOC.read_text()
+          and "inspection_record_confidence" in IRC_DOC.read_text(),
+          "declaration and API key present")
+
+    # Each pin must FIRE (Cheatcode #22).
+    m = json.loads(IRC.read_text()); m["outcome"]["failure_threshold"] = 20
+    check("a drifted failure threshold is CAUGHT",
+          any("failure_threshold" in b for b in prereg_faults(m)),
+          "; ".join(prereg_faults(m))[:80])
+
+    m = json.loads(IRC.read_text()); m["splitter_search_in_v1"] = True
+    check("re-enabling the v1 splitter search is CAUGHT",
+          any("middle band" in b for b in prereg_faults(m)),
+          "the no-search rule is pinned, not advisory")
+
+    m = json.loads(IRC.read_text())
+    for x in m["attached_rejections"]:
+        if x["hypothesis"] == "stale_records_predict_worse_outcomes":
+            x["spread_pp"] = abs(x["spread_pp"])
+    check("dropping the staleness minus sign is CAUGHT",
+          any("minus sign" in b for b in prereg_faults(m)),
+          "a rejected hypothesis cannot be quietly flipped to supported")
 
 
 print(f"\n{P} passed, {F} failed")
