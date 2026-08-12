@@ -1,0 +1,135 @@
+{
+  "engine_version": "1.0.0-candidate-engine.1",
+  "input_snapshot_sha256": "b992572a46c89e7922f0433b4f05b15f981837433c0df33608202024b91eb277",
+  "methodology_version": "1.0.0-candidate",
+  "payload": {
+    "age_sensitivity": {
+      "365": {
+        "abstained_by_age": 3592,
+        "abstained_other": 14403,
+        "classified": 7571,
+        "descriptive_outcomes": {
+          "censored": 237,
+          "failure_rate": 0.333,
+          "failures": 2442,
+          "wilson_hi": 0.3438,
+          "wilson_lo": 0.3223,
+          "with_outcome": 7334
+        },
+        "out_of_scope": 2015,
+        "share_abstained_by_age_of_scoped": 0.3218,
+        "snapshot_asof": "2024-06-30",
+        "threshold_days": 365
+      },
+      "545": {
+        "abstained_by_age": 669,
+        "abstained_other": 14403,
+        "classified": 10494,
+        "descriptive_outcomes": {
+          "censored": 384,
+          "failure_rate": 0.3251,
+          "failures": 3287,
+          "wilson_hi": 0.3343,
+          "wilson_lo": 0.3161,
+          "with_outcome": 10110
+        },
+        "out_of_scope": 2015,
+        "share_abstained_by_age_of_scoped": 0.0599,
+        "snapshot_asof": "2024-06-30",
+        "threshold_days": 545
+      },
+      "730": {
+        "abstained_by_age": 237,
+        "abstained_other": 14403,
+        "classified": 10926,
+        "descriptive_outcomes": {
+          "censored": 512,
+          "failure_rate": 0.3272,
+          "failures": 3407,
+          "wilson_hi": 0.3362,
+          "wilson_lo": 0.3182,
+          "with_outcome": 10414
+        },
+        "out_of_scope": 2015,
+        "share_abstained_by_age_of_scoped": 0.0212,
+        "snapshot_asof": "2024-06-30",
+        "threshold_days": 730
+      }
+    },
+    "censoring": {
+      "note": "closed restaurants are deleted from the source, so the censored population over-represents the worst outcomes",
+      "total_censored": 488
+    },
+    "development_asof_before": "2024-07-01",
+    "exclusions": {
+      "a_events_ineligible": 6668,
+      "graded_bc_events_not_units": 6639,
+      "rows_undateable_or_sentinel": 0
+    },
+    "levels": {
+      "limited": {
+        "censored": 83,
+        "failure_rate": 0.4407,
+        "failures": 1820,
+        "n": 4213,
+        "wilson_hi": 0.4559,
+        "wilson_lo": 0.4256,
+        "with_outcome": 4130
+      },
+      "strong": {
+        "censored": 405,
+        "failure_rate": 0.2761,
+        "failures": 2618,
+        "n": 9888,
+        "wilson_hi": 0.2852,
+        "wilson_lo": 0.2672,
+        "with_outcome": 9483
+      }
+    },
+    "observations": 14101,
+    "parameter_changes": "none - sensitivity thresholds are the registered fixed alternatives",
+    "strata": {
+      "ORIGIN_INITIAL": {
+        "censored": 405,
+        "failure_rate": 0.2761,
+        "failures": 2618,
+        "n": 9888,
+        "wilson_hi": 0.2852,
+        "wilson_lo": 0.2672,
+        "with_outcome": 9483
+      },
+      "ORIGIN_REINSP_AFTER_PASSED_INITIAL": {
+        "censored": 1,
+        "failure_rate": 0.4155,
+        "failures": 59,
+        "n": 143,
+        "wilson_hi": 0.4977,
+        "wilson_lo": 0.3377,
+        "with_outcome": 142
+      },
+      "ORIGIN_REINSP_CONFIRMED_FAILED_INITIAL": {
+        "censored": 22,
+        "failure_rate": 0.4494,
+        "failures": 519,
+        "n": 1177,
+        "wilson_hi": 0.4782,
+        "wilson_lo": 0.4209,
+        "with_outcome": 1155
+      },
+      "ORIGIN_REINSP_UNCONFIRMED_FAILS_CLOSED": {
+        "censored": 60,
+        "failure_rate": 0.4384,
+        "failures": 1242,
+        "n": 2893,
+        "wilson_hi": 0.4567,
+        "wilson_lo": 0.4202,
+        "with_outcome": 2833
+      }
+    },
+    "validation_reserved_observations_count_only": 24006,
+    "window": "development_only"
+  },
+  "registration_commit": "64c5bcd80c34f5e7ede884ab7f1ca9ccd382b940",
+  "source": "nyc_dohmh:43nn-pn8j",
+  "source_data_cutoff": "Tue, 11 Aug 2026 22:11:54 GMT"
+}

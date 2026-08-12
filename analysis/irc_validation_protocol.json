@@ -1,0 +1,40 @@
+{
+  "protocol_version": "1.0.0",
+  "frozen": "2026-08-12",
+  "registration_commit": "64c5bcd80c34f5e7ede884ab7f1ca9ccd382b940",
+  "validation_command": "python3 irc_run_validation.py --i-am-opening-the-one-shot-window",
+  "one_shot": {
+    "allowed_runs": 1,
+    "refusal_order": "existing-result check runs BEFORE the flag check and BEFORE any network access",
+    "refuse_if_result_exists": true,
+    "result_file": "irc_validation_result.json"
+  },
+  "windows": {
+    "development_asof_before": "2024-07-01",
+    "validation_asof_on_or_after": "2024-07-01",
+    "note": "windows are defined on AS-OF dates and partition the date line exactly; outcome observation dates may fall after the boundary for development observations, per the registration"
+  },
+  "input_snapshot": {
+    "acquisition": "live SODA pull at run time, inspection grain, same query the development diagnostics used",
+    "persisted_as": "irc_validation_snapshot.json.gz",
+    "hash": "sha256 over the UNCOMPRESSED canonical JSON rows, recorded in the result",
+    "gzip_mtime": 0
+  },
+  "output_schema": {
+    "registration_commit": "string, must equal this file's registration_commit",
+    "protocol_sha256": "sha256 of this file at run time",
+    "engine_version": "string",
+    "methodology_version": "string",
+    "source": "nyc_dohmh:43nn-pn8j",
+    "source_data_cutoff": "publisher Last-Modified watermark",
+    "input_snapshot_sha256": "string",
+    "window": "validation_only",
+    "levels": "per level: n, failures, failure_rate, wilson_lo, wilson_hi, censored",
+    "strata": "same fields per reason code, unconfirmed never folded into confirmed",
+    "verdict": "monotonic: bool, separation_pp: number, min_n_met: bool, h1: pass|fail|inconclusive",
+    "opened_at_utc": "timestamp of the one authorized opening"
+  },
+  "verdict_rules_source": "irc_prereg.json#hypothesis_h1 - not restated here, one source only",
+  "on_failure": "abandon_and_publish",
+  "on_inconclusive": "new methodology version against a later window; this window is spent either way"
+}
