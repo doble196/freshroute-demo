@@ -1,0 +1,79 @@
+{
+  "engine_version": "1.0.0-candidate-engine.1",
+  "input_snapshot_sha256": "b992572a46c89e7922f0433b4f05b15f981837433c0df33608202024b91eb277",
+  "methodology_version": "1.0.0-candidate",
+  "payload": {
+    "levels": {
+      "limited": {
+        "censored": 3862,
+        "failure_rate": 0.4595,
+        "failures": 1431,
+        "n": 6976,
+        "wilson_hi": 0.4771,
+        "wilson_lo": 0.4421,
+        "with_outcome": 3114
+      },
+      "strong": {
+        "censored": 12416,
+        "failure_rate": 0.2861,
+        "failures": 1320,
+        "n": 17030,
+        "wilson_hi": 0.2993,
+        "wilson_lo": 0.2732,
+        "with_outcome": 4614
+      }
+    },
+    "observations": 24006,
+    "opened_at_utc": "2026-08-12T16:37:00.662869+00:00",
+    "strata": {
+      "ORIGIN_INITIAL": {
+        "censored": 12416,
+        "failure_rate": 0.2861,
+        "failures": 1320,
+        "n": 17030,
+        "wilson_hi": 0.2993,
+        "wilson_lo": 0.2732,
+        "with_outcome": 4614
+      },
+      "ORIGIN_REINSP_AFTER_PASSED_INITIAL": {
+        "censored": 136,
+        "failure_rate": 0.3175,
+        "failures": 40,
+        "n": 262,
+        "wilson_hi": 0.4031,
+        "wilson_lo": 0.2426,
+        "with_outcome": 126
+      },
+      "ORIGIN_REINSP_CONFIRMED_FAILED_INITIAL": {
+        "censored": 2483,
+        "failure_rate": 0.4583,
+        "failures": 922,
+        "n": 4495,
+        "wilson_hi": 0.4801,
+        "wilson_lo": 0.4366,
+        "with_outcome": 2012
+      },
+      "ORIGIN_REINSP_UNCONFIRMED_FAILS_CLOSED": {
+        "censored": 1243,
+        "failure_rate": 0.4805,
+        "failures": 469,
+        "n": 2219,
+        "wilson_hi": 0.5119,
+        "wilson_lo": 0.4493,
+        "with_outcome": 976
+      }
+    },
+    "validation_asof_on_or_after": "2024-07-01",
+    "verdict": {
+      "h1": "pass",
+      "min_n_met": true,
+      "monotonic": true,
+      "separation_pp": 17.34
+    },
+    "window": "validation_only"
+  },
+  "protocol_sha256": "5e1d3e6c2f5446d26b24a673e90910f3fc6c18f2afec2b27e1f94b6e58c4ab7c",
+  "registration_commit": "64c5bcd80c34f5e7ede884ab7f1ca9ccd382b940",
+  "source": "nyc_dohmh:43nn-pn8j",
+  "source_data_cutoff": "Tue, 11 Aug 2026 22:11:54 GMT"
+}

@@ -1,0 +1,22 @@
+=== IRC one-shot validation run - full capture ===
+start_utc: 2026-08-12T16:36:47Z
+host: Darwin 24.6.0 arm64
+python: Python 3.9.7
+cwd: /Users/Rensley/Desktop/pursuit-war-room/data/socrata
+war_room_head: e662a7d8902e5cacba505dab307d2c0e775e9f87
+registration: 64c5bcd80c34f5e7ede884ab7f1ca9ccd382b940
+protocol_sha256: 5e1d3e6c2f5446d26b24a673e90910f3fc6c18f2afec2b27e1f94b6e58c4ab7c
+runner_sha256: 27c01ecad7880f56325d4a5443d568ecbfd565230b435790d8057a7e783f5526
+command: python3 irc_run_validation.py --i-am-opening-the-one-shot-window
+=== stdout+stderr ===
+{
+  "monotonic": true,
+  "separation_pp": 17.34,
+  "min_n_met": true,
+  "h1": "pass"
+}
+
+wrote irc_validation_result.json. The window is now spent. Publish the verdict either way - that was the registered deal.
+=== end ===
+exit_code: 0
+end_utc: 2026-08-12T16:37:01Z
