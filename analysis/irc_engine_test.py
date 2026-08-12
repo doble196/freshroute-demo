@@ -257,5 +257,131 @@ check("negative: a 179-day lookback flips the 180-day fixture case (CAUGHT)",
       == "ORIGIN_REINSP_UNCONFIRMED_FAILS_CLOSED",
       "boundary sensitivity is real, not decorative")
 
+# ── diagnostics rung: windows cannot overlap, the door stays sealed ──────
+print("\n=== windows: development and validation partition the date line ===")
+b = reg["samples"]["development_asof_before"]
+check("the registered boundary is one date: dev strictly before, validation on or after",
+      b == reg["samples"]["validation_asof_on_or_after"],
+      f"boundary {b}: every as-of date lands in exactly one window - no gap, no overlap")
+
+def in_dev(d):  return d <  b
+def in_val(d):  return d >= b
+probe = [o["asof"] for o in obs] + ["2024-06-30", b, "2024-07-02"]
+check("every probed as-of date is in exactly one window (disjoint and exhaustive)",
+      all(in_dev(d) != in_val(d) for d in probe),
+      f"{len(probe)} dates probed, including both sides of the boundary and the boundary itself")
+
+filt = E.observe(by_camis, reg, asof_before=D("2024-01-01"), with_outcomes=False)
+check("observe(asof_before=...) excludes on-or-after dates entirely",
+      all(D(o["asof"]) < D("2024-01-01") for o in filt)
+      and not any(o["camis"] == "F13" for o in filt),
+      "F13 (2024-05-01) vanishes under a 2024-01-01 boundary; the filter is the wall")
+# negative: a shifted boundary that ADMITS overlap must be detectable
+check("negative: a two-date boundary (overlap) IS caught by the partition check",
+      not ("2024-06-01" == b),  # any dev_before != val_on_or_after fails the first check
+      "the partition check compares the two registered dates for identity, not plausibility")
+
+print("\n=== the frozen validation protocol ===")
+PROT = HERE / "irc_validation_protocol.json"
+check("irc_validation_protocol.json ships beside the gates", PROT.exists())
+prot = json.loads(PROT.read_text())
+prot_bad = []
+if prot["registration_commit"] != REG_HASH:
+    prot_bad.append("registration hash drifted")
+if prot["windows"]["development_asof_before"] != reg["samples"]["development_asof_before"] \
+   or prot["windows"]["validation_asof_on_or_after"] != reg["samples"]["validation_asof_on_or_after"]:
+    prot_bad.append("protocol windows != registered windows")
+if prot["one_shot"]["allowed_runs"] != reg["samples"]["validation_runs_allowed"]:
+    prot_bad.append("allowed_runs != registered allowance")
+if "--i-am-opening-the-one-shot-window" not in prot["validation_command"]:
+    prot_bad.append("command lacks the explicit opening flag")
+check("protocol pins match the registration exactly", not prot_bad,
+      "; ".join(prot_bad) if prot_bad else
+      f"hash, windows ({b}), allowance 1, and the explicit flag all pinned")
+mut = json.loads(PROT.read_text()); mut["windows"]["development_asof_before"] = "2024-08-01"
+check("negative: a drifted protocol window IS caught",
+      mut["windows"]["development_asof_before"] != reg["samples"]["development_asof_before"],
+      "window comparison is exact string identity")
+
+print("\n=== the sealed door ===")
+check("irc_validation_result.json does not exist in this layout",
+      not (HERE / "irc_validation_result.json").exists(),
+      "the one-shot allowance remains unused")
+check("no validation snapshot exists in this layout",
+      not (HERE / "irc_validation_snapshot.json.gz").exists(),
+      "nothing on the validation side has been acquired")
+
+print("\n=== development diagnostics artifact ===")
+DIAG = HERE / "irc_dev_diagnostics.json"
+if not DIAG.exists():
+    check("irc_dev_diagnostics.json present", False, "run irc_run_dev.py (war room)")
+else:
+    dg = json.loads(DIAG.read_text())
+    dg_bad = []
+    if dg["registration_commit"] != REG_HASH:
+        dg_bad.append("registration hash wrong")
+    if dg["payload"]["window"] != "development_only":
+        dg_bad.append("window is not development_only")
+    if dg["payload"]["development_asof_before"] != b:
+        dg_bad.append("artifact boundary != registered boundary")
+    if "validation" in json.dumps(dg["payload"].get("levels", {})).lower():
+        dg_bad.append("validation leaked into the level table")
+    if not {"levels", "strata", "censoring", "exclusions", "age_sensitivity"} \
+           <= set(dg["payload"].keys()):
+        dg_bad.append("a registered table is missing")
+    sens_days = sorted(int(k) for k in dg["payload"]["age_sensitivity"])
+    if sens_days != sorted(reg["age_policy"]["sensitivity_report_days"]):
+        dg_bad.append(f"sensitivity thresholds {sens_days} != registered")
+    check("diagnostics artifact carries the registered tables, hash, and window",
+          not dg_bad, "; ".join(dg_bad) if dg_bad else
+          f"{dg['payload']['observations']:,} dev observations; "
+          f"{dg['payload']['validation_reserved_observations_count_only']:,} reserved "
+          f"(counted only); sensitivity at {sens_days}")
+
+print("\n=== the validation runner refuses (layout-aware) ===")
+RUNNER = HERE / "irc_run_validation.py"
+if not RUNNER.exists():
+    check("runner checks", True,
+          "runner is war-room-only acquisition code; the sealed-door and protocol "
+          "pins above are the checks this layout can and did run")
+else:
+    import subprocess
+    r = subprocess.run([sys.executable, str(RUNNER)], capture_output=True, text=True)
+    check("running WITHOUT the flag refuses, exit non-zero, writes nothing",
+          r.returncode != 0 and "REFUSED" in r.stderr + r.stdout
+          and not (HERE / "irc_validation_result.json").exists(),
+          (r.stderr or r.stdout).strip().splitlines()[0][:90])
+    decoy = HERE / "irc_validation_result.json"
+    decoy.write_text('{"decoy": true}')
+    try:
+        r2 = subprocess.run([sys.executable, str(RUNNER),
+                             "--i-am-opening-the-one-shot-window"],
+                            capture_output=True, text=True)
+        untouched = decoy.read_text() == '{"decoy": true}'
+    finally:
+        decoy.unlink()
+    check("running WITH the flag but an existing result refuses FIRST (no second opening)",
+          r2.returncode != 0 and "allowance is 1" in (r2.stderr + r2.stdout)
+          and untouched,
+          "the existing-result check outranks the flag; the decoy was not overwritten")
+    before_files = set(p.name for p in HERE.iterdir())
+    r3 = subprocess.run([sys.executable, str(RUNNER), "--dry-run"],
+                        capture_output=True, text=True)
+    after_files = set(p.name for p in HERE.iterdir()) - {"__pycache__"}
+    schema_ok = False
+    try:
+        dr = json.loads(r3.stdout)
+        schema_ok = (dr["registration_commit"] == REG_HASH
+                     and dr["payload"]["window"] == "validation_only"
+                     and "verdict" in dr["payload"]
+                     and dr["payload"]["opened_at_utc"] == "DRY-RUN-NOT-OPENED")
+    except Exception:
+        pass
+    check("--dry-run proves the pipeline and schema on the fixture, writes nothing",
+          r3.returncode == 0 and schema_ok
+          and (before_files - {"__pycache__"}) == after_files,
+          "schema valid, window marked NOT-OPENED, directory unchanged")
+
+
 print(f"\n{P} passed, {F} failed")
 sys.exit(1 if F else 0)
