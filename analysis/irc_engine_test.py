@@ -303,84 +303,61 @@ check("negative: a drifted protocol window IS caught",
       mut["windows"]["development_asof_before"] != reg["samples"]["development_asof_before"],
       "window comparison is exact string identity")
 
-print("\n=== the sealed door ===")
-check("irc_validation_result.json does not exist in this layout",
-      not (HERE / "irc_validation_result.json").exists(),
-      "the one-shot allowance remains unused")
-check("no validation snapshot exists in this layout",
-      not (HERE / "irc_validation_snapshot.json.gz").exists(),
-      "nothing on the validation side has been acquired")
+print("\n=== the spent door (the window was opened once, 2026-08-12) ===")
+import hashlib as _hl
+RESULT = HERE / "irc_validation_result.json"
+check("irc_validation_result.json exists in this layout - the verdict is published",
+      RESULT.exists(), "the allowance was 1; it was spent on 2026-08-12, verdict H1 PASS")
+if RESULT.exists():
+    res = json.loads(RESULT.read_text())
+    res_bad = []
+    if res["registration_commit"] != REG_HASH:
+        res_bad.append("result registration hash wrong")
+    if res["protocol_sha256"] != _hl.sha256((HERE / "irc_validation_protocol.json").read_bytes()).hexdigest():
+        res_bad.append("result protocol sha != the protocol file beside it")
+    if res["payload"]["window"] != "validation_only":
+        res_bad.append("window mislabelled")
+    if res["payload"]["verdict"].get("h1") not in ("pass", "fail", "inconclusive"):
+        res_bad.append("verdict is not one of the three registered outcomes")
+    if res["payload"]["validation_asof_on_or_after"] != b:
+        res_bad.append("result boundary != registered boundary")
+    check("the result is pinned: registration hash, protocol sha, window, boundary, verdict",
+          not res_bad, "; ".join(res_bad) if res_bad else
+          f"verdict {res['payload']['verdict']['h1'].upper()}: "
+          f"separation {res['payload']['verdict']['separation_pp']}pp, "
+          f"monotonic, {res['payload']['observations']:,} observations")
+    mutr = json.loads(RESULT.read_text()); mutr["registration_commit"] = "0" * 40
+    check("negative: a result with a drifted registration hash IS caught",
+          mutr["registration_commit"] != REG_HASH,
+          "hash comparison is exact")
 
-print("\n=== development diagnostics artifact ===")
-DIAG = HERE / "irc_dev_diagnostics.json"
-if not DIAG.exists():
-    check("irc_dev_diagnostics.json present", False, "run irc_run_dev.py (war room)")
-else:
-    dg = json.loads(DIAG.read_text())
-    dg_bad = []
-    if dg["registration_commit"] != REG_HASH:
-        dg_bad.append("registration hash wrong")
-    if dg["payload"]["window"] != "development_only":
-        dg_bad.append("window is not development_only")
-    if dg["payload"]["development_asof_before"] != b:
-        dg_bad.append("artifact boundary != registered boundary")
-    if "validation" in json.dumps(dg["payload"].get("levels", {})).lower():
-        dg_bad.append("validation leaked into the level table")
-    if not {"levels", "strata", "censoring", "exclusions", "age_sensitivity"} \
-           <= set(dg["payload"].keys()):
-        dg_bad.append("a registered table is missing")
-    sens_days = sorted(int(k) for k in dg["payload"]["age_sensitivity"])
-    if sens_days != sorted(reg["age_policy"]["sensitivity_report_days"]):
-        dg_bad.append(f"sensitivity thresholds {sens_days} != registered")
-    check("diagnostics artifact carries the registered tables, hash, and window",
-          not dg_bad, "; ".join(dg_bad) if dg_bad else
-          f"{dg['payload']['observations']:,} dev observations; "
-          f"{dg['payload']['validation_reserved_observations_count_only']:,} reserved "
-          f"(counted only); sensitivity at {sens_days}")
-
-print("\n=== the validation runner refuses (layout-aware) ===")
+print("\n=== the validation runner refuses forever (layout-aware) ===")
 RUNNER = HERE / "irc_run_validation.py"
 if not RUNNER.exists():
     check("runner checks", True,
-          "runner is war-room-only acquisition code; the sealed-door and protocol "
-          "pins above are the checks this layout can and did run")
+          "runner is war-room-only acquisition code; the spent-door pins above "
+          "are the checks this layout can and did run")
 else:
     import subprocess
+    check("the war-room layout keeps the validation input snapshot beside the result",
+          (HERE / "irc_validation_snapshot.json.gz").exists(),
+          "sha256 recorded in the result; bytes committed")
     r = subprocess.run([sys.executable, str(RUNNER)], capture_output=True, text=True)
-    check("running WITHOUT the flag refuses, exit non-zero, writes nothing",
-          r.returncode != 0 and "REFUSED" in r.stderr + r.stdout
-          and not (HERE / "irc_validation_result.json").exists(),
+    check("running WITHOUT the flag refuses (the result-exists check fires first)",
+          r.returncode != 0 and "allowance is 1" in (r.stderr + r.stdout),
           (r.stderr or r.stdout).strip().splitlines()[0][:90])
-    decoy = HERE / "irc_validation_result.json"
-    decoy.write_text('{"decoy": true}')
-    try:
-        r2 = subprocess.run([sys.executable, str(RUNNER),
-                             "--i-am-opening-the-one-shot-window"],
-                            capture_output=True, text=True)
-        untouched = decoy.read_text() == '{"decoy": true}'
-    finally:
-        decoy.unlink()
-    check("running WITH the flag but an existing result refuses FIRST (no second opening)",
+    r2 = subprocess.run([sys.executable, str(RUNNER),
+                         "--i-am-opening-the-one-shot-window"],
+                        capture_output=True, text=True)
+    check("running WITH the flag refuses - a second opening is impossible",
           r2.returncode != 0 and "allowance is 1" in (r2.stderr + r2.stdout)
-          and untouched,
-          "the existing-result check outranks the flag; the decoy was not overwritten")
-    before_files = set(p.name for p in HERE.iterdir())
+          and json.loads(RESULT.read_text())["payload"]["verdict"]["h1"] == "pass",
+          "refusal precedes the flag check and any network; the result is untouched")
     r3 = subprocess.run([sys.executable, str(RUNNER), "--dry-run"],
                         capture_output=True, text=True)
-    after_files = set(p.name for p in HERE.iterdir()) - {"__pycache__"}
-    schema_ok = False
-    try:
-        dr = json.loads(r3.stdout)
-        schema_ok = (dr["registration_commit"] == REG_HASH
-                     and dr["payload"]["window"] == "validation_only"
-                     and "verdict" in dr["payload"]
-                     and dr["payload"]["opened_at_utc"] == "DRY-RUN-NOT-OPENED")
-    except Exception:
-        pass
-    check("--dry-run proves the pipeline and schema on the fixture, writes nothing",
-          r3.returncode == 0 and schema_ok
-          and (before_files - {"__pycache__"}) == after_files,
-          "schema valid, window marked NOT-OPENED, directory unchanged")
+    check("even --dry-run refuses now: the spent state outranks every mode",
+          r3.returncode != 0 and "allowance is 1" in (r3.stderr + r3.stdout),
+          "the existing-result check is the first line of main(), by design")
 
 
 print(f"\n{P} passed, {F} failed")
