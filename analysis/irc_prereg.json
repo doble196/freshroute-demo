@@ -1,0 +1,67 @@
+{
+  "api_key": "inspection_record_confidence",
+  "methodology_version": "1.0.0-candidate",
+  "registered": "2026-08-11",
+  "registered_before_backtest": true,
+  "no_engine_exists_at_registration": true,
+  "result_artifacts_must_embed_registration_commit": true,
+  "scope": "displayed_grade_A_only",
+  "states": {
+    "candidate_ordered": ["strong", "limited"],
+    "reserved_not_emitted_in_v1": "moderate",
+    "abstain": "not_enough_current_evidence",
+    "out_of_scope": "displayed_grade_not_a"
+  },
+  "empty_moderate_is_valid_behavior": true,
+  "splitter_search_in_v1": false,
+  "outcome": {
+    "type": "next_cycle_initial_with_score_after_asof",
+    "failure_threshold": 14,
+    "censored_policy": "counted_and_published_never_dropped"
+  },
+  "hypothesis_h1": {
+    "compare": ["strong", "limited"],
+    "monotonic": true,
+    "adjacent_min_pp": 5.0,
+    "min_n_per_level": 500,
+    "interval": "wilson_95",
+    "on_failure": "abandon_and_publish",
+    "on_insufficient_support": "inconclusive_new_version_new_window"
+  },
+  "samples": {
+    "split": "temporal",
+    "development_asof_before": "2024-07-01",
+    "validation_asof_on_or_after": "2024-07-01",
+    "validation_runs_allowed": 1,
+    "development_role": "diagnostics_censoring_sensitivity_not_tuning"
+  },
+  "age_policy": {
+    "kind": "product_currentness_policy_not_outcome_validated",
+    "abstain_after_days": 730,
+    "age_is_risk_feature": false,
+    "sensitivity_report_days": [365, 545, 730],
+    "author_had_seen_age_outcome_data": true
+  },
+  "origin_lookback_days": 180,
+  "ambiguity_policy": "fails_closed_to_worst_confirmable",
+  "change_reasons": [
+    "NEW_CITY_DATA",
+    "METHODOLOGY_VERSION_CHANGED",
+    "SOURCE_RECORD_CORRECTED"
+  ],
+  "declared_limitations": [
+    "publication_lag_unobservable_asof_uses_inspection_date"
+  ],
+  "attached_rejections": [
+    {
+      "hypothesis": "building_dob_violations_explain_facility_persistence",
+      "result": "NOT_SUPPORTED",
+      "facility_diff_pp": -0.1
+    },
+    {
+      "hypothesis": "stale_records_predict_worse_outcomes",
+      "result": "FAILED_DIRECTION_REVERSED_CONFOUNDED",
+      "spread_pp": -10.33
+    }
+  ]
+}
