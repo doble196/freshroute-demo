@@ -7,7 +7,7 @@ the pages it checks, and a reader can actually run it:
 
     python3 gates_app_test.py
 
-Seven gates, each one a real failure that already happened (the seventh, a
+Eight gates, each one a real failure that already happened (the seventh, a
 failure mode being prevented rather than repeated):
 
   GUARD 10  check.html cannot import pull.Guarded, so its protections were
@@ -589,6 +589,19 @@ else:
     check("dropping the staleness minus sign is CAUGHT",
           any("minus sign" in b for b in prereg_faults(m)),
           "a rejected hypothesis cannot be quietly flipped to supported")
+
+
+# ── GUARD 17: the IRC engine obeys its registration (delegated) ──────────
+# The as-of engine's leakage wall, boundaries, determinism, fail-closed
+# behaviour, moderate-impossibility and earned_on parity live in
+# irc_engine_test.py - offline, fixture-pinned, runnable from either root.
+# Run there, counted here, so one command still covers everything.
+print("\n=== GUARD 17: IRC as-of engine gates (delegated) ===")
+r = subprocess.run([sys.executable, str(HERE / "irc_engine_test.py")],
+                   capture_output=True, text=True)
+tail = [l for l in r.stdout.strip().splitlines() if "passed" in l]
+check("irc_engine_test.py passes in full", r.returncode == 0,
+      tail[-1] if tail else (r.stderr.strip().splitlines()[-1][:110] if r.stderr else ""))
 
 
 print(f"\n{P} passed, {F} failed")
