@@ -179,6 +179,28 @@
     font-size:13.5px; color:var(--ink); margin-bottom:12px; line-height:1.45}
   .notice b{color:var(--watch)}
 
+  /* the two registers: never blended, never one number */
+  .regs{display:grid; grid-template-columns:1fr 2fr; gap:14px; margin-top:2px}
+  .reg .rv{font-size:21px; font-weight:720; letter-spacing:-.02em; margin-top:2px}
+  .reg .rr{font-size:12.5px; color:var(--ink2); margin-top:3px; line-height:1.4}
+  .reg .rr a{color:var(--ink2)}
+  .conf-strong{color:var(--ok)} .conf-limited{color:var(--watch)} .conf-abstain{color:var(--ink3)}
+  .actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:13px}
+  .actions a,.actions button{
+    font:650 12.5px/1 inherit; padding:9px 13px; border-radius:8px; cursor:pointer;
+    border:1px solid var(--rule); background:var(--panel); color:var(--ink);
+    text-decoration:none; display:inline-flex; align-items:center;
+  }
+  .actions a:hover,.actions button:hover{background:var(--ground)}
+  .cbar{display:flex; gap:9px; align-items:center; padding:10px 14px; border:1px solid var(--rule);
+    border-radius:10px; font-size:13px; background:var(--panel); flex-wrap:wrap}
+  .cbar button{font:650 12.5px/1 inherit; padding:7px 11px; border-radius:7px; cursor:pointer;
+    border:1px solid var(--rule); background:var(--ground); color:var(--ink)}
+  .ctable{width:100%; border-collapse:collapse; font-size:13px; margin-top:6px}
+  .ctable th{text-align:left; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink3); font-weight:650; padding:7px 8px 4px; border-bottom:1px solid var(--rule)}
+  .ctable td{padding:8px; border-bottom:1px solid var(--rule); vertical-align:top}
+
   .foot{font-size:12px; color:var(--ink3); line-height:1.55}
   .foot a{color:var(--ink2)}
   .foot code{font-size:11.5px}
@@ -212,6 +234,7 @@
     <button type="button" data-ex="SHAKE SHACK">Shake Shack</button>
   </div>
 
+  <div id="tray"></div>
   <div id="status" aria-live="polite"></div>
   <div id="out"></div>
 
@@ -257,6 +280,89 @@
   // answered a failed initial, vs 16,674 earned on an initial.
   const AGRADE = {"censored":19672,"dataset":"43nn-pn8j","failScore":14,"initialN":16674,"initialRate":0.2887,"lookbackDays":180,"paired":25103,"reinspN":4110,"reinspRate":0.4667,"watermark":"Tue, 11 Aug 2026 22:11:54 GMT"};
   // ---- END GENERATED ----
+
+  // ---- BEGIN GENERATED-IRC by build_pages.py - do not hand-edit ----
+  // Source: irc_validation_result.json (immutable one-shot) + irc_prereg.json.
+  // H1 PASS on the untouched window, 28.6% vs 46.0%.
+  const IRC = {"abstainAfterDays":730,"failScore":14,"limitedOutcomes":3114,"limitedRatePct":46.0,"lookbackDays":180,"methodologyVersion":"1.0.0-candidate","registration":"64c5bcd80c34f5e7ede884ab7f1ca9ccd382b940","strongOutcomes":4614,"strongRatePct":28.6,"validatedOn":"2026-08-12","verdict":"pass"};
+  // ---- END GENERATED-IRC ----
+
+  // Inspection Record Confidence, in the browser. Mirrors irc_engine.py's
+  // registered mapping exactly; irc_ui_parity_test.cjs replays the shared
+  // fixture through THIS code against the Python expectations, so drift
+  // between the two implementations fails the build (the GUARD 10 lesson).
+  //
+  // The walk below intentionally repeats reinspectionAContext's logic rather
+  // than wrapping it: the node harnesses extract each function by name and
+  // eval it standalone, so every tested function must be self-contained.
+  //
+  // The reserved middle level appears nowhere in this map. It is unearned -
+  // a gate proves no route can emit it.
+  const IRC_LEVEL = {
+    ORIGIN_INITIAL: "strong",
+    ORIGIN_REINSP_CONFIRMED_FAILED_INITIAL: "limited",
+    ORIGIN_REINSP_AFTER_PASSED_INITIAL: "limited",
+    ORIGIN_REINSP_UNCONFIRMED_FAILS_CLOSED: "limited",
+    ORIGIN_OTHER_CYCLE_FAILS_CLOSED: "limited",
+  };
+  const IRC_LABEL = {strong: "Strong", limited: "Limited",
+                     not_enough_current_evidence: "Not enough current evidence"};
+  const IRC_COPY = {
+    ORIGIN_INITIAL: "This A was earned on an initial inspection.",
+    ORIGIN_REINSP_CONFIRMED_FAILED_INITIAL: "This A followed a confirmed failed initial inspection.",
+    ORIGIN_REINSP_AFTER_PASSED_INITIAL: "This A was earned on a re-inspection; the initial before it had passed.",
+    ORIGIN_REINSP_UNCONFIRMED_FAILS_CLOSED: "This A was earned on a re-inspection whose earlier history could not be confirmed, so the rating takes the cautious reading.",
+    ORIGIN_OTHER_CYCLE_FAILS_CLOSED: "This A came from a cycle visit that was neither an initial inspection nor a re-inspection, so the rating takes the cautious reading.",
+    EVIDENCE_TOO_OLD: "The newest usable record is over two years old, so this tool will not claim confidence either way.",
+    NO_GRADED_RECORD: "No graded inspection is on file to rate.",
+    A_EVENT_NOT_ELIGIBLE: "The displayed A did not come from a full cycle inspection, so there is nothing this rating can honestly grade.",
+    DISPLAYED_GRADE_NOT_A: "Confidence levels apply to displayed A grades; a B or C already carries its own warning.",
+  };
+
+  function classifyIRC(dates, byDate, asofMs, cfg){
+    cfg = cfg || IRC;
+    const at = d => {
+      const rs = byDate.get(d) || [];
+      const s = rs.find(r => r.score != null)?.score;
+      return {
+        date: d,
+        type: (rs.find(r => r.inspection_type)?.inspection_type || "").toLowerCase(),
+        score: s == null ? null : Number(s),
+        grade: (rs.find(r => r.grade)?.grade || "").trim().toUpperCase(),
+      };
+    };
+    const graded = dates.map(at).filter(e => e.grade === "A" || e.grade === "B" || e.grade === "C");
+    if (!graded.length) return {state: "not_enough_current_evidence", reason: "NO_GRADED_RECORD"};
+    const disp = graded[0];                              // dates are newest-first
+    if (disp.grade !== "A")
+      return {state: "displayed_grade_not_a", reason: "DISPLAYED_GRADE_NOT_A", grade: disp.grade};
+    const eligible = disp.score != null && disp.type.indexOf("cycle inspection") === 0
+                     && disp.type.indexOf("reopen") === -1;
+    if (!eligible) return {state: "not_enough_current_evidence", reason: "A_EVENT_NOT_ELIGIBLE"};
+    const age = Math.floor((asofMs - Date.parse(disp.date + "T00:00:00Z")) / 864e5);
+    if (age > cfg.abstainAfterDays)
+      return {state: "not_enough_current_evidence", reason: "EVIDENCE_TOO_OLD", ageDays: age};
+
+    let origin = "ORIGIN_OTHER_CYCLE_FAILS_CLOSED";
+    if (disp.type.indexOf("initial") !== -1) origin = "ORIGIN_INITIAL";
+    else if (disp.type.indexOf("re-inspection") !== -1){
+      origin = "ORIGIN_REINSP_UNCONFIRMED_FAILS_CLOSED";
+      const dispMs = Date.parse(disp.date + "T00:00:00Z");
+      const later = dates.filter(d => d < disp.date);   // strictly before, newest-first
+      for (let i = 0; i < later.length; i++){
+        const prev = at(later[i]);
+        if ((dispMs - Date.parse(prev.date + "T00:00:00Z")) / 864e5 > cfg.lookbackDays) break;
+        if (!prev.type) break;                          // unclassifiable visit: fail closed
+        if (prev.type.indexOf("initial") === -1) continue;
+        if (prev.score == null) break;                  // cannot confirm it failed
+        origin = prev.score >= cfg.failScore
+          ? "ORIGIN_REINSP_CONFIRMED_FAILED_INITIAL"
+          : "ORIGIN_REINSP_AFTER_PASSED_INITIAL";
+        break;
+      }
+    }
+    return {state: IRC_LEVEL[origin], reason: origin, ageDays: age};
+  }
 
   const fmtDate = iso => new Date(iso).toLocaleDateString("en-US",
     {year:"numeric", month:"short", day:"numeric", timeZone:"UTC"});
@@ -384,6 +490,100 @@
 
   // Provenance of whatever is sitting in #out right now.
   let lastStamp = null;
+
+  const PAGE_URL = "https://doble196.github.io/freshroute-demo/data-app/check.html";
+  const mapsHref = h => "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(`${h.building || ""} ${h.street || ""}, ${h.boro || ""}, NYC`.trim());
+  const deepLink = camis => `${PAGE_URL}?camis=${encodeURIComponent(camis)}`;
+
+  async function shareCard(h, grade, confLabel, reasonCopy){
+    const text = `${titleCase(h.dba)} \u2014 ${titleCase(`${h.building || ""} ${h.street || ""}`)}, ${h.boro}\n` +
+      `City grade ${grade} \u00b7 Record confidence ${confLabel}\n${reasonCopy}\n${deepLink(h.camis)}`;
+    try{
+      if (navigator.share){ await navigator.share({text}); return; }
+      await navigator.clipboard.writeText(text);
+      $("#status").innerHTML = `<div class="msg">Copied to clipboard.</div>`;
+      setTimeout(() => { if ($("#status").textContent.indexOf("Copied") !== -1) $("#status").innerHTML = ""; }, 2500);
+    }catch(e){ /* user cancelled the share sheet - nothing to report */ }
+  }
+
+  // The compare tray lives on THIS DEVICE only (localStorage). It is a
+  // comparison selector, not an account: nothing leaves the browser. Save
+  // behind real authentication ships with a backend, not before.
+  const TRAY_KEY = "irc_compare_v1";
+  const tray = () => { try{ return JSON.parse(localStorage.getItem(TRAY_KEY)) || []; }catch(e){ return []; } };
+  const setTray = t => { localStorage.setItem(TRAY_KEY, JSON.stringify(t.slice(0, 3))); paintTray(); };
+  function paintTray(){
+    const t = tray();
+    const el = $("#tray");
+    if (!t.length){ el.innerHTML = ""; return; }
+    el.innerHTML = `<div class="cbar"><span><b>${t.length}</b> in compare (this device only)</span>` +
+      (t.length >= 2 ? `<button id="cmpGo">Compare</button>` : `<span style="color:var(--ink3)">add one more to compare</span>`) +
+      `<button id="cmpClear">Clear</button></div>`;
+    const go = $("#cmpGo"); if (go) go.addEventListener("click", runCompare);
+    $("#cmpClear").addEventListener("click", () => setTray([]));
+  }
+
+  async function runCompare(){
+    const t = tray();
+    const my = ++ticket;
+    setBusy(true, "Fetching each location live for the comparison\u2026");
+    try{
+      const cols = [];
+      for (const camis of t){
+        const {rows} = await api({
+          "camis": camis,
+          "$select": "camis,dba,boro,building,street,inspection_date,score,grade,action,inspection_type",
+          "$order": "inspection_date DESC", "$limit": "400",
+        });
+        if (!rows.length){ cols.push({camis, missing: true}); continue; }
+        const byD = new Map();
+        for (const r of rows){
+          const d = (r.inspection_date || "").slice(0,10);
+          if (!d || d === "1900-01-01") continue;
+          if (!byD.has(d)) byD.set(d, []);
+          byD.get(d).push(r);
+        }
+        const ds = [...byD.keys()].sort().reverse();
+        const c = classifyIRC(ds, byD, Date.now());
+        const curr = byD.get(ds[0]) || [];
+        cols.push({
+          camis, dba: rows[0].dba, addr: `${rows[0].building || ""} ${rows[0].street || ""}`,
+          boro: rows[0].boro,
+          grade: (curr.find(r => r.grade)?.grade || "\u2014"),
+          conf: c, evDate: ds[0],
+        });
+      }
+      if (my !== ticket) return;
+      stampFoot(lastStamp);
+      const levels = new Set(cols.filter(c => !c.missing).map(c => c.conf.state));
+      const note = levels.size === 1
+        ? "Same record confidence \u2014 choose based on the food, location, or available time."
+        : "A more dependable inspection record does not mean better food, and it does not mean the other restaurant is currently unsafe.";
+      settle(`<div class="panel"><div class="zone">
+        <div class="lab">Compare \u00b7 no overall winner, on purpose</div>
+        <div style="overflow-x:auto"><table class="ctable"><tr><th></th>${cols.map(c =>
+          `<th>${esc(titleCase(c.dba || c.camis))}</th>`).join("")}</tr>
+        <tr><td class="lab">Address</td>${cols.map(c => `<td>${c.missing ? "\u2014" :
+          esc(titleCase(c.addr)) + " \u00b7 " + esc(c.boro)}</td>`).join("")}</tr>
+        <tr><td class="lab">City grade</td>${cols.map(c => `<td><b>${c.missing ? "?" : esc(c.grade)}</b></td>`).join("")}</tr>
+        <tr><td class="lab">Record confidence</td>${cols.map(c => `<td>${c.missing ? "no record" :
+          `<b class="conf-${c.conf.state === "strong" ? "strong" : c.conf.state === "limited" ? "limited" : "abstain"}">${IRC_LABEL[c.conf.state] || "n/a"}</b>`}</td>`).join("")}</tr>
+        <tr><td class="lab">Why</td>${cols.map(c => `<td>${c.missing ? "\u2014" :
+          esc(IRC_COPY[c.conf.reason] || "")}</td>`).join("")}</tr>
+        <tr><td class="lab">Evidence date</td>${cols.map(c => `<td>${c.missing ? "\u2014" : fmtDate(c.evDate)}</td>`).join("")}</tr>
+        <tr><td class="lab"></td>${cols.map(c => `<td>${c.missing ? "" :
+          `<a href="${mapsHref({building: c.addr, street: "", boro: c.boro})}" target="_blank" rel="noopener">Directions</a> \u00b7 <a href="${deepLink(c.camis)}">Open</a>`}</td>`).join("")}</tr>
+        </table></div>
+        <p style="margin:10px 0 0;font-size:12.5px;color:var(--ink2)">${note}</p>
+      </div></div>`);
+    }catch(e){
+      if (my !== ticket || e.kind === "superseded") return;
+      renderError(e);
+    }finally{
+      if (my === ticket) setBusy(false);
+    }
+  }
 
   function renderError(e){
     const stale = out.innerHTML.trim().length > 0;
@@ -542,6 +742,8 @@
     const action = cur.find(r => r.action)?.action || null;
     const itype  = cur.find(r => r.inspection_type)?.inspection_type || null;
 
+    const conf = classifyIRC(dates, byDate, Date.now());
+
     // real violations only - an action-only row has no violation code
     const viols = cur.filter(r => r.violation_code);
     const crit  = viols.filter(r => r.critical_flag === "Critical").length;
@@ -558,6 +760,33 @@
         <div class="what">${esc(titleCase(head.dba))}</div>
         <div class="dir">${esc(titleCase(`${head.building||""} ${head.street||""}`))} &middot; ${esc(head.boro)}${
           head.cuisine_description ? " &middot; " + esc(head.cuisine_description) : ""}</div>
+      </div>
+
+      <div class="zone">
+        <div class="regs">
+          <div class="reg">
+            <div class="lab">City grade</div>
+            <div class="rv">${grade ? esc(grade) : "\u2014"}</div>
+            <div class="rr">the city&rsquo;s letter, shown as posted</div>
+          </div>
+          <div class="reg">
+            <div class="lab">Record confidence</div>
+            <div class="rv conf-${conf.state === "strong" ? "strong" : conf.state === "limited" ? "limited" : "abstain"}">${
+              esc(IRC_LABEL[conf.state] || "Not applicable")}</div>
+            <div class="rr">${esc(IRC_COPY[conf.reason] || "")}
+              ${conf.state === "strong" || conf.state === "limited"
+                ? `<a href="#found">See the supporting inspection rows below.</a>` : ""}</div>
+          </div>
+        </div>
+        <div class="rr" style="margin-top:10px;font-size:12.5px;color:var(--ink2)">
+          It says how sure we can be &mdash; not how good the restaurant is. Inspection Record
+          Confidence shows how much the available inspection history lets you lean on the city
+          grade. It rates the evidence, not the kitchen.</div>
+        <div class="actions">
+          <a href="${mapsHref(head)}" target="_blank" rel="noopener">Directions</a>
+          <button type="button" id="actShare">Share</button>
+          <button type="button" id="actCompare">Add to compare</button>
+        </div>
       </div>
 
       <div class="zone">
@@ -649,7 +878,7 @@
     </div>`;
 
     // ---- what the score is made of ------------------------------------
-    html += `<div class="zone">
+    html += `<div class="zone" id="found">
       <div class="lab">What this visit found</div>`;
     if (!viols.length){
       html += `<p style="margin:7px 0 0;font-size:13.5px;color:var(--ink2)">
@@ -696,9 +925,44 @@
         <li><b>Anything about places that closed.</b> Only active restaurants are in this dataset, so the failures
             were removed before we ever saw them.</li>
       </ul>
+      <div style="margin-top:11px;padding-top:10px;border-top:1px solid var(--rule)">
+        <div class="lab">About the confidence rating</div>
+        <p style="margin:7px 0 0;font-size:12.5px;color:var(--ink2)">
+          This rating can&rsquo;t be bought or changed by a business. It changes when the city
+          record changes or when we publish a new methodology version.</p>
+        <p style="margin:7px 0 0;font-size:12.5px;color:var(--ink2)">
+          <b>Validated before release:</b> In an untouched historical test, restaurants labeled
+          Strong failed their next full inspection <b>${IRC.strongRatePct.toFixed(1)}%</b> of the time,
+          compared with <b>${IRC.limitedRatePct.toFixed(1)}%</b> for Limited.</p>
+        <p style="margin:7px 0 0;font-size:12.5px;color:var(--ink3)">
+          Many recent records do not yet have a subsequent full inspection. Outcome rates are
+          based only on observations whose next inspection was available:
+          ${IRC.strongOutcomes.toLocaleString()} Strong and ${IRC.limitedOutcomes.toLocaleString()}
+          Limited. All censored observations remain counted and disclosed.</p>
+        <p style="margin:7px 0 0;font-size:12px;color:var(--ink3)">
+          Methodology ${esc(IRC.methodologyVersion)} \u00b7 validated ${esc(IRC.validatedOn)} \u00b7
+          registration <code>${esc(IRC.registration.slice(0,12))}</code> \u00b7
+          <a href="https://github.com/doble196/freshroute-demo/blob/main/analysis/INSPECTION-RECORD-CONFIDENCE-PREREG.md">methodology</a> \u00b7
+          <a href="https://github.com/doble196/freshroute-demo/blob/main/analysis/irc_validation_result.json">validation report</a> \u00b7
+          <a href="https://github.com/doble196/freshroute-demo/blob/main/analysis/IRC-VALIDATION-PROTOCOL.md">limitations</a></p>
+      </div>
     </div></div>`;
 
     settle(html);
+    const sh = $("#actShare");
+    if (sh) sh.addEventListener("click", () =>
+      shareCard(head, grade || (band ? band.g : "\u2014"),
+                IRC_LABEL[conf.state] || "Not applicable",
+                IRC_COPY[conf.reason] || ""));
+    const ac = $("#actCompare");
+    if (ac) ac.addEventListener("click", () => {
+      const t = tray();
+      if (t.indexOf(head.camis) === -1){
+        if (t.length >= 3){ $("#status").innerHTML =
+          `<div class="msg">Compare holds three locations. Clear it to add more.</div>`; return; }
+        setTray(t.concat([head.camis]));
+      }
+    });
   }
 
   function stampFoot(modified, stale){
@@ -728,7 +992,12 @@
   document.querySelectorAll("[data-ex]").forEach(b =>
     b.addEventListener("click", () => { $("#q").value = b.dataset.ex; search(b.dataset.ex); }));
 
-  search("EL SOL DE MEXICO");
+  paintTray();
+  // Deep link: ?camis= names an exact physical location (the source ID), so
+  // opening it directly is a selection, not a same-name guess.
+  const wanted = new URLSearchParams(location.search).get("camis");
+  if (wanted && /^\d{6,10}$/.test(wanted)) show(wanted);
+  else search("EL SOL DE MEXICO");
 })();
 </script>
 </body>
