@@ -107,6 +107,8 @@
 
   .ctx .what{font-size:16px; font-weight:660; letter-spacing:-.01em}
   .ctx .dir{font-size:13.5px; color:var(--ink2); margin-top:2px}
+  .ctx .thread{margin-top:7px}
+  .ctx .thread a{color:var(--ink2)}
 
   .track{position:relative; height:32px; margin:14px 0 6px}
   .rail{position:absolute; left:0; right:0; top:13px; height:6px; background:var(--track); border-radius:3px}
@@ -760,6 +762,9 @@
         <div class="what">${esc(titleCase(head.dba))}</div>
         <div class="dir">${esc(titleCase(`${head.building||""} ${head.street||""}`))} &middot; ${esc(head.boro)}${
           head.cuisine_description ? " &middot; " + esc(head.cuisine_description) : ""}</div>
+        <div class="dir thread">One address, three lenses — this is the <b>customer</b> one.
+          Same restaurant: <a href="operator.html?camis=${esc(camis)}">what the operator should fix first</a>
+          &middot; <a href="building.html?camis=${esc(camis)}">the building&rsquo;s own records</a></div>
       </div>
 
       <div class="zone">

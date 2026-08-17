@@ -177,7 +177,10 @@ async function showContext(camis) {
     let h = `<div class="card">
       <h2>${esc(titleCase(r.dba))}</h2>
       <p class="addr">${esc(titleCase(r.building + ' ' + r.street))}, ${esc(r.boro)} ${esc(r.zipcode ?? '')}</p>
-      <p class="meta">${esc(r.cuisine_description ?? 'cuisine not recorded')} · camis ${esc(r.camis)}${c.eligible ? ' · lot ' + esc(c.bbl) : ''}</p>`;
+      <p class="meta">${esc(r.cuisine_description ?? 'cuisine not recorded')} · camis ${esc(r.camis)}${c.eligible ? ' · lot ' + esc(c.bbl) : ''}</p>
+      <p class="meta">One address, three lenses — this is the <b>building</b> one.
+        Same restaurant: <a href="check.html?camis=${esc(r.camis)}">the customer view</a>
+        · <a href="operator.html?camis=${esc(r.camis)}">what the operator should fix first</a></p>`;
 
     h += `<h3>Its own record</h3>`;
     if (c.inspections.length) {
@@ -251,8 +254,13 @@ async function showContext(camis) {
 
 go.addEventListener('click', search);
 q.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
-const pre = new URLSearchParams(location.search).get('q');
-if (pre) { q.value = pre; search(); }
+// Deep links: ?camis= is an exact physical location (a selection, not a
+// same-name guess — mirrors check.html); ?q= pre-fills the name search.
+const params = new URLSearchParams(location.search);
+const preCamis = params.get('camis');
+const pre = params.get('q');
+if (preCamis && /^\d{6,10}$/.test(preCamis)) showContext(preCamis);
+else if (pre) { q.value = pre; search(); }
 </script>
 </body>
 </html>

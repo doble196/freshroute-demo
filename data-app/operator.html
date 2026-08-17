@@ -107,6 +107,8 @@
 
   .ctx .what{font-size:16px; font-weight:660; letter-spacing:-.01em}
   .ctx .dir{font-size:13.5px; color:var(--ink2); margin-top:2px}
+  .ctx .thread{margin-top:7px}
+  .ctx .thread a{color:var(--ink2)}
 
   /* the clock */
   .clock{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-top:4px}
@@ -462,6 +464,9 @@
         <div class="what">${esc(titleCase(head.dba))}</div>
         <div class="dir">${esc(titleCase(`${head.building||""} ${head.street||""}`))} &middot; ${esc(head.boro)}${
           head.cuisine_description ? " &middot; " + esc(head.cuisine_description) : ""}</div>
+        <div class="dir thread">One address, three lenses — this is the <b>operator</b> one.
+          Same restaurant: <a href="check.html?camis=${esc(camis)}">the customer view</a>
+          &middot; <a href="building.html?camis=${esc(camis)}">the building&rsquo;s own records</a></div>
       </div>`;
 
     if (!dates.length){
@@ -651,7 +656,15 @@
   document.querySelectorAll("[data-ex]").forEach(b =>
     b.addEventListener("click", () => { $("#q").value = b.dataset.ex; search(b.dataset.ex); }));
 
-  search("SHAXIAN DELICACIES");
+  // Deep links: ?camis= is an exact physical location (the source ID — a
+  // selection, not a same-name guess); ?q= pre-fills the name search. This is
+  // how the customer and building views hand a restaurant to THIS lens.
+  const params = new URLSearchParams(location.search);
+  const wantedCamis = params.get("camis");
+  const wantedQ = params.get("q");
+  if (wantedCamis && /^\d{6,10}$/.test(wantedCamis)) show(wantedCamis);
+  else if (wantedQ) { $("#q").value = wantedQ; search(wantedQ); }
+  else search("SHAXIAN DELICACIES");
 })();
 </script>
 </body>

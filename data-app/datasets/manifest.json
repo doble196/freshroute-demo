@@ -3,28 +3,28 @@
   "tagline": "Live public data, presented so you can trust it: every tool fetches from the source API in your browser, and every chart declares what one row counts, what it cannot answer, and which framing choices were made. Adding a dataset is one JSON file. Adding a tool is one HTML file and one manifest line.",
   "tools": [
     {
-      "badge": "Live · fetches the city's API when you search",
+      "badge": "For customers · live, fetches the city's API",
       "title": "What does that grade in the window actually mean?",
       "blurb": "Type any NYC restaurant. See the score, this restaurant's own history, and what the inspector actually found — because a good number and a fixed building are not the same thing.",
       "cta": "Check a restaurant",
       "href": "check.html"
     },
     {
-      "badge": "Live · fetches the city's API when you search",
+      "badge": "For the business · live, fetches the city's API",
       "title": "You failed the inspection. What do you fix first?",
       "blurb": "Your open violations, ranked by how often that exact code was still there at the re-inspection. Measured across 6,960 paired NYC inspections — so the order is evidence, not a guess about what looks worst.",
       "cta": "Rank my violations",
       "href": "operator.html"
     },
     {
-      "badge": "Live · joins three city datasets on the tax lot",
+      "badge": "For both · the address they share — 3 city datasets on the tax lot",
       "title": "What does the building say?",
-      "blurb": "City rodent inspections and 311 complaints at a restaurant's tax lot — labeled building-level, because 46.4% of NYC restaurants share their lot with another restaurant and the record may belong to a neighbour.",
+      "blurb": "City rodent inspections and 311 complaints at a restaurant's tax lot — labeled building-level, because 46.4% of NYC restaurants share their lot with another restaurant and the record may belong to a neighbour. Every restaurant page links here on its address.",
       "cta": "Check a building",
       "href": "building.html"
     },
     {
-      "badge": "Live · 8 trades, 4 city agencies",
+      "badge": "For customers · 8 trades, 4 city agencies",
       "title": "Who else does the city inspect?",
       "blurb": "Restaurants hang a grade in the window. Barbershops, pools, daycares, car washes and tax preparers are inspected too — the results are public and almost nobody reads them.",
       "cta": "Look up a business",
