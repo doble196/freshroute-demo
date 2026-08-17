@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What does the building say?</title>
+<meta name="description" content="City rodent inspections and 311 complaints at a restaurant's tax lot, read live from NYC's API — labeled building-level, because nearly half of NYC restaurants share their lot with another restaurant.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="canonical" href="https://doble196.github.io/freshroute-demo/data-app/building.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="What does the building say?">
+<meta property="og:description" content="Lot-level city records next to a restaurant's own inspection record — with the shared-lot limit shown, not hidden.">
+<meta property="og:url" content="https://doble196.github.io/freshroute-demo/data-app/building.html">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "What does the building say?",
+  "url": "https://doble196.github.io/freshroute-demo/data-app/building.html",
+  "applicationCategory": "ReferenceApplication",
+  "operatingSystem": "Any modern browser",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "description": "Joins a NYC restaurant to city rodent inspections and 311 complaints at the same tax lot, read live at search time. States explicitly that these are building-level facts and that 46.4% of NYC restaurants share a lot, so the records may concern a neighbour.",
+  "isBasedOn": [
+    {"@type": "Dataset", "name": "DOHMH New York City Restaurant Inspection Results", "identifier": "43nn-pn8j", "isAccessibleForFree": true},
+    {"@type": "Dataset", "name": "Rodent Inspection", "identifier": "p937-wjvj", "isAccessibleForFree": true},
+    {"@type": "Dataset", "name": "311 Service Requests from 2020 to Present", "identifier": "erm2-nwe9", "isAccessibleForFree": true}
+  ]
+}
+</script>
+<style>
+  :root{
+    --ground:#faf9f7; --panel:#fff; --ink:#171614; --ink2:#5f5c56; --ink3:#8a8580;
+    --rule:#e6e2da; --track:#eceae4; --band:#dcd8cf;
+    --ok:#2f7d5d; --watch:#b07407; --act:#bd3f1e; --city:#2b5f8a;
+    --shadow:0 1px 2px rgba(23,22,20,.05), 0 8px 24px -12px rgba(23,22,20,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ground:#131211; --panel:#1c1a18; --ink:#f2efe9; --ink2:#a8a29a; --ink3:#7d7871;
+      --rule:#2e2b27; --track:#262320; --band:#3a3630;
+      --ok:#5fb98d; --watch:#d9a039; --act:#e2795a; --city:#7fb2d9;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font:16px/1.6 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:780px;margin:0 auto;padding:32px 20px 96px}
+  a{color:inherit}
+  header h1{font-size:clamp(28px,5vw,40px);line-height:1.15;letter-spacing:-.02em;margin:.2em 0 .3em}
+  .lede{color:var(--ink2);font-size:17px;max-width:62ch;margin:0 0 4px}
+  .backlink{font-size:14px;color:var(--ink3);text-decoration:none}
+  .backlink:hover{color:var(--ink)}
+  .searchbar{display:flex;gap:8px;margin:26px 0 8px}
+  input[type=search]{flex:1;padding:13px 15px;font-size:16px;color:var(--ink);
+    background:var(--panel);border:1px solid var(--rule);border-radius:10px}
+  input[type=search]:focus{outline:2px solid var(--city);outline-offset:1px}
+  button{padding:13px 20px;font-size:15px;font-weight:600;cursor:pointer;color:var(--ground);
+    background:var(--ink);border:0;border-radius:10px}
+  button:disabled{opacity:.5;cursor:default}
+  .hint{font-size:13.5px;color:var(--ink3);margin:0 0 22px}
+  .card{background:var(--panel);border:1px solid var(--rule);border-radius:14px;
+    padding:20px 22px;margin:16px 0;box-shadow:var(--shadow)}
+  .result{cursor:pointer;padding:13px 16px;margin:7px 0;border:1px solid var(--rule);
+    border-radius:10px;background:var(--panel);display:flex;justify-content:space-between;
+    gap:12px;align-items:baseline}
+  .result:hover{border-color:var(--city)}
+  .result b{font-weight:600}
+  .result span{color:var(--ink3);font-size:13.5px;text-align:right}
+  h2{font-size:20px;margin:0 0 4px;letter-spacing:-.01em}
+  h3{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);
+    margin:26px 0 10px;font-weight:700}
+  .addr{color:var(--ink2);font-size:14.5px;margin:0 0 2px}
+  .meta{color:var(--ink3);font-size:13px;font-variant-numeric:tabular-nums}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14.5px}
+  th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--ink3);border-bottom:1px solid var(--rule);padding:0 8px 7px 0;font-weight:700}
+  td{padding:8px 8px 8px 0;border-bottom:1px solid var(--track)}
+  .stat{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    padding:11px 0;border-bottom:1px solid var(--track)}
+  .stat:last-child{border-bottom:0}
+  .stat .n{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums}
+  .stat .lbl{color:var(--ink2);font-size:14.5px;max-width:46ch}
+  .stat .src{display:block;color:var(--ink3);font-size:12.5px;margin-top:2px}
+  .flag{border-left:3px solid var(--act);background:color-mix(in oklab,var(--act) 7%,transparent);
+    padding:13px 16px;border-radius:0 10px 10px 0;margin:14px 0;font-size:14.5px}
+  .flag.calm{border-left-color:var(--ok);background:color-mix(in oklab,var(--ok) 7%,transparent)}
+  .flag.note{border-left-color:var(--city);background:color-mix(in oklab,var(--city) 7%,transparent)}
+  .flag b{font-weight:650}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;
+    text-transform:uppercase;padding:3px 8px;border-radius:999px;vertical-align:middle}
+  .tag.city{background:color-mix(in oklab,var(--city) 16%,transparent);color:var(--city)}
+  .tag.public{background:color-mix(in oklab,var(--watch) 16%,transparent);color:var(--watch)}
+  .limits{font-size:14px;color:var(--ink2)}
+  .limits li{margin:7px 0}
+  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--rule);
+    font-size:13px;color:var(--ink3)}
+  code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--track);
+    padding:1px 5px;border-radius:4px}
+  .spin{color:var(--ink3);font-size:14.5px;padding:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="backlink" href="index.html">← DataHub</a>
+  <h1>What does the building say?</h1>
+  <p class="lede">A restaurant's grade describes the restaurant. These records describe
+  the <b>building it sits in</b> — city rodent inspections and public complaints at the
+  same tax lot. Useful context, and only that: nearly half of NYC restaurants share a lot
+  with another restaurant, so these records may belong to a neighbour.</p>
+</header>
+
+<div class="searchbar">
+  <input type="search" id="q" placeholder="Restaurant name, e.g. Katz" autocomplete="off" aria-label="Restaurant name">
+  <button id="go">Search</button>
+</div>
+<p class="hint">Reads the city's API live when you search. Nothing is stored.</p>
+
+<div id="out"></div>
+
+<footer>
+  Sources, all NYC OpenData, read live at search time:
+  <a href="https://data.cityofnewyork.us/d/43nn-pn8j">43nn-pn8j</a> restaurant inspections ·
+  <a href="https://data.cityofnewyork.us/d/p937-wjvj">p937-wjvj</a> rodent inspections ·
+  <a href="https://data.cityofnewyork.us/d/erm2-nwe9">erm2-nwe9</a> 311 service requests.
+  Joined on <code>bbl</code>, the Borough-Block-Lot tax-lot identifier both datasets publish.
+  <br><br>
+  This page shows public records. It is not a rating, it does not feed a rating, and no
+  business can change what appears here.
+</footer>
+</div>
+
+<script type="module">
+import { searchRestaurants, getBuildingContext, configure } from './lib/nyc-sources.js';
+
+// Static host today -> talk to the city directly. When this moves behind an
+// app, this single line becomes: configure({mode:'proxy', proxyBase:'/api/publicdata'})
+configure({ mode: 'direct' });
+
+const out = document.getElementById('out');
+const q = document.getElementById('q');
+const go = document.getElementById('go');
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const titleCase = (s) => String(s ?? '').toLowerCase().replace(/\b[a-z]/g, (m) => m.toUpperCase());
+
+async function search() {
+  const term = q.value.trim();
+  if (term.length < 2) { out.innerHTML = '<p class="spin">Type at least two characters.</p>'; return; }
+  out.innerHTML = '<p class="spin">Searching the city\'s records…</p>';
+  go.disabled = true;
+  try {
+    const rows = await searchRestaurants(term, 12);
+    if (!rows.length) { out.innerHTML = `<p class="spin">No restaurant matching “${esc(term)}”.</p>`; return; }
+    out.innerHTML = `<h3>${rows.length} match${rows.length > 1 ? 'es' : ''} — pick one</h3>` +
+      rows.map((r) => `<div class="result" data-camis="${esc(r.camis)}">
+          <b>${esc(titleCase(r.dba))}</b>
+          <span>${esc(titleCase(r.building + ' ' + r.street))}<br>${esc(r.boro)} ${esc(r.zipcode ?? '')}</span>
+        </div>`).join('');
+    out.querySelectorAll('.result').forEach((el) =>
+      el.addEventListener('click', () => showContext(el.dataset.camis)));
+  } catch (e) {
+    out.innerHTML = `<div class="flag"><b>The city's API did not answer.</b> ${esc(e.message)}
+      — this page has no cached copy on purpose, so there is nothing to show until it responds.</div>`;
+  } finally { go.disabled = false; }
+}
+
+async function showContext(camis) {
+  out.innerHTML = '<p class="spin">Reading building records…</p>';
+  try {
+    const c = await getBuildingContext(camis);
+    if (!c) { out.innerHTML = '<p class="spin">That record disappeared between the two calls.</p>'; return; }
+    const r = c.restaurant;
+    let h = `<div class="card">
+      <h2>${esc(titleCase(r.dba))}</h2>
+      <p class="addr">${esc(titleCase(r.building + ' ' + r.street))}, ${esc(r.boro)} ${esc(r.zipcode ?? '')}</p>
+      <p class="meta">${esc(r.cuisine_description ?? 'cuisine not recorded')} · camis ${esc(r.camis)}${c.eligible ? ' · lot ' + esc(c.bbl) : ''}</p>`;
+
+    h += `<h3>Its own record</h3>`;
+    if (c.inspections.length) {
+      h += `<table><thead><tr><th>Inspected</th><th>Score</th><th>Grade</th></tr></thead><tbody>` +
+        c.inspections.slice(0, 6).map((i) => `<tr>
+          <td>${esc(String(i.inspection_date).slice(0, 10))}</td>
+          <td>${esc(i.score ?? '—')}</td><td>${esc(i.grade ?? '—')}</td></tr>`).join('') +
+        `</tbody></table>
+        <p class="meta" style="margin-top:8px">This is the only thing the confidence rating reads.</p>`;
+    } else {
+      h += `<p class="meta">No scored inspection on file.</p>`;
+    }
+
+    if (!c.eligible) {
+      h += `<div class="flag note"><b>No building records available.</b> ${esc(c.ineligibleReason)}</div></div>`;
+      out.innerHTML = h; return;
+    }
+
+    const n = c.occupants.length;
+    h += `<h3>The building <span class="tag city">lot-level</span></h3>`;
+    if (c.sharing.shared) {
+      const names = [...new Set(c.occupants.map((o) => titleCase(o.dba)))].slice(0, 8);
+      h += `<div class="flag"><b>${n} restaurants share this tax lot.</b>
+        Everything below is a fact about the lot, shared by all ${n} of them — it cannot say
+        which one it concerns.<br><span class="meta">${esc(names.join(' · '))}${n > 8 ? ' and more' : ''}</span></div>`;
+    } else {
+      h += `<div class="flag calm"><b>Sole restaurant on this tax lot.</b>
+        Building records below are unambiguous — they concern this address and no other restaurant.</div>`;
+    }
+
+    const cp = c.cityPerformed, pr = c.publicReported;
+    h += `<div class="stat"><div class="lbl">Rodent inspections by the city at this lot
+        <span class="src">last ${c.windowDays} days · DOHMH, same agency that grades the restaurant</span></div>
+        <div class="n">${cp.rodentInspections}</div></div>
+      <div class="stat"><div class="lbl">…of those, <b>failed for rat activity</b>
+        <span class="src">verified result values, not a guess at the wording</span></div>
+        <div class="n" style="color:${cp.rodentRatFailures ? 'var(--act)' : 'var(--ok)'}">${cp.rodentRatFailures}</div></div>`;
+
+    if (cp.rodentFailureRows.length) {
+      h += `<table style="margin-top:12px"><thead><tr><th>Failed inspection</th><th>Result</th></tr></thead><tbody>` +
+        cp.rodentFailureRows.slice(0, 5).map((x) => `<tr>
+          <td>${esc(String(x.inspection_date).slice(0, 10))}</td><td>${esc(x.result)}</td></tr>`).join('') +
+        `</tbody></table>`;
+    }
+
+    h += `<h3>Complaints from the public <span class="tag public">not a rating input</span></h3>
+      <div class="stat"><div class="lbl">311 rodent complaints at this lot
+        <span class="src">anyone may file one — see the note below</span></div>
+        <div class="n">${pr.rodentComplaints}</div></div>
+      <div class="stat"><div class="lbl">311 food-establishment complaints at this lot
+        <span class="src">last ${c.windowDays} days</span></div>
+        <div class="n">${pr.foodEstablishmentComplaints}</div></div>
+      <div class="flag note">311 complaints are filed by members of the public, so anyone —
+        a competitor, a neighbour, a landlord — can create one. That is exactly why they are
+        shown here as context and can never move a rating.</div>`;
+
+    h += `<h3>What this cannot tell you</h3><ul class="limits">
+        <li>Whether the rats were <em>inside this restaurant</em>. A lot is a parcel of land; the
+          inspection may concern a bin, a basement, or a neighbouring tenant.</li>
+        <li>Anything about the ${n > 1 ? `other ${n - 1} restaurant${n > 2 ? 's' : ''} on this lot individually` : 'building before it was inspected'} —
+          the city publishes the visit, not the unit.</li>
+        <li>Whether the restaurant's own next inspection will go badly. Nothing on this page has
+          been validated as a predictor; that test is registered and has not been run.</li>
+      </ul></div>`;
+    out.innerHTML = h;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    out.innerHTML = `<div class="flag"><b>Could not read the building records.</b> ${esc(e.message)}</div>`;
+  }
+}
+
+go.addEventListener('click', search);
+q.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+const pre = new URLSearchParams(location.search).get('q');
+if (pre) { q.value = pre; search(); }
+</script>
+</body>
+</html>

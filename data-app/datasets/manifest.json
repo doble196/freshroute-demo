@@ -17,6 +17,13 @@
       "href": "operator.html"
     },
     {
+      "badge": "Live · joins three city datasets on the tax lot",
+      "title": "What does the building say?",
+      "blurb": "City rodent inspections and 311 complaints at a restaurant's tax lot — labeled building-level, because 46.4% of NYC restaurants share their lot with another restaurant and the record may belong to a neighbour.",
+      "cta": "Check a building",
+      "href": "building.html"
+    },
+    {
       "badge": "Interactive · scroll-driven",
       "title": "Watch a true chart become a false one",
       "blurb": "One chart, pinned to your screen, spun one display lever at a time. No number changes at any point — that is the lesson.",
