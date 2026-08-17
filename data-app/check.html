@@ -763,8 +763,8 @@
         <div class="dir">${esc(titleCase(`${head.building||""} ${head.street||""}`))} &middot; ${esc(head.boro)}${
           head.cuisine_description ? " &middot; " + esc(head.cuisine_description) : ""}</div>
         <div class="dir thread">One address, three lenses — this is the <b>customer</b> one.
-          Same restaurant: <a href="operator.html?camis=${esc(camis)}">what the operator should fix first</a>
-          &middot; <a href="building.html?camis=${esc(camis)}">the building&rsquo;s own records</a></div>
+          Same restaurant: <a href="operator.html?camis=${esc(head.camis)}">what the operator should fix first</a>
+          &middot; <a href="building.html?camis=${esc(head.camis)}">the building&rsquo;s own records</a></div>
       </div>
 
       <div class="zone">

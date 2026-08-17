@@ -145,9 +145,18 @@ export async function query(source, params = {}) {
   const headers = {};
   if (transport.mode === 'proxy' && transport.appToken) headers['X-App-Token'] = transport.appToken;
 
-  const res = await getFetch()(url, { headers });
-  if (!res.ok) throw new Error(`${src.id} HTTP ${res.status}`);
-  return res.json();
+  // Socrata answers 500/503 transiently and 429 when the keyless per-IP pool
+  // is busy — all three clear on retry. Two short backoffs, then the real
+  // error surfaces; any other status fails immediately.
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await getFetch()(url, { headers });
+    if (res.ok) return res.json();
+    lastStatus = res.status;
+    if (![429, 500, 503].includes(res.status)) break;
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+  }
+  throw new Error(`${src.id} HTTP ${lastStatus}`);
 }
 
 /* ─── pure helpers (no IO — unit-testable, portable to TS) ─────────── */
