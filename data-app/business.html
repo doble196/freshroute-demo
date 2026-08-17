@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who else does the city inspect?</title>
+<meta name="description" content="Restaurants get a letter grade in the window. Barbershops, salons, pools, daycares, car washes and tax preparers get inspected too — the city publishes those results and almost nobody reads them.">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="canonical" href="https://doble196.github.io/freshroute-demo/data-app/business.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Who else does the city inspect?">
+<meta property="og:description" content="Public inspection records for barbershops, salons, pools, daycares, car washes and more — read live from NYC's API.">
+<meta property="og:url" content="https://doble196.github.io/freshroute-demo/data-app/business.html">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"WebApplication",
+  "name":"Who else does the city inspect?",
+  "url":"https://doble196.github.io/freshroute-demo/data-app/business.html",
+  "applicationCategory":"ReferenceApplication","operatingSystem":"Any modern browser",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+  "description":"Public inspection histories for NYC business types beyond restaurants — salons and barbershops, swimming pools, childcare centres, car washes, tax preparers, immigration services and mobile food vendors — read live from the city's API at search time."
+}
+</script>
+<style>
+  :root{
+    --ground:#faf9f7; --panel:#fff; --ink:#171614; --ink2:#5f5c56; --ink3:#8a8580;
+    --rule:#e6e2da; --track:#eceae4;
+    --ok:#2f7d5d; --watch:#b07407; --act:#bd3f1e; --city:#2b5f8a; --gone:#8a8580;
+    --shadow:0 1px 2px rgba(23,22,20,.05), 0 8px 24px -12px rgba(23,22,20,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ground:#131211; --panel:#1c1a18; --ink:#f2efe9; --ink2:#a8a29a; --ink3:#7d7871;
+      --rule:#2e2b27; --track:#262320;
+      --ok:#5fb98d; --watch:#d9a039; --act:#e2795a; --city:#7fb2d9; --gone:#7d7871;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font:16px/1.6 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:780px;margin:0 auto;padding:32px 20px 96px}
+  a{color:inherit}
+  header h1{font-size:clamp(28px,5vw,40px);line-height:1.15;letter-spacing:-.02em;margin:.2em 0 .3em}
+  .lede{color:var(--ink2);font-size:17px;max-width:62ch;margin:0 0 4px}
+  .backlink{font-size:14px;color:var(--ink3);text-decoration:none}
+  .backlink:hover{color:var(--ink)}
+  .verticals{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 14px}
+  .vchip{padding:8px 14px;font-size:14px;border:1px solid var(--rule);border-radius:999px;
+    background:var(--panel);cursor:pointer;color:var(--ink2)}
+  .vchip[aria-pressed=true]{background:var(--ink);color:var(--ground);border-color:var(--ink);font-weight:600}
+  .vnote{font-size:13.5px;color:var(--ink3);margin:0 0 16px;min-height:1.2em}
+  .searchbar{display:flex;gap:8px;margin:8px 0}
+  input[type=search]{flex:1;padding:13px 15px;font-size:16px;color:var(--ink);
+    background:var(--panel);border:1px solid var(--rule);border-radius:10px}
+  input[type=search]:focus{outline:2px solid var(--city);outline-offset:1px}
+  button.go{padding:13px 20px;font-size:15px;font-weight:600;cursor:pointer;color:var(--ground);
+    background:var(--ink);border:0;border-radius:10px}
+  button.go:disabled{opacity:.5}
+  .hint{font-size:13.5px;color:var(--ink3);margin:0 0 22px}
+  .card{background:var(--panel);border:1px solid var(--rule);border-radius:14px;
+    padding:20px 22px;margin:16px 0;box-shadow:var(--shadow)}
+  .result{cursor:pointer;padding:13px 16px;margin:7px 0;border:1px solid var(--rule);
+    border-radius:10px;background:var(--panel);display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+  .result:hover{border-color:var(--city)}
+  .result span{color:var(--ink3);font-size:13.5px;text-align:right}
+  h2{font-size:20px;margin:0 0 4px;letter-spacing:-.01em}
+  h3{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);margin:24px 0 10px;font-weight:700}
+  .addr{color:var(--ink2);font-size:14.5px;margin:0 0 2px}
+  .meta{color:var(--ink3);font-size:13px}
+  .insp{display:flex;gap:14px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--track)}
+  .insp:last-child{border-bottom:0}
+  .insp .d{font-size:13px;color:var(--ink3);font-variant-numeric:tabular-nums;min-width:84px}
+  .insp .h{font-weight:600;font-size:15px}
+  .insp .x{color:var(--ink3);font-size:13px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+  .k-good{background:var(--ok)} .k-bad{background:var(--act)}
+  .k-neutral{background:var(--watch)} .k-gone{background:var(--gone)}
+  .flag{border-left:3px solid var(--city);background:color-mix(in oklab,var(--city) 7%,transparent);
+    padding:13px 16px;border-radius:0 10px 10px 0;margin:14px 0;font-size:14.5px}
+  .limits{font-size:14px;color:var(--ink2)}
+  .limits li{margin:7px 0}
+  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--rule);font-size:13px;color:var(--ink3)}
+  code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--track);padding:1px 5px;border-radius:4px}
+  .spin{color:var(--ink3);font-size:14.5px;padding:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="backlink" href="index.html">← DataHub</a>
+  <h1>Who else does the city inspect?</h1>
+  <p class="lede">A restaurant has to hang its grade in the window. A barbershop, a swimming
+  pool, a daycare, a car wash and a tax preparer are all inspected too — the results are
+  public, and almost nobody reads them. Pick a trade and look one up.</p>
+</header>
+
+<div class="verticals" id="verticals" role="group" aria-label="Business type"></div>
+<p class="vnote" id="vnote"></p>
+
+<div class="searchbar">
+  <input type="search" id="q" placeholder="Business name" autocomplete="off" aria-label="Business name">
+  <button class="go" id="go">Search</button>
+</div>
+<p class="hint">Reads the city's API live when you search. Nothing is stored.</p>
+
+<div id="out"></div>
+
+<footer>
+  Sources, read live: <a href="https://data.cityofnewyork.us/d/43nn-pn8j">43nn-pn8j</a> restaurants ·
+  <a href="https://data.cityofnewyork.us/d/jzhd-m6uv">jzhd-m6uv</a> DCWP inspections ·
+  <a href="https://data.cityofnewyork.us/d/3kfa-rvez">3kfa-rvez</a> pools ·
+  <a href="https://data.cityofnewyork.us/d/dsg6-ifza">dsg6-ifza</a> childcare centres.
+  <br><br>
+  Different agencies publish different things: DOHMH gives restaurants a numeric score,
+  DCWP records only whether a violation was issued, pools get violation counts, and
+  childcare centres get a violation rate next to the city average. They are not comparable
+  to each other and this page does not pretend they are.
+</footer>
+</div>
+
+<script type="module">
+import { VERTICALS, searchVertical, getVerticalInspections, configure } from './lib/nyc-sources.js';
+configure({ mode: 'direct' });
+
+const out = document.getElementById('out');
+const q = document.getElementById('q');
+const go = document.getElementById('go');
+const vnote = document.getElementById('vnote');
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const titleCase = (s) => String(s ?? '').toLowerCase().replace(/\b[a-z]/g, (m) => m.toUpperCase());
+
+let active = 'salon_barbershop';
+
+const chips = document.getElementById('verticals');
+chips.innerHTML = Object.entries(VERTICALS).map(([k, v]) =>
+  `<button class="vchip" data-k="${k}" aria-pressed="${k === active}">${esc(v.label)}</button>`).join('');
+chips.querySelectorAll('.vchip').forEach((b) => b.addEventListener('click', () => {
+  active = b.dataset.k;
+  chips.querySelectorAll('.vchip').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+  paintNote(); out.innerHTML = ''; q.focus();
+}));
+
+function paintNote() {
+  const v = VERTICALS[active];
+  vnote.innerHTML = `<b>${esc(v.inspector)}</b> · ${esc(v.outcomeLabel)} — ${esc(v.note)}`;
+}
+paintNote();
+
+async function search() {
+  const term = q.value.trim();
+  if (term.length < 2) { out.innerHTML = '<p class="spin">Type at least two characters.</p>'; return; }
+  out.innerHTML = '<p class="spin">Searching the city\'s records…</p>';
+  go.disabled = true;
+  try {
+    const rows = await searchVertical(active, term, 12);
+    if (!rows.length) {
+      out.innerHTML = `<p class="spin">No ${esc(VERTICALS[active].label.toLowerCase())} matching “${esc(term)}”.
+        The city only lists businesses it has actually inspected — an absence here is not a clean record,
+        it is no record.</p>`;
+      return;
+    }
+    out.innerHTML = `<h3>${rows.length} match${rows.length > 1 ? 'es' : ''} — pick one</h3>` +
+      rows.map((r, i) => `<div class="result" data-i="${i}">
+        <b>${esc(titleCase(r.name))}</b>
+        <span>${esc(titleCase(r.address))}<br>${esc(titleCase(r.locality))}</span></div>`).join('');
+    out.querySelectorAll('.result').forEach((el) =>
+      el.addEventListener('click', () => showOne(rows[Number(el.dataset.i)])));
+  } catch (e) {
+    out.innerHTML = `<div class="flag"><b>The city's API did not answer.</b> ${esc(e.message)}</div>`;
+  } finally { go.disabled = false; }
+}
+
+async function showOne(row) {
+  const v = VERTICALS[active];
+  out.innerHTML = '<p class="spin">Reading inspection history…</p>';
+  try {
+    const hist = await getVerticalInspections(active, row.id, 14);
+    let h = `<div class="card">
+      <h2>${esc(titleCase(row.name))}</h2>
+      <p class="addr">${esc(titleCase(row.address))}${row.locality ? ', ' + esc(titleCase(row.locality)) : ''}</p>
+      <p class="meta">${esc(v.label)} · inspected by ${esc(v.inspector)}${row.bbl ? ' · lot ' + esc(row.bbl) : ''}</p>
+      <h3>Inspection history — ${esc(v.outcomeLabel)}</h3>`;
+    if (!hist.length) {
+      h += `<p class="meta">No inspection rows for this name.</p>`;
+    } else {
+      h += hist.map((i) => `<div class="insp">
+          <span class="dot k-${esc(i.kind)}"></span>
+          <span class="d">${esc(i.date)}</span>
+          <span class="h">${esc(i.headline)}</span>
+          <span class="x">${esc(i.detail ?? '')}</span></div>`).join('');
+      const bad = hist.filter((i) => i.kind === 'bad').length;
+      const gone = hist.some((i) => i.kind === 'gone');
+      h += `<p class="meta" style="margin-top:12px">${hist.length} inspection${hist.length > 1 ? 's' : ''} shown ·
+        ${bad} with an adverse finding${gone ? ' · at least one visit recorded the business as closed or gone' : ''}.</p>`;
+    }
+    h += `<h3>What this cannot tell you</h3><ul class="limits">
+        <li>These records are matched on the <b>business name the agency filed</b>, not a stable
+          business ID. Two shops with the same name will collide, and a renamed shop breaks the chain.
+          The restaurant dataset is the exception — it has a real identifier.</li>
+        <li>"No violation issued" means the inspector did not write one on that visit. It is not a
+          grade, and it is not the same thing as a restaurant's A.</li>
+        <li>Whether the business is any good. This is a compliance record, nothing more.</li>
+      </ul></div>`;
+    out.innerHTML = h;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    out.innerHTML = `<div class="flag"><b>Could not read the history.</b> ${esc(e.message)}</div>`;
+  }
+}
+
+go.addEventListener('click', search);
+q.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+const params = new URLSearchParams(location.search);
+if (params.get('v') && VERTICALS[params.get('v')]) {
+  active = params.get('v');
+  chips.querySelectorAll('.vchip').forEach((o) => o.setAttribute('aria-pressed', String(o.dataset.k === active)));
+  paintNote();
+}
+if (params.get('q')) { q.value = params.get('q'); search(); }
+</script>
+</body>
+</html>
