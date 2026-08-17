@@ -209,6 +209,7 @@
   <div class="foot" id="foot"></div>
 </div>
 
+<script src="lib/insight-card.js"></script>
 <script>
 (() => {
   const API = "https://data.cityofnewyork.us/resource/43nn-pn8j.json";
@@ -503,6 +504,24 @@
              city does not publish when yours is coming.`}</div>`;
     }
     html += `</div>`;
+
+    // ---- the pattern on the record -------------------------------------
+    // The two-sentence recurring-critical-flag card (lib/insight-card.js):
+    // the claim first, then the limit phrased to AIM the claim — the rate
+    // measures inspection days, and inspection day is what this page is
+    // for. The builder REFUSES ({none}) rather than stretch thin data, and
+    // a refusal renders as nothing at all: no card beats a weak card.
+    const insight = InsightCard.buildRecurringFlagInsight([...byDate.entries()], PERSIST);
+    if (insight.card){
+      const c = insight.card;
+      html += `<div class="zone">
+        <div class="lab">The pattern on your record</div>
+        <div class="warn" style="margin-top:9px"><b>${esc(c.sentence1)}</b><br><br>${esc(c.sentence2)}
+          <div style="margin-top:8px;opacity:.75;font-size:.86em">Measured on
+          ${c.pairs.toLocaleString()} initial-to-re-inspection pairs. A re-inspection follows a
+          failed initial &mdash; it is not a random sample of kitchens.</div>
+        </div></div>`;
+    }
 
     // A page that ranks "what comes back at the re-inspection" is answering a
     // question this restaurant may not be asking. Say so rather than let the
