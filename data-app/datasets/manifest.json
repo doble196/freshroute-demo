@@ -36,6 +36,13 @@
       "blurb": "One chart, pinned to your screen, spun one display lever at a time. No number changes at any point — that is the lesson.",
       "cta": "Watch the transformation",
       "href": "spin-scrolly.html"
+    },
+    {
+      "badge": "The talk · how this app gets presented",
+      "title": "How do you demo this in five sentences?",
+      "blurb": "The demo-day storyboard: a person before the product, one sentence per beat, the product not named until Beat 4 — with the live captures, the runbook, and the fallback protocol. All six storyboard gates pass on these exact sentences.",
+      "cta": "Read the storyboard",
+      "href": "five-beats.html"
     }
   ],
   "datasets": [
