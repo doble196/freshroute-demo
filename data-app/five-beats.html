@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FreshRoute in five beats — the demo-day storyboard</title>
+<meta name="description" content="The five-beat storyboard for the FreshRoute live inspection app — person before product, gate-checked, with the live captures and the demo runbook.">
+<style>
+  :root{
+    --ground:#131211; --card:#1d1b18; --line:#2e2b26;
+    --text:#f0ede6; --muted:#9a938a; --accent:#e8834a;
+    --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:780px;margin:0 auto;padding:56px 24px 80px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  header h1{font-size:clamp(30px,5.5vw,44px);line-height:1.12;margin:.5rem 0 0;text-wrap:balance;font-weight:700}
+  header h1 em{font-style:normal;color:var(--accent)}
+  header p.lede{color:var(--muted);margin:.9rem 0 0;max-width:58ch}
+  .law{margin:40px 0 8px;padding:14px 18px;border:1px solid var(--line);border-radius:10px;
+       background:var(--card);color:var(--muted);font-size:14.5px}
+  .law b{color:var(--text);font-weight:600}
+  ol.beats{list-style:none;margin:32px 0 0;padding:0;display:flex;flex-direction:column;gap:36px}
+  .beat{border-top:1px solid var(--line);padding-top:26px}
+  .beat .tag{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .beat .num{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--ground);
+             background:var(--accent);border-radius:999px;width:26px;height:26px;
+             display:inline-flex;align-items:center;justify-content:center;transform:translateY(3px)}
+  .beat .label{font-family:var(--mono);font-size:13px;letter-spacing:.16em;color:var(--accent)}
+  .beat .job{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .beat p.sentence{font-size:clamp(19px,2.6vw,23px);line-height:1.45;margin:.85rem 0 0;max-width:62ch}
+  .beat p.sentence strong{color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+  figure{margin:22px 0 0}
+  figure img{max-width:100%;display:block;border:1px solid var(--line);border-radius:10px}
+  figcaption{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:8px;text-align:right}
+  section.card{margin-top:52px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px 26px}
+  section.card h2{margin:0;font-size:13px;font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  section.card ul{margin:14px 0 0;padding-left:1.15rem;color:var(--text)}
+  section.card li{margin:.45rem 0}
+  section.card li::marker{color:var(--accent)}
+  code{font-family:var(--mono);font-size:.92em;background:#26231f;border-radius:5px;padding:1px 6px}
+  .muted{color:var(--muted)}
+  a{color:var(--accent);text-underline-offset:3px}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+  footer{margin-top:56px;border-top:1px solid var(--line);padding-top:18px;
+         font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.9}
+</style>
+<div class="wrap">
+  <header>
+    <p style="margin:0 0 18px"><a href="index.html" style="font-family:var(--mono);font-size:13px">&larr; back to the DataHub</a></p>
+    <div class="eyebrow">Pursuit demo day &middot; the storyboard</div>
+    <h1>You failed the inspection.<br><em>What do you fix first?</em></h1>
+    <p class="lede">FreshRoute in five one-sentence beats &mdash; the person before the product,
+    the product not named until Beat&nbsp;4. Say each sentence aloud; rewrite any that
+    don&rsquo;t sound like you. The structure survives rewording.</p>
+  </header>
+
+  <div class="law"><b>The format&rsquo;s law:</b> one sentence per beat &mdash; a beat you can&rsquo;t say in
+  one sentence is a beat you haven&rsquo;t decided yet. All five below pass the storyboard
+  skill&rsquo;s six gates.</div>
+
+  <ol class="beats">
+    <li class="beat">
+      <div class="tag"><span class="num">1</span><span class="label">ROLE</span>
+        <span class="job">a person you could pick out of a room</span></div>
+      <p class="sentence">The operator of a bubble-tea shop on Main Street in Flushing failed their
+      health inspection <strong>five days ago</strong>, and tonight they are deciding what their crew
+      fixes before a re-inspection they cannot schedule.</p>
+    </li>
+    <li class="beat">
+      <div class="tag"><span class="num">2</span><span class="label">PROBLEM</span>
+        <span class="job">the pain and its root cause, together</span></div>
+      <p class="sentence">They have <strong>nine violations and 41 points</strong> but no idea where to
+      start, because the city publishes each citation as a line on a list and never tells you which
+      violations actually come back at the re-inspection.</p>
+    </li>
+    <li class="beat">
+      <div class="tag"><span class="num">3</span><span class="label">VALUE</span>
+        <span class="job">an outcome they&rsquo;d notice by Friday</span></div>
+      <p class="sentence">Instead of splitting a week of crew time nine ways, they spend it on the
+      three violations that citywide stay unfixed at the re-inspection most often &mdash;
+      <strong>53%, 43%, and 41%</strong> of the time.</p>
+    </li>
+    <li class="beat">
+      <div class="tag"><span class="num">4</span><span class="label">SOLUTION</span>
+        <span class="job">the flow, verbs in order &mdash; the product&rsquo;s first appearance</span></div>
+      <p class="sentence">They <strong>open</strong> FreshRoute&rsquo;s inspection page,
+      <strong>type</strong> the shop&rsquo;s name, <strong>pick</strong> their address from the five that
+      share it, and <strong>read</strong> their own city record ranked by how often each violation
+      survived the re-inspection.</p>
+      <figure>
+        <img alt="The FreshRoute picker: five Moge Tee locations, disambiguated by address"
+             src="assets/five-beats/flow-picker.png">
+        <figcaption>live capture &middot; the five-location picker &middot; NYC OpenData 43nn-pn8j</figcaption>
+      </figure>
+    </li>
+    <li class="beat">
+      <div class="tag"><span class="num">5</span><span class="label">DEMO</span>
+        <span class="job">what the room should watch happen</span></div>
+      <p class="sentence">I&rsquo;ll run that exact lookup live on the city&rsquo;s data right now &mdash;
+      when the record loads, watch the ranking appear with the mice violation everyone fears sitting
+      <strong>third</strong>, under two items nobody in this room would have fixed first.</p>
+      <figure>
+        <img alt="The ranked fix-first list: 10F at 53.4%, 08A at 43.3%, then the critical mice flag 04L at 41.0%"
+             src="assets/five-beats/ranking-top3.png">
+        <figcaption>live capture &middot; the ranking the room watches appear</figcaption>
+      </figure>
+    </li>
+  </ol>
+
+  <section class="card">
+    <h2>Run the demo</h2>
+    <ul>
+      <li>Type <code>moge tee</code> &rarr; Enter. Pick <b>42-35 Main Street &middot; Queens</b>.</li>
+      <li>When the banner lands, <b>stop talking</b> &mdash; let the room read
+          &ldquo;3 of your last 3 inspections&rdquo; themselves.</li>
+      <li>The numbers stay on screen, the meaning stays in your mouth &mdash; never read the
+          n and the interval aloud.</li>
+      <li>Backup subject: <code>kingston pizza</code> &rarr; the Kingston Avenue &middot; Brooklyn row.</li>
+      <li>If anything breaks: ten seconds of honest diagnosis, one pivot sentence, then the
+          <a href="https://doble196.github.io/freshroute-demo/data-app/assets/demo-fallback/02-record-moge-tee-main-st.png">fallback captures</a>.
+          The error state is a feature &mdash; say so.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Checked, not vibes</h2>
+    <ul>
+      <li>All six storyboard gates pass on these exact sentences: five beats, one sentence each,
+          no semicolon splices, product waits until Beat 4, a cause in Beat 2, a watchable event in Beat 5.</li>
+      <li>The checker earned its keep: the first Beat 5 draft said &ldquo;land third&rdquo; &mdash; a state,
+          not an event &mdash; and the <code>demo_visible</code> gate rejected it. &ldquo;Watch the ranking
+          appear&rdquo; is both compliant and better stagecraft.</li>
+      <li class="muted">The persistence numbers are measured, not vibes either: 6,960 paired NYC
+          inspections, computed offline, embedded in the page &mdash; the demo can&rsquo;t un-measure them.</li>
+    </ul>
+  </section>
+
+  <footer>
+    the live app: <a href="https://doble196.github.io/freshroute-demo/data-app/operator.html">operator.html</a> &middot;
+    data: NYC OpenData, DOHMH Restaurant Inspection Results (43nn-pn8j)<br>
+    storyboard format: the Pursuit storyboard skill &middot; deck + beats:
+    <code>pursuit-ai-native-kit/docs/</code> &middot; captured &amp; verified 2026-08-17 &middot; Part of the <a href="index.html">DataHub</a>
+  </footer>
+</div>
+
+</html>
